@@ -8,6 +8,7 @@ import 'dart:async' as _i4;
 import 'package:mockito/mockito.dart' as _i1;
 import 'package:myapp/database_helper.dart' as _i3;
 import 'package:myapp/student_model.dart' as _i5;
+import 'package:myapp/teacher_model.dart' as _i6;
 import 'package:sqflite/sqflite.dart' as _i2;
 
 // ignore_for_file: type=lint
@@ -86,4 +87,44 @@ class MockDatabaseHelper extends _i1.Mock implements _i3.DatabaseHelper {
             returnValue: _i4.Future<List<_i5.Student>>.value(<_i5.Student>[]),
           )
           as _i4.Future<List<_i5.Student>>);
+
+  @override
+  _i4.Future<int> createTeacher(_i6.Teacher? teacher) =>
+      (super.noSuchMethod(
+            Invocation.method(#createTeacher, [teacher]),
+            returnValue: _i4.Future<int>.value(0),
+          )
+          as _i4.Future<int>);
+
+  @override
+  _i4.Future<List<_i6.Teacher>> getTeachers() =>
+      (super.noSuchMethod(
+            Invocation.method(#getTeachers, []),
+            returnValue: _i4.Future<List<_i6.Teacher>>.value(<_i6.Teacher>[]),
+          )
+          as _i4.Future<List<_i6.Teacher>>);
+
+  @override
+  _i4.Future<int> updateTeacher(_i6.Teacher? teacher) =>
+      (super.noSuchMethod(
+            Invocation.method(#updateTeacher, [teacher]),
+            returnValue: _i4.Future<int>.value(0),
+          )
+          as _i4.Future<int>);
+
+  @override
+  _i4.Future<int> deleteTeacher(int? id) =>
+      (super.noSuchMethod(
+            Invocation.method(#deleteTeacher, [id]),
+            returnValue: _i4.Future<int>.value(0),
+          )
+          as _i4.Future<int>);
+
+  @override
+  _i4.Future<List<_i6.Teacher>> searchTeachers(String? name) =>
+      (super.noSuchMethod(
+            Invocation.method(#searchTeachers, [name]),
+            returnValue: _i4.Future<List<_i6.Teacher>>.value(<_i6.Teacher>[]),
+          )
+          as _i4.Future<List<_i6.Teacher>>);
 }

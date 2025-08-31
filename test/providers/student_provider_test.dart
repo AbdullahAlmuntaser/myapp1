@@ -1,27 +1,22 @@
-
 import 'package:flutter_test/flutter_test.dart';
+import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
+import 'package:myapp/database_helper.dart';
 import 'package:myapp/providers/student_provider.dart';
 import 'package:myapp/student_model.dart';
 
-import '../mock_generator_test.mocks.dart';
+import '../student_provider_test.mocks.dart'; // This import is for the generated mock
 
-// This is a clean, test-specific version of the provider.
-// It inherits from the real provider but allows us to inject a mock database helper.
-class TestableStudentProvider extends StudentProvider {
-  TestableStudentProvider(MockDatabaseHelper dbHelper) {
-    super.dbHelper = dbHelper;
-  }
-}
-
+// Generate a MockClient using the Mockito package.
+@GenerateMocks([DatabaseHelper])
 void main() {
-  late TestableStudentProvider studentProvider;
+  late StudentProvider studentProvider;
   late MockDatabaseHelper mockDatabaseHelper;
 
   // This function runs before each test, ensuring a clean state.
   setUp(() {
     mockDatabaseHelper = MockDatabaseHelper();
-    studentProvider = TestableStudentProvider(mockDatabaseHelper);
+    studentProvider = StudentProvider(databaseHelper: mockDatabaseHelper);
   });
 
   final tStudent = Student(id: 1, name: 'Test Student', dob: '2000-01-01', phone: '12345', grade: 'A');

@@ -5,13 +5,15 @@ import '../student_model.dart';
 class StudentProvider with ChangeNotifier {
   List<Student> _students = [];
   
-  @protected
-  DatabaseHelper dbHelper = DatabaseHelper();
+  final DatabaseHelper _dbHelper; // Made private and final
+
+  // Constructor to allow injecting DatabaseHelper for testing
+  StudentProvider({DatabaseHelper? databaseHelper}) : _dbHelper = databaseHelper ?? DatabaseHelper();
 
   List<Student> get students => _students;
 
   Future<void> fetchStudents() async {
-    _students = await dbHelper.getStudents();
+    _students = await _dbHelper.getStudents();
     notifyListeners();
   }
 
@@ -19,23 +21,23 @@ class StudentProvider with ChangeNotifier {
     if (query.isEmpty) {
       await fetchStudents();
     } else {
-      _students = await dbHelper.searchStudents(query);
+      _students = await _dbHelper.searchStudents(query);
       notifyListeners();
     }
   }
 
   Future<void> addStudent(Student student) async {
-    await dbHelper.createStudent(student);
+    await _dbHelper.createStudent(student);
     await fetchStudents(); // Refresh the list
   }
 
   Future<void> updateStudent(Student student) async {
-    await dbHelper.updateStudent(student);
+    await _dbHelper.updateStudent(student);
     await fetchStudents(); // Refresh the list
   }
 
   Future<void> deleteStudent(int id) async {
-    await dbHelper.deleteStudent(id);
+    await _dbHelper.deleteStudent(id);
     await fetchStudents(); // Refresh the list
   }
 }

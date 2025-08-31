@@ -10,15 +10,18 @@ class AddEditStudentScreen extends StatefulWidget {
   const AddEditStudentScreen({super.key, this.student});
 
   @override
-  _AddEditStudentScreenState createState() => _AddEditStudentScreenState();
+  AddEditStudentScreenState createState() => AddEditStudentScreenState();
 }
 
-class _AddEditStudentScreenState extends State<AddEditStudentScreen> {
+class AddEditStudentScreenState extends State<AddEditStudentScreen> {
   final _formKey = GlobalKey<FormState>();
   late TextEditingController _nameController;
   late TextEditingController _dobController;
   late TextEditingController _phoneController;
   late TextEditingController _gradeController;
+  late TextEditingController _emailController;
+  late TextEditingController _passwordController;
+  late TextEditingController _classIdController;
 
   @override
   void initState() {
@@ -27,6 +30,9 @@ class _AddEditStudentScreenState extends State<AddEditStudentScreen> {
     _dobController = TextEditingController(text: widget.student?.dob ?? '');
     _phoneController = TextEditingController(text: widget.student?.phone ?? '');
     _gradeController = TextEditingController(text: widget.student?.grade ?? '');
+    _emailController = TextEditingController(text: widget.student?.email ?? '');
+    _passwordController = TextEditingController(text: widget.student?.password ?? '');
+    _classIdController = TextEditingController(text: widget.student?.classId ?? '');
   }
 
   @override
@@ -35,6 +41,9 @@ class _AddEditStudentScreenState extends State<AddEditStudentScreen> {
     _dobController.dispose();
     _phoneController.dispose();
     _gradeController.dispose();
+    _emailController.dispose();
+    _passwordController.dispose();
+    _classIdController.dispose();
     super.dispose();
   }
 
@@ -46,6 +55,7 @@ class _AddEditStudentScreenState extends State<AddEditStudentScreen> {
       lastDate: DateTime.now(),
     );
     if (picked != null) {
+      if (!mounted) return;
       setState(() {
         _dobController.text = DateFormat('yyyy-MM-dd').format(picked);
       });
@@ -60,6 +70,9 @@ class _AddEditStudentScreenState extends State<AddEditStudentScreen> {
         dob: _dobController.text,
         phone: _phoneController.text,
         grade: _gradeController.text,
+        email: _emailController.text.isNotEmpty ? _emailController.text : null,
+        password: _passwordController.text.isNotEmpty ? _passwordController.text : null,
+        classId: _classIdController.text.isNotEmpty ? _classIdController.text : null,
       );
 
       final provider = Provider.of<StudentProvider>(context, listen: false);
@@ -73,12 +86,14 @@ class _AddEditStudentScreenState extends State<AddEditStudentScreen> {
         } else {
           await provider.updateStudent(student);
         }
+        if (!mounted) return;
         Navigator.of(context).pop();
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(message)));
       } catch (e) {
-         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Failed to save student: $e')),
-        );
+        if (!mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Failed to save student: $e')),
+          );
       }
     }
   }
@@ -124,8 +139,37 @@ class _AddEditStudentScreenState extends State<AddEditStudentScreen> {
                 const SizedBox(height: 16),
                 TextFormField(
                   controller: _gradeController,
-                  decoration: const InputDecoration(labelText: 'Grade/Class', border: OutlineInputBorder()),
+                  decoration: const InputDecoration(labelText: 'Grade', border: OutlineInputBorder()),
                    validator: (value) => value!.isEmpty ? 'Please enter a grade' : null,
+                ),
+                const SizedBox(height: 16),
+                // New fields for Student
+                TextFormField(
+                  controller: _emailController,
+                  decoration: const InputDecoration(labelText: 'Email', border: OutlineInputBorder()),
+                  keyboardType: TextInputType.emailAddress,
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'Please enter an email';
+                    }
+                    if (!RegExp(r"^[a-zA-Z0-9.a-zA-Z0-9.!#$%&'*+-/=?^_`{|}~]+@[a-zA-Z0-9]+\.[a-zA-Z]+").hasMatch(value)) {
+                      return 'Please enter a valid email address';
+                    }
+                    return null;
+                  },
+                ),
+                const SizedBox(height: 16),
+                TextFormField(
+                  controller: _passwordController,
+                  decoration: const InputDecoration(labelText: 'Password', border: OutlineInputBorder()),
+                  obscureText: true,
+                  validator: (value) => value!.isEmpty ? 'Please enter a password' : null,
+                ),
+                const SizedBox(height: 16),
+                TextFormField(
+                  controller: _classIdController,
+                  decoration: const InputDecoration(labelText: 'Class ID', border: OutlineInputBorder()),
+                  validator: (value) => value!.isEmpty ? 'Please enter a class ID' : null,
                 ),
                 const SizedBox(height: 32),
                 ElevatedButton(

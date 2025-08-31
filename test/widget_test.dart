@@ -1,29 +1,21 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
-import 'package:myapp/main.dart';
 import 'package:myapp/providers/student_provider.dart';
 import 'package:myapp/providers/theme_provider.dart';
-import 'package:myapp/screens/home_screen.dart';
+import 'package:myapp/screens/dashboard_screen.dart';
 import 'package:myapp/student_model.dart';
 import 'package:provider/provider.dart';
 
 import 'mock_generator_test.mocks.dart';
 
-// A new version of the provider that allows dependency injection for testing.
-class TestableStudentProvider extends StudentProvider {
-  TestableStudentProvider(MockDatabaseHelper dbHelper) {
-    super.dbHelper = dbHelper;
-  }
-}
-
 void main() {
-  late TestableStudentProvider studentProvider;
+  late StudentProvider studentProvider;
   late MockDatabaseHelper mockDatabaseHelper;
 
   setUp(() {
     mockDatabaseHelper = MockDatabaseHelper();
-    studentProvider = TestableStudentProvider(mockDatabaseHelper);
+    studentProvider = StudentProvider(databaseHelper: mockDatabaseHelper);
   });
 
   Widget createHomeScreen() {
@@ -32,7 +24,7 @@ void main() {
         ChangeNotifierProvider<ThemeProvider>(create: (_) => ThemeProvider()),
         ChangeNotifierProvider<StudentProvider>.value(value: studentProvider),
       ],
-      child: const MaterialApp(home: HomeScreen()),
+      child: const MaterialApp(home: DashboardScreen()),
     );
   }
 
@@ -46,7 +38,8 @@ void main() {
 
     // Assert
     expect(find.text('No students found.'), findsOneWidget);
-    expect(find.byType(ListView), findsNothing);
+    // The student list is inside a tab, so we need to find the specific tab content
+    expect(find.byKey(const Key('students_tab_view')), findsOneWidget);
   });
 
   testWidgets('Shows a list of students when data is available', (WidgetTester tester) async {
@@ -60,7 +53,6 @@ void main() {
 
     // Assert
     expect(find.text('No students found.'), findsNothing);
-    expect(find.byType(ListView), findsOneWidget);
     expect(find.text('First Student'), findsOneWidget);
     expect(find.text('Grade: B | DOB: 2001-01-01'), findsOneWidget);
   });

@@ -2,8 +2,10 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
-import 'screens/home_screen.dart';
+import 'screens/dashboard_screen.dart';
 import 'providers/student_provider.dart';
+import 'providers/teacher_provider.dart';
+import 'providers/class_provider.dart'; // New import for ClassProvider
 import 'providers/theme_provider.dart';
 
 void main() {
@@ -20,6 +22,7 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => ThemeProvider()),
         ChangeNotifierProvider(create: (_) => StudentProvider()),
         ChangeNotifierProvider(create: (_) => TeacherProvider()),
+        ChangeNotifierProvider(create: (_) => ClassProvider()), // Added ClassProvider
       ],
       child: Consumer<ThemeProvider>(
         builder: (context, themeProvider, child) {

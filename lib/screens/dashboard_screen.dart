@@ -3,31 +3,41 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/student_provider.dart';
 import '../providers/teacher_provider.dart';
+import '../providers/class_provider.dart';
+import '../providers/subject_provider.dart';
+// import '../providers/theme_provider.dart'; // Removed unused import
 import 'tabs/students_tab.dart';
 import 'tabs/teachers_tab.dart';
+import 'tabs/classes_tab.dart';
+import 'tabs/subjects_tab.dart';
 
 class DashboardScreen extends StatefulWidget {
   const DashboardScreen({super.key});
 
   @override
-  _DashboardScreenState createState() => _DashboardScreenState();
+  DashboardScreenState createState() => DashboardScreenState();
 }
 
-class _DashboardScreenState extends State<DashboardScreen> {
+class DashboardScreenState extends State<DashboardScreen> {
   int _selectedIndex = 0;
 
   static const List<Widget> _widgetOptions = <Widget>[
     StudentsTab(),
     TeachersTab(),
+    ClassesTab(),
+    SubjectsTab(),
   ];
 
   @override
   void initState() {
     super.initState();
-    // Load initial data for both providers
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      Provider.of<StudentProvider>(context, listen: false).fetchStudents();
-      Provider.of<TeacherProvider>(context, listen: false).fetchTeachers();
+      if (mounted) {
+        Provider.of<StudentProvider>(context, listen: false).fetchStudents();
+        Provider.of<TeacherProvider>(context, listen: false).fetchTeachers();
+        Provider.of<ClassProvider>(context, listen: false).fetchClasses();
+        Provider.of<SubjectProvider>(context, listen: false).fetchSubjects();
+      }
     });
   }
 
@@ -53,9 +63,19 @@ class _DashboardScreenState extends State<DashboardScreen> {
             icon: Icon(Icons.person),
             label: 'Teachers',
           ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.class_),
+            label: 'Classes',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.book),
+            label: 'Subjects',
+          ),
         ],
         currentIndex: _selectedIndex,
         onTap: _onItemTapped,
+        selectedItemColor: Theme.of(context).primaryColor,
+        unselectedItemColor: Colors.grey,
       ),
     );
   }

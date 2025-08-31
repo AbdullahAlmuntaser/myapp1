@@ -10,15 +10,21 @@ class StudentsTab extends StatefulWidget {
   const StudentsTab({super.key});
 
   @override
-  _StudentsTabState createState() => _StudentsTabState();
+  StudentsTabState createState() => StudentsTabState();
 }
 
-class _StudentsTabState extends State<StudentsTab> {
+class StudentsTabState extends State<StudentsTab> {
   final TextEditingController _searchController = TextEditingController();
 
   @override
   void initState() {
     super.initState();
+    // Fetch students after the first frame is rendered
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        Provider.of<StudentProvider>(context, listen: false).fetchStudents();
+      }
+    });
     _searchController.addListener(_filterStudents);
   }
 
@@ -42,8 +48,7 @@ class _StudentsTabState extends State<StudentsTab> {
   }
 
   Future<void> _deleteStudent(int id) async {
-    // ... (Confirmation dialog logic remains the same)
-     final bool? confirm = await showDialog(
+    final bool? confirm = await showDialog(
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Confirm Deletion'),
@@ -61,9 +66,12 @@ class _StudentsTabState extends State<StudentsTab> {
       ),
     );
 
+    if (!mounted) return;
+
     if (confirm == true) {
       await Provider.of<StudentProvider>(context, listen: false).deleteStudent(id);
-       ScaffoldMessenger.of(context).showSnackBar(
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Student deleted successfully')),
       );
     }
@@ -75,6 +83,7 @@ class _StudentsTabState extends State<StudentsTab> {
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
 
     return Scaffold(
+      key: const Key('students_tab_view'),
       appBar: AppBar(
         title: const Text('Student Dashboard'),
         actions: [

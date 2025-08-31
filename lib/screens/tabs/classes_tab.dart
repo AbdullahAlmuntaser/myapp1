@@ -1,30 +1,28 @@
-
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../../providers/teacher_provider.dart';
-import '../../teacher_model.dart';
-import '../add_edit_teacher_screen.dart';
+import '../../providers/class_provider.dart';
+import '../../class_model.dart';
+import '../add_edit_class_screen.dart';
 
-class TeachersTab extends StatefulWidget {
-  const TeachersTab({super.key});
+class ClassesTab extends StatefulWidget {
+  const ClassesTab({super.key});
 
   @override
-  TeachersTabState createState() => TeachersTabState();
+  ClassesTabState createState() => ClassesTabState();
 }
 
-class TeachersTabState extends State<TeachersTab> {
+class ClassesTabState extends State<ClassesTab> {
   final TextEditingController _searchController = TextEditingController();
 
   @override
   void initState() {
     super.initState();
-    // Fetch teachers after the first frame is rendered
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted) {
-        Provider.of<TeacherProvider>(context, listen: false).fetchTeachers();
+        Provider.of<ClassProvider>(context, listen: false).fetchClasses();
       }
     });
-    _searchController.addListener(_filterTeachers);
+    _searchController.addListener(_filterClasses);
   }
 
   @override
@@ -33,25 +31,25 @@ class TeachersTabState extends State<TeachersTab> {
     super.dispose();
   }
 
-  void _filterTeachers() {
-    Provider.of<TeacherProvider>(context, listen: false)
-        .searchTeachers(_searchController.text);
+  void _filterClasses() {
+    Provider.of<ClassProvider>(context, listen: false)
+        .searchClasses(_searchController.text);
   }
 
-  void _navigateToAddEditScreen([Teacher? teacher]) {
+  void _navigateToAddEditScreen([SchoolClass? schoolClass]) {
     Navigator.of(context).push(
       MaterialPageRoute(
-        builder: (context) => AddEditTeacherScreen(teacher: teacher),
+        builder: (context) => AddEditClassScreen(schoolClass: schoolClass),
       ),
     );
   }
 
-  Future<void> _deleteTeacher(int id) async {
+  Future<void> _deleteClass(int id) async {
     final bool? confirm = await showDialog(
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Confirm Deletion'),
-        content: const Text('Are you sure you want to delete this teacher?'),
+        content: const Text('Are you sure you want to delete this class?'),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(false),
@@ -68,10 +66,10 @@ class TeachersTabState extends State<TeachersTab> {
     if (!mounted) return;
 
     if (confirm == true) {
-      await Provider.of<TeacherProvider>(context, listen: false).deleteTeacher(id);
+      await Provider.of<ClassProvider>(context, listen: false).deleteClass(id);
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Teacher deleted successfully')),
+        const SnackBar(content: Text('Class deleted successfully')),
       );
     }
   }
@@ -80,7 +78,7 @@ class TeachersTabState extends State<TeachersTab> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Teacher Dashboard'),
+        title: const Text('Class Dashboard'),
       ),
       body: Column(
         children: [
@@ -89,7 +87,7 @@ class TeachersTabState extends State<TeachersTab> {
             child: TextField(
               controller: _searchController,
               decoration: const InputDecoration(
-                labelText: 'Search by Name',
+                labelText: 'Search by Class Name or ID',
                 prefixIcon: Icon(Icons.search),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.all(Radius.circular(12.0)),
@@ -98,28 +96,29 @@ class TeachersTabState extends State<TeachersTab> {
             ),
           ),
           Expanded(
-            child: Consumer<TeacherProvider>(
-              builder: (context, teacherProvider, child) {
-                if (teacherProvider.teachers.isEmpty) {
-                  return const Center(child: Text('No teachers found.'));
+            child: Consumer<ClassProvider>(
+              builder: (context, classProvider, child) {
+                if (classProvider.classes.isEmpty) {
+                  return const Center(child: Text('No classes found.'));
                 }
                 return ListView.builder(
-                  itemCount: teacherProvider.teachers.length,
+                  itemCount: classProvider.classes.length,
                   itemBuilder: (context, index) {
-                    final teacher = teacherProvider.teachers[index];
+                    final schoolClass = classProvider.classes[index];
                     return Card(
+                      margin: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 6.0),
                       child: ListTile(
-                        title: Text(teacher.name),
+                        title: Text(schoolClass.name),
                         subtitle: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text('Subject: ${teacher.subject}'),
-                            if (teacher.email != null && teacher.email!.isNotEmpty)
-                              Text('Email: ${teacher.email}'),
-                            if (teacher.qualificationType != null && teacher.qualificationType!.isNotEmpty)
-                              Text('Qualification: ${teacher.qualificationType}'),
-                            if (teacher.responsibleClassId != null && teacher.responsibleClassId!.isNotEmpty)
-                              Text('Responsible Class: ${teacher.responsibleClassId}'),
+                            Text('Class ID: ${schoolClass.classId}'),
+                            if (schoolClass.teacherId != null && schoolClass.teacherId!.isNotEmpty)
+                              Text('Responsible Teacher ID: ${schoolClass.teacherId}'),
+                            if (schoolClass.capacity != null)
+                              Text('Capacity: ${schoolClass.capacity}'),
+                            if (schoolClass.yearTerm != null && schoolClass.yearTerm!.isNotEmpty)
+                              Text('Year/Term: ${schoolClass.yearTerm}'),
                           ],
                         ),
                         trailing: Row(
@@ -127,11 +126,11 @@ class TeachersTabState extends State<TeachersTab> {
                           children: [
                             IconButton(
                               icon: const Icon(Icons.edit),
-                              onPressed: () => _navigateToAddEditScreen(teacher),
+                              onPressed: () => _navigateToAddEditScreen(schoolClass),
                             ),
                             IconButton(
                               icon: const Icon(Icons.delete),
-                              onPressed: () => _deleteTeacher(teacher.id!),
+                              onPressed: () => _deleteClass(schoolClass.id!),
                             ),
                           ],
                         ),
