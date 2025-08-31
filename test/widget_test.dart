@@ -1,30 +1,81 @@
-// This is a basic Flutter widget test.
-//
-// To perform an interaction with a widget in your test, use the WidgetTester
-// utility in the flutter_test package. For example, you can send tap and scroll
-// gestures. You can also use WidgetTester to find child widgets in the widget
-// tree, read text, and verify that the values of widget properties are correct.
-
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-
+import 'package:mockito/mockito.dart';
 import 'package:myapp/main.dart';
+import 'package:myapp/providers/student_provider.dart';
+import 'package:myapp/providers/theme_provider.dart';
+import 'package:myapp/screens/home_screen.dart';
+import 'package:myapp/student_model.dart';
+import 'package:provider/provider.dart';
+
+import 'mock_generator_test.mocks.dart';
+
+// A new version of the provider that allows dependency injection for testing.
+class TestableStudentProvider extends StudentProvider {
+  TestableStudentProvider(MockDatabaseHelper dbHelper) {
+    super.dbHelper = dbHelper;
+  }
+}
 
 void main() {
-  testWidgets('Counter increments smoke test', (WidgetTester tester) async {
-    // Build our app and trigger a frame.
-    await tester.pumpWidget(const MyApp());
+  late TestableStudentProvider studentProvider;
+  late MockDatabaseHelper mockDatabaseHelper;
 
-    // Verify that our counter starts at 0.
-    expect(find.text('0'), findsOneWidget);
-    expect(find.text('1'), findsNothing);
+  setUp(() {
+    mockDatabaseHelper = MockDatabaseHelper();
+    studentProvider = TestableStudentProvider(mockDatabaseHelper);
+  });
 
-    // Tap the '+' icon and trigger a frame.
-    await tester.tap(find.byIcon(Icons.add));
-    await tester.pump();
+  Widget createHomeScreen() {
+    return MultiProvider(
+      providers: [
+        ChangeNotifierProvider<ThemeProvider>(create: (_) => ThemeProvider()),
+        ChangeNotifierProvider<StudentProvider>.value(value: studentProvider),
+      ],
+      child: const MaterialApp(home: HomeScreen()),
+    );
+  }
 
-    // Verify that our counter has incremented.
-    expect(find.text('0'), findsNothing);
-    expect(find.text('1'), findsOneWidget);
+  testWidgets('Shows "No students found" message when list is empty', (WidgetTester tester) async {
+    // Arrange
+    when(mockDatabaseHelper.getStudents()).thenAnswer((_) async => []);
+
+    // Act
+    await tester.pumpWidget(createHomeScreen());
+    await tester.pumpAndSettle(); // Wait for async operations and animations
+
+    // Assert
+    expect(find.text('No students found.'), findsOneWidget);
+    expect(find.byType(ListView), findsNothing);
+  });
+
+  testWidgets('Shows a list of students when data is available', (WidgetTester tester) async {
+    // Arrange
+    final studentList = [Student(id: 1, name: 'First Student', dob: '2001-01-01', phone: '111', grade: 'B')];
+    when(mockDatabaseHelper.getStudents()).thenAnswer((_) async => studentList);
+
+    // Act
+    await tester.pumpWidget(createHomeScreen());
+    await tester.pumpAndSettle();
+
+    // Assert
+    expect(find.text('No students found.'), findsNothing);
+    expect(find.byType(ListView), findsOneWidget);
+    expect(find.text('First Student'), findsOneWidget);
+    expect(find.text('Grade: B | DOB: 2001-01-01'), findsOneWidget);
+  });
+
+   testWidgets('Tapping FAB navigates to AddEditStudentScreen', (WidgetTester tester) async {
+    // Arrange
+    when(mockDatabaseHelper.getStudents()).thenAnswer((_) async => []);
+    await tester.pumpWidget(createHomeScreen());
+    await tester.pumpAndSettle();
+
+    // Act
+    await tester.tap(find.byType(FloatingActionButton));
+    await tester.pumpAndSettle();
+
+    // Assert
+    expect(find.text('Add Student'), findsOneWidget);
   });
 }
