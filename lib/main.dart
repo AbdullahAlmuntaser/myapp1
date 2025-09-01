@@ -1,11 +1,12 @@
-
 import 'package:flutter/material.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import 'screens/dashboard_screen.dart';
 import 'providers/student_provider.dart';
 import 'providers/teacher_provider.dart';
-import 'providers/class_provider.dart'; // New import for ClassProvider
+import 'providers/class_provider.dart';
+import 'providers/subject_provider.dart';
 import 'providers/theme_provider.dart';
 
 void main() {
@@ -22,17 +23,29 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => ThemeProvider()),
         ChangeNotifierProvider(create: (_) => StudentProvider()),
         ChangeNotifierProvider(create: (_) => TeacherProvider()),
-        ChangeNotifierProvider(create: (_) => ClassProvider()), // Added ClassProvider
+        ChangeNotifierProvider(create: (_) => ClassProvider()),
+        ChangeNotifierProvider(create: (_) => SubjectProvider()),
       ],
       child: Consumer<ThemeProvider>(
         builder: (context, themeProvider, child) {
           return MaterialApp(
-            title: 'Student Management',
+            title: 'نظام إدارة الطلاب',
             theme: AppTheme.lightTheme,
             darkTheme: AppTheme.darkTheme,
             themeMode: themeProvider.themeMode,
             home: const DashboardScreen(),
             debugShowCheckedModeBanner: false,
+            // Localization settings for Arabic and RTL support
+            localizationsDelegates: const [
+              GlobalMaterialLocalizations.delegate,
+              GlobalWidgetsLocalizations.delegate,
+              GlobalCupertinoLocalizations.delegate,
+            ],
+            supportedLocales: const [
+              Locale('en', ''), // English
+              Locale('ar', ''), // Arabic
+            ],
+            locale: const Locale('ar', ''), // Set default locale to Arabic
           );
         },
       ),

@@ -2,10 +2,10 @@ import 'dart:async';
 import 'package:path/path.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:path_provider/path_provider.dart';
-import '../student_model.dart';
-import '../teacher_model.dart';
-import '../class_model.dart';
-import '../subject_model.dart'; // New import
+import 'student_model.dart';
+import 'teacher_model.dart';
+import 'class_model.dart';
+import 'subject_model.dart'; // New import
 
 class DatabaseHelper {
   static final DatabaseHelper _instance = DatabaseHelper._internal();

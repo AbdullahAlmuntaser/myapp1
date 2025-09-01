@@ -6,8 +6,10 @@
 import 'dart:async' as _i4;
 
 import 'package:mockito/mockito.dart' as _i1;
+import 'package:myapp/class_model.dart' as _i7;
 import 'package:myapp/database_helper.dart' as _i3;
 import 'package:myapp/student_model.dart' as _i5;
+import 'package:myapp/subject_model.dart' as _i8;
 import 'package:myapp/teacher_model.dart' as _i6;
 import 'package:sqflite/sqflite.dart' as _i2;
 
@@ -127,4 +129,88 @@ class MockDatabaseHelper extends _i1.Mock implements _i3.DatabaseHelper {
             returnValue: _i4.Future<List<_i6.Teacher>>.value(<_i6.Teacher>[]),
           )
           as _i4.Future<List<_i6.Teacher>>);
+
+  @override
+  _i4.Future<int> createClass(_i7.SchoolClass? schoolClass) =>
+      (super.noSuchMethod(
+            Invocation.method(#createClass, [schoolClass]),
+            returnValue: _i4.Future<int>.value(0),
+          )
+          as _i4.Future<int>);
+
+  @override
+  _i4.Future<List<_i7.SchoolClass>> getClasses() =>
+      (super.noSuchMethod(
+            Invocation.method(#getClasses, []),
+            returnValue: _i4.Future<List<_i7.SchoolClass>>.value(
+              <_i7.SchoolClass>[],
+            ),
+          )
+          as _i4.Future<List<_i7.SchoolClass>>);
+
+  @override
+  _i4.Future<int> updateClass(_i7.SchoolClass? schoolClass) =>
+      (super.noSuchMethod(
+            Invocation.method(#updateClass, [schoolClass]),
+            returnValue: _i4.Future<int>.value(0),
+          )
+          as _i4.Future<int>);
+
+  @override
+  _i4.Future<int> deleteClass(int? id) =>
+      (super.noSuchMethod(
+            Invocation.method(#deleteClass, [id]),
+            returnValue: _i4.Future<int>.value(0),
+          )
+          as _i4.Future<int>);
+
+  @override
+  _i4.Future<List<_i7.SchoolClass>> searchClasses(String? query) =>
+      (super.noSuchMethod(
+            Invocation.method(#searchClasses, [query]),
+            returnValue: _i4.Future<List<_i7.SchoolClass>>.value(
+              <_i7.SchoolClass>[],
+            ),
+          )
+          as _i4.Future<List<_i7.SchoolClass>>);
+
+  @override
+  _i4.Future<int> createSubject(_i8.Subject? subject) =>
+      (super.noSuchMethod(
+            Invocation.method(#createSubject, [subject]),
+            returnValue: _i4.Future<int>.value(0),
+          )
+          as _i4.Future<int>);
+
+  @override
+  _i4.Future<List<_i8.Subject>> getSubjects() =>
+      (super.noSuchMethod(
+            Invocation.method(#getSubjects, []),
+            returnValue: _i4.Future<List<_i8.Subject>>.value(<_i8.Subject>[]),
+          )
+          as _i4.Future<List<_i8.Subject>>);
+
+  @override
+  _i4.Future<int> updateSubject(_i8.Subject? subject) =>
+      (super.noSuchMethod(
+            Invocation.method(#updateSubject, [subject]),
+            returnValue: _i4.Future<int>.value(0),
+          )
+          as _i4.Future<int>);
+
+  @override
+  _i4.Future<int> deleteSubject(int? id) =>
+      (super.noSuchMethod(
+            Invocation.method(#deleteSubject, [id]),
+            returnValue: _i4.Future<int>.value(0),
+          )
+          as _i4.Future<int>);
+
+  @override
+  _i4.Future<List<_i8.Subject>> searchSubjects(String? query) =>
+      (super.noSuchMethod(
+            Invocation.method(#searchSubjects, [query]),
+            returnValue: _i4.Future<List<_i8.Subject>>.value(<_i8.Subject>[]),
+          )
+          as _i4.Future<List<_i8.Subject>>);
 }

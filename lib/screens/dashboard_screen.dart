@@ -5,7 +5,6 @@ import '../providers/student_provider.dart';
 import '../providers/teacher_provider.dart';
 import '../providers/class_provider.dart';
 import '../providers/subject_provider.dart';
-// import '../providers/theme_provider.dart'; // Removed unused import
 import 'tabs/students_tab.dart';
 import 'tabs/teachers_tab.dart';
 import 'tabs/classes_tab.dart';
@@ -57,19 +56,19 @@ class DashboardScreenState extends State<DashboardScreen> {
         items: const <BottomNavigationBarItem>[
           BottomNavigationBarItem(
             icon: Icon(Icons.school),
-            label: 'Students',
+            label: 'الطلاب',
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.person),
-            label: 'Teachers',
+            label: 'المعلمون',
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.class_),
-            label: 'Classes',
+            label: 'الفصول',
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.book),
-            label: 'Subjects',
+            label: 'المواد',
           ),
         ],
         currentIndex: _selectedIndex,
