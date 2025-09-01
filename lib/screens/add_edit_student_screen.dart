@@ -3,6 +3,8 @@ import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import '../../providers/student_provider.dart';
 import '../../student_model.dart';
+import '../../providers/class_provider.dart'; // Added import for ClassProvider
+import '../../class_model.dart'; // Added import for SchoolClass
 
 class AddEditStudentScreen extends StatefulWidget {
   final Student? student;
@@ -21,7 +23,14 @@ class AddEditStudentScreenState extends State<AddEditStudentScreen> {
   late TextEditingController _gradeController;
   late TextEditingController _emailController;
   late TextEditingController _passwordController;
-  late TextEditingController _classIdController;
+  late TextEditingController _academicNumberController;
+  late TextEditingController _sectionController;
+  late TextEditingController _parentNameController;
+  late TextEditingController _parentPhoneController;
+  late TextEditingController _addressController;
+
+  String? _selectedClassId; // For DropdownButton
+  bool _status = true; // Default student status to active
 
   @override
   void initState() {
@@ -32,7 +41,20 @@ class AddEditStudentScreenState extends State<AddEditStudentScreen> {
     _gradeController = TextEditingController(text: widget.student?.grade ?? '');
     _emailController = TextEditingController(text: widget.student?.email ?? '');
     _passwordController = TextEditingController(text: widget.student?.password ?? '');
-    _classIdController = TextEditingController(text: widget.student?.classId ?? '');
+    // New controllers initialization
+    _academicNumberController = TextEditingController(text: widget.student?.academicNumber ?? '');
+    _sectionController = TextEditingController(text: widget.student?.section ?? '');
+    _parentNameController = TextEditingController(text: widget.student?.parentName ?? '');
+    _parentPhoneController = TextEditingController(text: widget.student?.parentPhone ?? '');
+    _addressController = TextEditingController(text: widget.student?.address ?? '');
+
+    _selectedClassId = widget.student?.classId; // Initialize selected class ID
+    _status = widget.student?.status ?? true; // Initialize status
+
+    // Fetch classes when the screen initializes
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      Provider.of<ClassProvider>(context, listen: false).fetchClasses();
+    });
   }
 
   @override
@@ -43,7 +65,11 @@ class AddEditStudentScreenState extends State<AddEditStudentScreen> {
     _gradeController.dispose();
     _emailController.dispose();
     _passwordController.dispose();
-    _classIdController.dispose();
+    _academicNumberController.dispose();
+    _sectionController.dispose();
+    _parentNameController.dispose();
+    _parentPhoneController.dispose();
+    _addressController.dispose();
     super.dispose();
   }
 
@@ -82,19 +108,25 @@ class AddEditStudentScreenState extends State<AddEditStudentScreen> {
         grade: _gradeController.text,
         email: _emailController.text.isNotEmpty ? _emailController.text : null,
         password: _passwordController.text.isNotEmpty ? _passwordController.text : null,
-        classId: _classIdController.text.isNotEmpty ? _classIdController.text : null,
+        classId: _selectedClassId, // Use selected class ID
+        academicNumber: _academicNumberController.text.isNotEmpty ? _academicNumberController.text : null,
+        section: _sectionController.text.isNotEmpty ? _sectionController.text : null,
+        parentName: _parentNameController.text.isNotEmpty ? _parentNameController.text : null,
+        parentPhone: _parentPhoneController.text.isNotEmpty ? _parentPhoneController.text : null,
+        address: _addressController.text.isNotEmpty ? _addressController.text : null,
+        status: _status,
       );
 
       final provider = Provider.of<StudentProvider>(context, listen: false);
-      final message = widget.student == null
-          ? 'Student added successfully'
-          : 'Student updated successfully';
+      String message;
 
       try {
         if (widget.student == null) {
           await provider.addStudent(student);
+          message = 'تم إضافة الطالب بنجاح';
         } else {
           await provider.updateStudent(student);
+          message = 'تم تحديث الطالب بنجاح';
         }
         if (!mounted) return;
         Navigator.of(context).pop();
@@ -102,7 +134,7 @@ class AddEditStudentScreenState extends State<AddEditStudentScreen> {
       } catch (e) {
         if (!mounted) return;
         ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Failed to save student: $e')),
+            SnackBar(content: Text('فشل حفظ الطالب: ${e.toString()}')),
           );
       }
     }
@@ -112,7 +144,7 @@ class AddEditStudentScreenState extends State<AddEditStudentScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.student == null ? 'Add Student' : 'Edit Student'),
+        title: Text(widget.student == null ? 'إضافة طالب' : 'تعديل طالب'),
       ),
       body: SingleChildScrollView(
         child: Padding(
@@ -126,6 +158,13 @@ class AddEditStudentScreenState extends State<AddEditStudentScreen> {
                   controller: _nameController,
                   decoration: const InputDecoration(labelText: 'الاسم الكامل', border: OutlineInputBorder()),
                   validator: (value) => value!.isEmpty ? 'الرجاء إدخال الاسم' : null,
+                ),
+                const SizedBox(height: 16),
+                TextFormField(
+                  controller: _academicNumberController,
+                  decoration: const InputDecoration(labelText: 'الرقم الأكاديمي', border: OutlineInputBorder()),
+                  keyboardType: TextInputType.number,
+                  validator: (value) => value!.isEmpty ? 'الرجاء إدخال الرقم الأكاديمي' : null,
                 ),
                 const SizedBox(height: 16),
                 TextFormField(
@@ -175,10 +214,63 @@ class AddEditStudentScreenState extends State<AddEditStudentScreen> {
                   validator: (value) => value!.isEmpty ? 'الرجاء إدخال كلمة المرور' : null,
                 ),
                 const SizedBox(height: 16),
+                // Dropdown for Class ID
+                Consumer<ClassProvider>(
+                  builder: (context, classProvider, child) {
+                    return DropdownButtonFormField<String>(
+                      decoration: const InputDecoration(
+                        labelText: 'الفصل',
+                        border: OutlineInputBorder(),
+                      ),
+                      value: _selectedClassId,
+                      hint: const Text('اختر فصلاً'),
+                      items: classProvider.classes.map((SchoolClass classItem) {
+                        return DropdownMenuItem<String>(
+                          value: classItem.classId,
+                          child: Text(classItem.name),
+                        );
+                      }).toList(),
+                      onChanged: (String? newValue) {
+                        setState(() {
+                          _selectedClassId = newValue;
+                        });
+                      },
+                      validator: (value) => value == null || value.isEmpty ? 'الرجاء اختيار فصل' : null,
+                    );
+                  },
+                ),
+                const SizedBox(height: 16),
                 TextFormField(
-                  controller: _classIdController,
-                  decoration: const InputDecoration(labelText: 'معرف الفصل', border: OutlineInputBorder()),
-                  validator: (value) => value!.isEmpty ? 'الرجاء إدخال معرف الفصل' : null,
+                  controller: _sectionController,
+                  decoration: const InputDecoration(labelText: 'الشعبة (اختياري)', border: OutlineInputBorder()),
+                ),
+                const SizedBox(height: 16),
+                TextFormField(
+                  controller: _parentNameController,
+                  decoration: const InputDecoration(labelText: 'اسم ولي الأمر (اختياري)', border: OutlineInputBorder()),
+                ),
+                const SizedBox(height: 16),
+                TextFormField(
+                  controller: _parentPhoneController,
+                  decoration: const InputDecoration(labelText: 'هاتف ولي الأمر (اختياري)', border: OutlineInputBorder()),
+                  keyboardType: TextInputType.phone,
+                ),
+                const SizedBox(height: 16),
+                TextFormField(
+                  controller: _addressController,
+                  decoration: const InputDecoration(labelText: 'العنوان (اختياري)', border: OutlineInputBorder()),
+                  maxLines: 2,
+                ),
+                const SizedBox(height: 16),
+                SwitchListTile(
+                  title: const Text('حالة الطالب'),
+                  subtitle: Text(_status ? 'نشط' : 'غير نشط'),
+                  value: _status,
+                  onChanged: (bool value) {
+                    setState(() {
+                      _status = value;
+                    });
+                  },
                 ),
                 const SizedBox(height: 32),
                 ElevatedButton(

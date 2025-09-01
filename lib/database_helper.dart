@@ -5,7 +5,7 @@ import 'package:path_provider/path_provider.dart';
 import 'student_model.dart';
 import 'teacher_model.dart';
 import 'class_model.dart';
-import 'subject_model.dart'; // New import
+import 'subject_model.dart';
 
 class DatabaseHelper {
   static final DatabaseHelper _instance = DatabaseHelper._internal();
@@ -25,7 +25,7 @@ class DatabaseHelper {
     final path = join(dbPath.path, 'students.db');
     return await openDatabase(
       path,
-      version: 7, // Increased version to handle schema changes for subjects
+      version: 8, // Increased version to trigger onUpgrade for new student fields
       onCreate: _onCreate,
       onUpgrade: _onUpgrade,
     );
@@ -39,9 +39,15 @@ class DatabaseHelper {
         dob TEXT NOT NULL,
         phone TEXT NOT NULL,
         grade TEXT NOT NULL,
-        email TEXT,
+        email TEXT UNIQUE,
         password TEXT,
-        classId TEXT
+        classId TEXT,
+        academicNumber TEXT,
+        section TEXT,
+        parentName TEXT,
+        parentPhone TEXT,
+        address TEXT,
+        status INTEGER NOT NULL DEFAULT 1
       )
     ''');
      await db.execute('''
@@ -79,10 +85,11 @@ class DatabaseHelper {
 
   Future<void> _onUpgrade(Database db, int oldVersion, int newVersion) async {
     if (oldVersion < newVersion) {
+      // Drop all tables and recreate them to apply new schema
       await db.execute('DROP TABLE IF EXISTS students');
       await db.execute('DROP TABLE IF EXISTS teachers');
       await db.execute('DROP TABLE IF EXISTS classes');
-      await db.execute('DROP TABLE IF EXISTS subjects'); // Drop subjects table as well
+      await db.execute('DROP TABLE IF EXISTS subjects');
       await _onCreate(db, newVersion);
     }
   }
@@ -91,7 +98,7 @@ class DatabaseHelper {
 
   Future<int> createStudent(Student student) async {
     final db = await database;
-    return await db.insert('students', student.toMap());
+    return await db.insert('students', student.toMap(), conflictAlgorithm: ConflictAlgorithm.replace);
   }
 
   Future<List<Student>> getStudents() async {
@@ -121,16 +128,46 @@ class DatabaseHelper {
     );
   }
 
-  Future<List<Student>> searchStudents(String name) async {
+  Future<List<Student>> searchStudents(String nameQuery, {String? classId}) async {
     final db = await database;
+    List<String> whereClauses = [];
+    List<dynamic> whereArgs = [];
+
+    if (nameQuery.isNotEmpty) {
+      whereClauses.add('name LIKE ? OR academicNumber LIKE ?');
+      whereArgs.add('%$nameQuery%');
+      whereArgs.add('%$nameQuery%');
+    }
+
+    if (classId != null && classId.isNotEmpty) {
+      whereClauses.add('classId = ?');
+      whereArgs.add(classId);
+    }
+
+    String whereString = whereClauses.isEmpty ? '' : 'WHERE ${whereClauses.join(' AND ')}';
+
     final List<Map<String, dynamic>> maps = await db.query(
       'students',
-      where: 'name LIKE ?',
-      whereArgs: ['%$name%'],
+      where: whereString.isEmpty ? null : whereString.substring(6), // Remove "WHERE " prefix if exists
+      whereArgs: whereArgs.isEmpty ? null : whereArgs,
     );
     return List.generate(maps.length, (i) {
       return Student.fromMap(maps[i]);
     });
+  }
+
+  Future<Student?> getStudentByEmail(String email) async {
+    final db = await database;
+    final List<Map<String, dynamic>> maps = await db.query(
+      'students',
+      where: 'email = ?',
+      whereArgs: [email],
+    );
+    if (maps.isNotEmpty) {
+      return Student.fromMap(maps.first);
+    } else {
+      return null;
+    }
   }
 
   // --- Teacher Methods ---
@@ -183,7 +220,7 @@ class DatabaseHelper {
 
   Future<int> createClass(SchoolClass schoolClass) async {
     final db = await database;
-    return await db.insert('classes', schoolClass.toMap());
+    return await db.insert('classes', schoolClass.toMap(), conflictAlgorithm: ConflictAlgorithm.replace);
   }
 
   Future<List<SchoolClass>> getClasses() async {
@@ -229,7 +266,7 @@ class DatabaseHelper {
 
   Future<int> createSubject(Subject subject) async {
     final db = await database;
-    return await db.insert('subjects', subject.toMap());
+    return await db.insert('subjects', subject.toMap(), conflictAlgorithm: ConflictAlgorithm.replace);
   }
 
   Future<List<Subject>> getSubjects() async {

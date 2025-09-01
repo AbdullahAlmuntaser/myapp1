@@ -83,12 +83,27 @@ class MockDatabaseHelper extends _i1.Mock implements _i3.DatabaseHelper {
           as _i4.Future<int>);
 
   @override
-  _i4.Future<List<_i5.Student>> searchStudents(String? name) =>
+  _i4.Future<List<_i5.Student>> searchStudents(
+    String? nameQuery, {
+    String? classId,
+  }) =>
       (super.noSuchMethod(
-            Invocation.method(#searchStudents, [name]),
+            Invocation.method(
+              #searchStudents,
+              [nameQuery],
+              {#classId: classId},
+            ),
             returnValue: _i4.Future<List<_i5.Student>>.value(<_i5.Student>[]),
           )
           as _i4.Future<List<_i5.Student>>);
+
+  @override
+  _i4.Future<_i5.Student?> getStudentByEmail(String? email) =>
+      (super.noSuchMethod(
+            Invocation.method(#getStudentByEmail, [email]),
+            returnValue: _i4.Future<_i5.Student?>.value(),
+          )
+          as _i4.Future<_i5.Student?>);
 
   @override
   _i4.Future<int> createTeacher(_i6.Teacher? teacher) =>

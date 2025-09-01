@@ -8,6 +8,12 @@ class Student {
   final String? email;
   final String? password;
   final String? classId;
+  final String? academicNumber;
+  final String? section;
+  final String? parentName;
+  final String? parentPhone;
+  final String? address;
+  final bool status; // true for active, false for inactive
 
   Student({
     this.id,
@@ -18,6 +24,12 @@ class Student {
     this.email,
     this.password,
     this.classId,
+    this.academicNumber,
+    this.section,
+    this.parentName,
+    this.parentPhone,
+    this.address,
+    this.status = true, // Default to active
   });
 
   Map<String, dynamic> toMap() {
@@ -30,6 +42,12 @@ class Student {
       'email': email,
       'password': password,
       'classId': classId,
+      'academicNumber': academicNumber,
+      'section': section,
+      'parentName': parentName,
+      'parentPhone': parentPhone,
+      'address': address,
+      'status': status ? 1 : 0, // SQLite stores bool as int
     };
   }
 
@@ -43,12 +61,18 @@ class Student {
       email: map['email'] as String?,
       password: map['password'] as String?,
       classId: map['classId'] as String?,
+      academicNumber: map['academicNumber'] as String?,
+      section: map['section'] as String?,
+      parentName: map['parentName'] as String?,
+      parentPhone: map['parentPhone'] as String?,
+      address: map['address'] as String?,
+      status: (map['status'] as int?) == 1 ? true : false,
     );
   }
 
   @override
   String toString() {
-    return 'Student{id: $id, name: $name, dob: $dob, phone: $phone, grade: $grade, email: $email, password: $password, classId: $classId}';
+    return 'Student{id: $id, name: $name, dob: $dob, phone: $phone, grade: $grade, email: $email, password: $password, classId: $classId, academicNumber: $academicNumber, section: $section, parentName: $parentName, parentPhone: $parentPhone, address: $address, status: $status}';
   }
 
   Student copyWith({
@@ -60,6 +84,12 @@ class Student {
     String? email,
     String? password,
     String? classId,
+    String? academicNumber,
+    String? section,
+    String? parentName,
+    String? parentPhone,
+    String? address,
+    bool? status,
   }) {
     return Student(
       id: id ?? this.id,
@@ -70,6 +100,12 @@ class Student {
       email: email ?? this.email,
       password: password ?? this.password,
       classId: classId ?? this.classId,
+      academicNumber: academicNumber ?? this.academicNumber,
+      section: section ?? this.section,
+      parentName: parentName ?? this.parentName,
+      parentPhone: parentPhone ?? this.parentPhone,
+      address: address ?? this.address,
+      status: status ?? this.status,
     );
   }
 }
