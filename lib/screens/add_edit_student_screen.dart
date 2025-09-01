@@ -53,6 +53,16 @@ class AddEditStudentScreenState extends State<AddEditStudentScreen> {
       initialDate: DateTime.now(),
       firstDate: DateTime(1950),
       lastDate: DateTime.now(),
+      builder: (context, child) {
+        return Theme(
+          data: ThemeData.light().copyWith(
+            primaryColor: Theme.of(context).primaryColor,
+            colorScheme: ColorScheme.light(primary: Theme.of(context).primaryColor),
+            buttonTheme: ButtonThemeData(textTheme: ButtonTextTheme.primary),
+          ),
+          child: child!,
+        );
+      },
     );
     if (picked != null) {
       if (!mounted) return;
@@ -77,8 +87,8 @@ class AddEditStudentScreenState extends State<AddEditStudentScreen> {
 
       final provider = Provider.of<StudentProvider>(context, listen: false);
       final message = widget.student == null
-          ? 'Student added successfully'
-          : 'Student updated successfully';
+          ? 'تم إضافة الطالب بنجاح'
+          : 'تم تحديث الطالب بنجاح';
 
       try {
         if (widget.student == null) {
@@ -92,7 +102,7 @@ class AddEditStudentScreenState extends State<AddEditStudentScreen> {
       } catch (e) {
         if (!mounted) return;
         ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Failed to save student: $e')),
+            SnackBar(content: Text('فشل حفظ الطالب: $e')),
           );
       }
     }
@@ -102,7 +112,7 @@ class AddEditStudentScreenState extends State<AddEditStudentScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.student == null ? 'Add Student' : 'Edit Student'),
+        title: Text(widget.student == null ? 'إضافة طالب' : 'تعديل طالب'),
       ),
       body: SingleChildScrollView(
         child: Padding(
@@ -114,46 +124,45 @@ class AddEditStudentScreenState extends State<AddEditStudentScreen> {
               children: [
                 TextFormField(
                   controller: _nameController,
-                  decoration: const InputDecoration(labelText: 'Full Name', border: OutlineInputBorder()),
-                  validator: (value) => value!.isEmpty ? 'Please enter a name' : null,
+                  decoration: const InputDecoration(labelText: 'الاسم الكامل', border: OutlineInputBorder()),
+                  validator: (value) => value!.isEmpty ? 'الرجاء إدخال الاسم' : null,
                 ),
                 const SizedBox(height: 16),
                 TextFormField(
                   controller: _dobController,
                   decoration: const InputDecoration(
-                    labelText: 'Date of Birth',
+                    labelText: 'تاريخ الميلاد',
                     border: OutlineInputBorder(),
                     suffixIcon: Icon(Icons.calendar_today),
                   ),
                   readOnly: true,
                   onTap: _selectDate,
-                   validator: (value) => value!.isEmpty ? 'Please select a date of birth' : null,
+                   validator: (value) => value!.isEmpty ? 'الرجاء اختيار تاريخ الميلاد' : null,
                 ),
                 const SizedBox(height: 16),
                 TextFormField(
                   controller: _phoneController,
-                  decoration: const InputDecoration(labelText: 'Phone Number', border: OutlineInputBorder()),
+                  decoration: const InputDecoration(labelText: 'رقم الهاتف', border: OutlineInputBorder()),
                   keyboardType: TextInputType.phone,
-                   validator: (value) => value!.isEmpty ? 'Please enter a phone number' : null,
+                   validator: (value) => value!.isEmpty ? 'الرجاء إدخال رقم الهاتف' : null,
                 ),
                 const SizedBox(height: 16),
                 TextFormField(
                   controller: _gradeController,
-                  decoration: const InputDecoration(labelText: 'Grade', border: OutlineInputBorder()),
-                   validator: (value) => value!.isEmpty ? 'Please enter a grade' : null,
+                  decoration: const InputDecoration(labelText: 'الدرجة/الصف', border: OutlineInputBorder()),
+                   validator: (value) => value!.isEmpty ? 'الرجاء إدخال الدرجة/الصف' : null,
                 ),
                 const SizedBox(height: 16),
-                // New fields for Student
                 TextFormField(
                   controller: _emailController,
-                  decoration: const InputDecoration(labelText: 'Email', border: OutlineInputBorder()),
+                  decoration: const InputDecoration(labelText: 'البريد الإلكتروني', border: OutlineInputBorder()),
                   keyboardType: TextInputType.emailAddress,
                   validator: (value) {
                     if (value == null || value.isEmpty) {
-                      return 'Please enter an email';
+                      return 'الرجاء إدخال البريد الإلكتروني';
                     }
                     if (!RegExp(r"^[a-zA-Z0-9.a-zA-Z0-9.!#$%&'*+-/=?^_`{|}~]+@[a-zA-Z0-9]+\.[a-zA-Z]+").hasMatch(value)) {
-                      return 'Please enter a valid email address';
+                      return 'الرجاء إدخال عنوان بريد إلكتروني صحيح';
                     }
                     return null;
                   },
@@ -161,15 +170,15 @@ class AddEditStudentScreenState extends State<AddEditStudentScreen> {
                 const SizedBox(height: 16),
                 TextFormField(
                   controller: _passwordController,
-                  decoration: const InputDecoration(labelText: 'Password', border: OutlineInputBorder()),
+                  decoration: const InputDecoration(labelText: 'كلمة المرور', border: OutlineInputBorder()),
                   obscureText: true,
-                  validator: (value) => value!.isEmpty ? 'Please enter a password' : null,
+                  validator: (value) => value!.isEmpty ? 'الرجاء إدخال كلمة المرور' : null,
                 ),
                 const SizedBox(height: 16),
                 TextFormField(
                   controller: _classIdController,
-                  decoration: const InputDecoration(labelText: 'Class ID', border: OutlineInputBorder()),
-                  validator: (value) => value!.isEmpty ? 'Please enter a class ID' : null,
+                  decoration: const InputDecoration(labelText: 'معرف الفصل', border: OutlineInputBorder()),
+                  validator: (value) => value!.isEmpty ? 'الرجاء إدخال معرف الفصل' : null,
                 ),
                 const SizedBox(height: 32),
                 ElevatedButton(
@@ -178,7 +187,7 @@ class AddEditStudentScreenState extends State<AddEditStudentScreen> {
                     padding: const EdgeInsets.symmetric(vertical: 16),
                     textStyle: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)
                   ),
-                  child: const Text('Save Student'),
+                  child: const Text('حفظ الطالب'),
                 ),
               ],
             ),

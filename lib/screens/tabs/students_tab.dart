@@ -51,16 +51,16 @@ class StudentsTabState extends State<StudentsTab> {
     final bool? confirm = await showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Confirm Deletion'),
-        content: const Text('Are you sure you want to delete this student?'),
+        title: const Text('تأكيد الحذف'),
+        content: const Text('هل أنت متأكد أنك تريد حذف هذا الطالب؟'),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(false),
-            child: const Text('Cancel'),
+            child: const Text('إلغاء'),
           ),
           TextButton(
             onPressed: () => Navigator.of(context).pop(true),
-            child: const Text('Delete'),
+            child: const Text('حذف'),
           ),
         ],
       ),
@@ -72,7 +72,7 @@ class StudentsTabState extends State<StudentsTab> {
       await Provider.of<StudentProvider>(context, listen: false).deleteStudent(id);
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Student deleted successfully')),
+        const SnackBar(content: Text('تم حذف الطالب بنجاح')),
       );
     }
   }
@@ -85,14 +85,14 @@ class StudentsTabState extends State<StudentsTab> {
     return Scaffold(
       key: const Key('students_tab_view'),
       appBar: AppBar(
-        title: const Text('Student Dashboard'),
+        title: const Text('لوحة تحكم الطلاب'),
         actions: [
           IconButton(
             icon: Icon(isDarkMode ? Icons.light_mode : Icons.dark_mode),
             onPressed: () {
               themeProvider.toggleTheme(!isDarkMode);
             },
-            tooltip: 'Toggle Theme',
+            tooltip: 'تبديل الوضع',
           )
         ],
       ),
@@ -103,7 +103,7 @@ class StudentsTabState extends State<StudentsTab> {
             child: TextField(
               controller: _searchController,
               decoration: const InputDecoration(
-                labelText: 'Search by Name',
+                labelText: 'البحث بالاسم',
                 prefixIcon: Icon(Icons.search),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.all(Radius.circular(12.0)),
@@ -115,7 +115,7 @@ class StudentsTabState extends State<StudentsTab> {
             child: Consumer<StudentProvider>(
               builder: (context, studentProvider, child) {
                 if (studentProvider.students.isEmpty) {
-                  return const Center(child: Text('No students found.'));
+                  return const Center(child: Text('لا يوجد طلاب حالياً.'));
                 }
                 return ListView.builder(
                   itemCount: studentProvider.students.length,
@@ -124,17 +124,19 @@ class StudentsTabState extends State<StudentsTab> {
                     return Card(
                       child: ListTile(
                         title: Text(student.name),
-                        subtitle: Text('Grade: ${student.grade}'),
+                        subtitle: Text('الصف: ${student.grade}'), // Changed 'Grade' to 'الصف'
                         trailing: Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
                             IconButton(
                               icon: const Icon(Icons.edit),
                               onPressed: () => _navigateToAddEditScreen(student),
+                              tooltip: 'تعديل',
                             ),
                             IconButton(
                               icon: const Icon(Icons.delete),
                               onPressed: () => _deleteStudent(student.id!),
+                              tooltip: 'حذف',
                             ),
                           ],
                         ),
@@ -150,6 +152,7 @@ class StudentsTabState extends State<StudentsTab> {
       floatingActionButton: FloatingActionButton(
         onPressed: () => _navigateToAddEditScreen(),
         child: const Icon(Icons.add),
+        tooltip: 'إضافة طالب جديد',
       ),
     );
   }

@@ -67,15 +67,15 @@ class AddEditTeacherScreenState extends State<AddEditTeacherScreen> {
         } else {
           await provider.updateTeacher(teacher);
         }
-        if (!mounted) return; // Added mounted check
+        if (!mounted) return;
         Navigator.of(context).pop();
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(widget.teacher == null ? 'Teacher added successfully' : 'Teacher updated successfully')),
+          SnackBar(content: Text(widget.teacher == null ? 'تم إضافة المعلم بنجاح' : 'تم تحديث المعلم بنجاح')),
         );
       } catch (e) {
-        if (!mounted) return; // Added mounted check
+        if (!mounted) return;
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Failed to save teacher: $e')),
+          SnackBar(content: Text('فشل حفظ المعلم: $e')),
         );
       }
     }
@@ -85,7 +85,7 @@ class AddEditTeacherScreenState extends State<AddEditTeacherScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.teacher == null ? 'Add Teacher' : 'Edit Teacher'),
+        title: Text(widget.teacher == null ? 'إضافة معلم' : 'تعديل معلم'),
       ),
       body: SingleChildScrollView(
         child: Padding(
@@ -93,37 +93,37 @@ class AddEditTeacherScreenState extends State<AddEditTeacherScreen> {
           child: Form(
             key: _formKey,
             child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 TextFormField(
                   controller: _nameController,
-                  decoration: const InputDecoration(labelText: 'Name', border: OutlineInputBorder()),
-                  validator: (value) => value!.isEmpty ? 'Please enter a name' : null,
+                  decoration: const InputDecoration(labelText: 'الاسم', border: OutlineInputBorder()),
+                  validator: (value) => value!.isEmpty ? 'الرجاء إدخال الاسم' : null,
                 ),
                 const SizedBox(height: 16),
                 TextFormField(
                   controller: _subjectController,
-                  decoration: const InputDecoration(labelText: 'Subject/Specialization', border: OutlineInputBorder()),
-                  validator: (value) => value!.isEmpty ? 'Please enter a subject/specialization' : null,
+                  decoration: const InputDecoration(labelText: 'المادة/التخصص', border: OutlineInputBorder()),
+                  validator: (value) => value!.isEmpty ? 'الرجاء إدخال المادة/التخصص' : null,
                 ),
                 const SizedBox(height: 16),
                 TextFormField(
                   controller: _phoneController,
-                  decoration: const InputDecoration(labelText: 'Phone', border: OutlineInputBorder()),
+                  decoration: const InputDecoration(labelText: 'رقم الهاتف', border: OutlineInputBorder()),
                   keyboardType: TextInputType.phone,
-                  validator: (value) => value!.isEmpty ? 'Please enter a phone number' : null,
+                  validator: (value) => value!.isEmpty ? 'الرجاء إدخال رقم الهاتف' : null,
                 ),
                 const SizedBox(height: 16),
-                // New fields for Teacher
                 TextFormField(
                   controller: _emailController,
-                  decoration: const InputDecoration(labelText: 'Email', border: OutlineInputBorder()),
+                  decoration: const InputDecoration(labelText: 'البريد الإلكتروني', border: OutlineInputBorder()),
                   keyboardType: TextInputType.emailAddress,
                   validator: (value) {
                     if (value == null || value.isEmpty) {
-                      return 'Please enter an email';
+                      return 'الرجاء إدخال البريد الإلكتروني';
                     }
                     if (!RegExp(r"^[a-zA-Z0-9.a-zA-Z0-9.!#$%&'*+-/=?^_`{|}~]+@[a-zA-Z0-9]+\.[a-zA-Z]+").hasMatch(value)) {
-                      return 'Please enter a valid email address';
+                      return 'الرجاء إدخال عنوان بريد إلكتروني صحيح';
                     }
                     return null;
                   },
@@ -131,26 +131,30 @@ class AddEditTeacherScreenState extends State<AddEditTeacherScreen> {
                 const SizedBox(height: 16),
                 TextFormField(
                   controller: _passwordController,
-                  decoration: const InputDecoration(labelText: 'Password', border: OutlineInputBorder()),
+                  decoration: const InputDecoration(labelText: 'كلمة المرور', border: OutlineInputBorder()),
                   obscureText: true,
-                  validator: (value) => value!.isEmpty ? 'Please enter a password' : null,
+                  validator: (value) => value!.isEmpty ? 'الرجاء إدخال كلمة المرور' : null,
                 ),
                 const SizedBox(height: 16),
                 TextFormField(
                   controller: _qualificationTypeController,
-                  decoration: const InputDecoration(labelText: 'Qualification Type', border: OutlineInputBorder()),
-                  validator: (value) => value!.isEmpty ? 'Please enter a qualification type' : null,
+                  decoration: const InputDecoration(labelText: 'نوع المؤهل', border: OutlineInputBorder()),
+                  validator: (value) => value!.isEmpty ? 'الرجاء إدخال نوع المؤهل' : null,
                 ),
                 const SizedBox(height: 16),
                 TextFormField(
                   controller: _responsibleClassIdController,
-                  decoration: const InputDecoration(labelText: 'Responsible Class ID', border: OutlineInputBorder()),
-                  validator: (value) => value!.isEmpty ? 'Please enter the responsible class ID' : null,
+                  decoration: const InputDecoration(labelText: 'معرف الفصل المسؤول عنه', border: OutlineInputBorder()),
+                  validator: (value) => value!.isEmpty ? 'الرجاء إدخال معرف الفصل المسؤول عنه' : null,
                 ),
                 const SizedBox(height: 32),
                 ElevatedButton(
                   onPressed: _saveTeacher,
-                  child: const Text('Save'),
+                  style: ElevatedButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    textStyle: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)
+                  ),
+                  child: const Text('حفظ المعلم'),
                 ),
               ],
             ),
