@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
-import '../providers/student_provider.dart';
-import '../student_model.dart';
+import '../../providers/student_provider.dart';
+import '../../student_model.dart';
 
 class AddEditStudentScreen extends StatefulWidget {
   final Student? student;
@@ -87,8 +87,8 @@ class AddEditStudentScreenState extends State<AddEditStudentScreen> {
 
       final provider = Provider.of<StudentProvider>(context, listen: false);
       final message = widget.student == null
-          ? 'تم إضافة الطالب بنجاح'
-          : 'تم تحديث الطالب بنجاح';
+          ? 'Student added successfully'
+          : 'Student updated successfully';
 
       try {
         if (widget.student == null) {
@@ -102,7 +102,7 @@ class AddEditStudentScreenState extends State<AddEditStudentScreen> {
       } catch (e) {
         if (!mounted) return;
         ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('فشل حفظ الطالب: $e')),
+            SnackBar(content: Text('Failed to save student: $e')),
           );
       }
     }
@@ -112,7 +112,7 @@ class AddEditStudentScreenState extends State<AddEditStudentScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.student == null ? 'إضافة طالب' : 'تعديل طالب'),
+        title: Text(widget.student == null ? 'Add Student' : 'Edit Student'),
       ),
       body: SingleChildScrollView(
         child: Padding(

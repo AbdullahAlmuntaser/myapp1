@@ -86,25 +86,25 @@ class AddEditSubjectScreenState extends State<AddEditSubjectScreen> {
               children: [
                 TextFormField(
                   controller: _nameController,
-                  decoration: const InputDecoration(labelText: 'Subject Name', border: OutlineInputBorder()),
-                  validator: (value) => value!.isEmpty ? 'Please enter a subject name' : null,
+                  decoration: const InputDecoration(labelText: 'اسم المادة', border: OutlineInputBorder()),
+                  validator: (value) => value!.isEmpty ? 'الرجاء إدخال اسم المادة' : null,
                 ),
                 const SizedBox(height: 16),
                 TextFormField(
                   controller: _subjectIdController,
-                  decoration: const InputDecoration(labelText: 'Subject ID (Unique)', border: OutlineInputBorder()),
-                  validator: (value) => value!.isEmpty ? 'Please enter a unique subject ID' : null,
+                  decoration: const InputDecoration(labelText: 'معرف المادة (فريد)', border: OutlineInputBorder()),
+                  validator: (value) => value!.isEmpty ? 'الرجاء إدخال معرف مادة فريد' : null,
                 ),
                 const SizedBox(height: 16),
                 TextFormField(
                   controller: _descriptionController,
-                  decoration: const InputDecoration(labelText: 'Description (Optional)', border: OutlineInputBorder()),
+                  decoration: const InputDecoration(labelText: 'الوصف (اختياري)', border: OutlineInputBorder()),
                   maxLines: 3,
                 ),
                 const SizedBox(height: 16),
                 TextFormField(
                   controller: _teacherIdController,
-                  decoration: const InputDecoration(labelText: 'Responsible Teacher ID (Optional)', border: OutlineInputBorder()),
+                  decoration: const InputDecoration(labelText: 'معرف المعلم المسؤول (اختياري)', border: OutlineInputBorder()),
                 ),
                 const SizedBox(height: 32),
                 ElevatedButton(
@@ -113,7 +113,7 @@ class AddEditSubjectScreenState extends State<AddEditSubjectScreen> {
                     padding: const EdgeInsets.symmetric(vertical: 16),
                     textStyle: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)
                   ),
-                  child: const Text('Save Subject'),
+                  child: const Text('حفظ المادة'),
                 ),
               ],
             ),

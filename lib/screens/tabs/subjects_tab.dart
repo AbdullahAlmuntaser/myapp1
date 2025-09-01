@@ -48,16 +48,16 @@ class SubjectsTabState extends State<SubjectsTab> {
     final bool? confirm = await showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Confirm Deletion'),
-        content: const Text('Are you sure you want to delete this subject?'),
+        title: const Text('تأكيد الحذف'),
+        content: const Text('هل أنت متأكد أنك تريد حذف هذه المادة؟'),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(false),
-            child: const Text('Cancel'),
+            child: const Text('إلغاء'),
           ),
           TextButton(
             onPressed: () => Navigator.of(context).pop(true),
-            child: const Text('Delete'),
+            child: const Text('حذف'),
           ),
         ],
       ),
@@ -69,7 +69,7 @@ class SubjectsTabState extends State<SubjectsTab> {
       await Provider.of<SubjectProvider>(context, listen: false).deleteSubject(id);
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Subject deleted successfully')),
+        const SnackBar(content: Text('تم حذف المادة بنجاح')),
       );
     }
   }
@@ -78,7 +78,7 @@ class SubjectsTabState extends State<SubjectsTab> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Subject Dashboard'),
+        title: const Text('لوحة تحكم المواد'),
       ),
       body: Column(
         children: [
@@ -87,7 +87,7 @@ class SubjectsTabState extends State<SubjectsTab> {
             child: TextField(
               controller: _searchController,
               decoration: const InputDecoration(
-                labelText: 'Search by Subject Name or ID',
+                labelText: 'البحث باسم المادة أو المعرف',
                 prefixIcon: Icon(Icons.search),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.all(Radius.circular(12.0)),
@@ -99,7 +99,7 @@ class SubjectsTabState extends State<SubjectsTab> {
             child: Consumer<SubjectProvider>(
               builder: (context, subjectProvider, child) {
                 if (subjectProvider.subjects.isEmpty) {
-                  return const Center(child: Text('No subjects found.'));
+                  return const Center(child: Text('لا توجد مواد حالياً.'));
                 }
                 return ListView.builder(
                   itemCount: subjectProvider.subjects.length,
@@ -112,11 +112,11 @@ class SubjectsTabState extends State<SubjectsTab> {
                         subtitle: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text('Subject ID: ${subject.subjectId}'),
+                            Text('معرف المادة: ${subject.subjectId}'),
                             if (subject.description != null && subject.description!.isNotEmpty)
-                              Text('Description: ${subject.description}'),
+                              Text('الوصف: ${subject.description}'),
                             if (subject.teacherId != null && subject.teacherId!.isNotEmpty)
-                              Text('Responsible Teacher ID: ${subject.teacherId}'),
+                              Text('معرف المعلم المسؤول: ${subject.teacherId}'),
                           ],
                         ),
                         trailing: Row(
@@ -125,10 +125,12 @@ class SubjectsTabState extends State<SubjectsTab> {
                             IconButton(
                               icon: const Icon(Icons.edit),
                               onPressed: () => _navigateToAddEditScreen(subject),
+                              tooltip: 'تعديل',
                             ),
                             IconButton(
                               icon: const Icon(Icons.delete),
                               onPressed: () => _deleteSubject(subject.id!),
+                              tooltip: 'حذف',
                             ),
                           ],
                         ),
@@ -143,6 +145,7 @@ class SubjectsTabState extends State<SubjectsTab> {
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () => _navigateToAddEditScreen(),
+        tooltip: 'إضافة مادة جديدة',
         child: const Icon(Icons.add),
       ),
     );

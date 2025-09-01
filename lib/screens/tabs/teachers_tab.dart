@@ -148,8 +148,8 @@ class TeachersTabState extends State<TeachersTab> {
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () => _navigateToAddEditScreen(),
-        child: const Icon(Icons.add),
         tooltip: 'إضافة معلم جديد',
+        child: const Icon(Icons.add),
       ),
     );
   }

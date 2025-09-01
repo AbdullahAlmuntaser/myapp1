@@ -70,12 +70,12 @@ class AddEditTeacherScreenState extends State<AddEditTeacherScreen> {
         if (!mounted) return;
         Navigator.of(context).pop();
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(widget.teacher == null ? 'تم إضافة المعلم بنجاح' : 'تم تحديث المعلم بنجاح')),
+          SnackBar(content: Text(widget.teacher == null ? 'Teacher added successfully' : 'Teacher updated successfully')),
         );
       } catch (e) {
         if (!mounted) return;
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('فشل حفظ المعلم: $e')),
+          SnackBar(content: Text('Failed to save teacher: $e')),
         );
       }
     }
@@ -85,7 +85,7 @@ class AddEditTeacherScreenState extends State<AddEditTeacherScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.teacher == null ? 'إضافة معلم' : 'تعديل معلم'),
+        title: Text(widget.teacher == null ? 'Add Teacher' : 'Edit Teacher'),
       ),
       body: SingleChildScrollView(
         child: Padding(

@@ -48,16 +48,16 @@ class ClassesTabState extends State<ClassesTab> {
     final bool? confirm = await showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Confirm Deletion'),
-        content: const Text('Are you sure you want to delete this class?'),
+        title: const Text('تأكيد الحذف'),
+        content: const Text('هل أنت متأكد أنك تريد حذف هذا الفصل؟'),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(false),
-            child: const Text('Cancel'),
+            child: const Text('إلغاء'),
           ),
           TextButton(
             onPressed: () => Navigator.of(context).pop(true),
-            child: const Text('Delete'),
+            child: const Text('حذف'),
           ),
         ],
       ),
@@ -69,7 +69,7 @@ class ClassesTabState extends State<ClassesTab> {
       await Provider.of<ClassProvider>(context, listen: false).deleteClass(id);
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Class deleted successfully')),
+        const SnackBar(content: Text('تم حذف الفصل بنجاح')),
       );
     }
   }
@@ -78,7 +78,7 @@ class ClassesTabState extends State<ClassesTab> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Class Dashboard'),
+        title: const Text('لوحة تحكم الفصول'),
       ),
       body: Column(
         children: [
@@ -87,7 +87,7 @@ class ClassesTabState extends State<ClassesTab> {
             child: TextField(
               controller: _searchController,
               decoration: const InputDecoration(
-                labelText: 'Search by Class Name or ID',
+                labelText: 'البحث باسم الفصل أو المعرف',
                 prefixIcon: Icon(Icons.search),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.all(Radius.circular(12.0)),
@@ -99,7 +99,7 @@ class ClassesTabState extends State<ClassesTab> {
             child: Consumer<ClassProvider>(
               builder: (context, classProvider, child) {
                 if (classProvider.classes.isEmpty) {
-                  return const Center(child: Text('No classes found.'));
+                  return const Center(child: Text('لا توجد فصول حالياً.'));
                 }
                 return ListView.builder(
                   itemCount: classProvider.classes.length,
@@ -112,13 +112,13 @@ class ClassesTabState extends State<ClassesTab> {
                         subtitle: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text('Class ID: ${schoolClass.classId}'),
+                            Text('معرف الفصل: ${schoolClass.classId}'),
                             if (schoolClass.teacherId != null && schoolClass.teacherId!.isNotEmpty)
-                              Text('Responsible Teacher ID: ${schoolClass.teacherId}'),
+                              Text('معرف المعلم المسؤول: ${schoolClass.teacherId}'),
                             if (schoolClass.capacity != null)
-                              Text('Capacity: ${schoolClass.capacity}'),
+                              Text('السعة: ${schoolClass.capacity}'),
                             if (schoolClass.yearTerm != null && schoolClass.yearTerm!.isNotEmpty)
-                              Text('Year/Term: ${schoolClass.yearTerm}'),
+                              Text('السنة/الفصل الدراسي: ${schoolClass.yearTerm}'),
                           ],
                         ),
                         trailing: Row(
@@ -127,10 +127,12 @@ class ClassesTabState extends State<ClassesTab> {
                             IconButton(
                               icon: const Icon(Icons.edit),
                               onPressed: () => _navigateToAddEditScreen(schoolClass),
+                              tooltip: 'تعديل',
                             ),
                             IconButton(
                               icon: const Icon(Icons.delete),
                               onPressed: () => _deleteClass(schoolClass.id!),
+                              tooltip: 'حذف',
                             ),
                           ],
                         ),
@@ -145,6 +147,7 @@ class ClassesTabState extends State<ClassesTab> {
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () => _navigateToAddEditScreen(),
+        tooltip: 'إضافة فصل جديد',
         child: const Icon(Icons.add),
       ),
     );

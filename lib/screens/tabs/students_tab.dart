@@ -2,7 +2,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../providers/student_provider.dart';
-import '../../providers/theme_provider.dart';
 import '../../student_model.dart';
 import '../add_edit_student_screen.dart';
 
@@ -79,21 +78,12 @@ class StudentsTabState extends State<StudentsTab> {
 
   @override
   Widget build(BuildContext context) {
-    final themeProvider = Provider.of<ThemeProvider>(context);
-    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
-
     return Scaffold(
       key: const Key('students_tab_view'),
       appBar: AppBar(
         title: const Text('لوحة تحكم الطلاب'),
         actions: [
-          IconButton(
-            icon: Icon(isDarkMode ? Icons.light_mode : Icons.dark_mode),
-            onPressed: () {
-              themeProvider.toggleTheme(!isDarkMode);
-            },
-            tooltip: 'تبديل الوضع',
-          )
+          // Removed theme toggle button from here
         ],
       ),
       body: Column(
@@ -151,8 +141,8 @@ class StudentsTabState extends State<StudentsTab> {
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () => _navigateToAddEditScreen(),
-        child: const Icon(Icons.add),
         tooltip: 'إضافة طالب جديد',
+        child: const Icon(Icons.add),
       ),
     );
   }

@@ -53,8 +53,8 @@ class AddEditClassScreenState extends State<AddEditClassScreen> {
 
       final provider = Provider.of<ClassProvider>(context, listen: false);
       final message = widget.schoolClass == null
-          ? 'Class added successfully'
-          : 'Class updated successfully';
+          ? 'تم إضافة الصف بنجاح'
+          : 'تم تحديث الصف بنجاح';
 
       try {
         if (widget.schoolClass == null) {
@@ -68,7 +68,7 @@ class AddEditClassScreenState extends State<AddEditClassScreen> {
       } catch (e) {
         if (!mounted) return;
         ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Failed to save class: $e')),
+            SnackBar(content: Text('فشل حفظ الصف: $e')),
           );
       }
     }
@@ -78,7 +78,7 @@ class AddEditClassScreenState extends State<AddEditClassScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.schoolClass == null ? 'Add Class' : 'Edit Class'),
+        title: Text(widget.schoolClass == null ? 'إضافة صف' : 'تعديل صف'),
       ),
       body: SingleChildScrollView(
         child: Padding(
@@ -90,29 +90,29 @@ class AddEditClassScreenState extends State<AddEditClassScreen> {
               children: [
                 TextFormField(
                   controller: _nameController,
-                  decoration: const InputDecoration(labelText: 'Class Name', border: OutlineInputBorder()),
-                  validator: (value) => value!.isEmpty ? 'Please enter a class name' : null,
+                  decoration: const InputDecoration(labelText: 'اسم الصف', border: OutlineInputBorder()),
+                  validator: (value) => value!.isEmpty ? 'الرجاء إدخال اسم الصف' : null,
                 ),
                 const SizedBox(height: 16),
                 TextFormField(
                   controller: _classIdController,
-                  decoration: const InputDecoration(labelText: 'Class ID (Unique)', border: OutlineInputBorder()),
-                  validator: (value) => value!.isEmpty ? 'Please enter a unique class ID' : null,
+                  decoration: const InputDecoration(labelText: 'معرف الصف (فريد)', border: OutlineInputBorder()),
+                  validator: (value) => value!.isEmpty ? 'الرجاء إدخال معرف صف فريد' : null,
                 ),
                 const SizedBox(height: 16),
                 TextFormField(
                   controller: _teacherIdController,
-                  decoration: const InputDecoration(labelText: 'Responsible Teacher ID (Optional)', border: OutlineInputBorder()),
+                  decoration: const InputDecoration(labelText: 'معرف المعلم المسؤول (اختياري)', border: OutlineInputBorder()),
                 ),
                 const SizedBox(height: 16),
                 TextFormField(
                   controller: _capacityController,
-                  decoration: const InputDecoration(labelText: 'Capacity (Number of Students) (Optional)', border: OutlineInputBorder()),
+                  decoration: const InputDecoration(labelText: 'السعة (عدد الطلاب) (اختياري)', border: OutlineInputBorder()),
                   keyboardType: TextInputType.number,
                   validator: (value) {
                     if (value == null || value.isEmpty) return null;
                     if (int.tryParse(value) == null) {
-                      return 'Please enter a valid number';
+                      return 'الرجاء إدخال رقم صحيح';
                     }
                     return null;
                   },
@@ -120,7 +120,7 @@ class AddEditClassScreenState extends State<AddEditClassScreen> {
                 const SizedBox(height: 16),
                 TextFormField(
                   controller: _yearTermController,
-                  decoration: const InputDecoration(labelText: 'Academic Year/Term (Optional)', border: OutlineInputBorder()),
+                  decoration: const InputDecoration(labelText: 'السنة/الفصل الدراسي (اختياري)', border: OutlineInputBorder()),
                 ),
                 const SizedBox(height: 32),
                 ElevatedButton(
@@ -129,7 +129,7 @@ class AddEditClassScreenState extends State<AddEditClassScreen> {
                     padding: const EdgeInsets.symmetric(vertical: 16),
                     textStyle: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)
                   ),
-                  child: const Text('Save Class'),
+                  child: const Text('حفظ الصف'),
                 ),
               ],
             ),
