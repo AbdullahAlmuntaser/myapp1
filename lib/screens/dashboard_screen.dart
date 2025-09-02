@@ -9,6 +9,8 @@ import 'tabs/students_tab.dart';
 import 'tabs/teachers_tab.dart';
 import 'tabs/classes_tab.dart';
 import 'tabs/subjects_tab.dart';
+import 'tabs/settings_tab.dart';
+import 'tabs/reports_tab.dart';
 
 class DashboardScreen extends StatefulWidget {
   const DashboardScreen({super.key});
@@ -25,6 +27,8 @@ class DashboardScreenState extends State<DashboardScreen> {
     TeachersTab(),
     ClassesTab(),
     SubjectsTab(),
+    SettingsTab(),
+    ReportsTab(),
   ];
 
   @override
@@ -77,6 +81,8 @@ class DashboardScreenState extends State<DashboardScreen> {
           BottomNavigationBarItem(icon: Icon(Icons.person), label: 'المعلمون'),
           BottomNavigationBarItem(icon: Icon(Icons.class_), label: 'الفصول'),
           BottomNavigationBarItem(icon: Icon(Icons.book), label: 'المواد'),
+          BottomNavigationBarItem(icon: Icon(Icons.settings), label: 'الإعدادات'),
+          BottomNavigationBarItem(icon: Icon(Icons.bar_chart), label: 'التقارير'),
         ],
         currentIndex: _selectedIndex,
         onTap: _onItemTapped,

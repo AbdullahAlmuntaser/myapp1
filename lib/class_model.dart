@@ -6,6 +6,7 @@ class SchoolClass {
   final String? teacherId; // ID of the responsible teacher
   final int? capacity; // Maximum number of students
   final String? yearTerm; // Academic year or term
+  final List<String>? subjectIds; // List of subject IDs associated with this class
 
   SchoolClass({
     this.id,
@@ -14,6 +15,7 @@ class SchoolClass {
     this.teacherId,
     this.capacity,
     this.yearTerm,
+    this.subjectIds,
   });
 
   Map<String, dynamic> toMap() {
@@ -24,6 +26,7 @@ class SchoolClass {
       'teacherId': teacherId,
       'capacity': capacity,
       'yearTerm': yearTerm,
+      'subjectIds': subjectIds?.join(','), // Convert list to comma-separated string
     };
   }
 
@@ -35,12 +38,18 @@ class SchoolClass {
       teacherId: map['teacherId'] as String?,
       capacity: map['capacity'] as int?,
       yearTerm: map['yearTerm'] as String?,
+      subjectIds: map['subjectIds'] != null
+          ? (map['subjectIds'] as String)
+              .split(',')
+              .where((id) => id.isNotEmpty)
+              .toList()
+          : null,
     );
   }
 
   @override
   String toString() {
-    return 'SchoolClass{id: $id, name: $name, classId: $classId, teacherId: $teacherId, capacity: $capacity, yearTerm: $yearTerm}';
+    return 'SchoolClass{id: $id, name: $name, classId: $classId, teacherId: $teacherId, capacity: $capacity, yearTerm: $yearTerm, subjectIds: $subjectIds}';
   }
 
   SchoolClass copyWith({
@@ -50,6 +59,7 @@ class SchoolClass {
     String? teacherId,
     int? capacity,
     String? yearTerm,
+    List<String>? subjectIds,
   }) {
     return SchoolClass(
       id: id ?? this.id,
@@ -58,6 +68,7 @@ class SchoolClass {
       teacherId: teacherId ?? this.teacherId,
       capacity: capacity ?? this.capacity,
       yearTerm: yearTerm ?? this.yearTerm,
+      subjectIds: subjectIds ?? this.subjectIds,
     );
   }
 }

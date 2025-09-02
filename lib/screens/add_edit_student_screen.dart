@@ -74,7 +74,6 @@ class AddEditStudentScreenState extends State<AddEditStudentScreen> {
     _nameController.dispose();
     _dobController.dispose();
     _phoneController.dispose();
-    _phoneController.dispose();
     _gradeController.dispose();
     _emailController.dispose();
     _passwordController.dispose();
