@@ -59,8 +59,8 @@ class AddEditSubjectScreenState extends State<AddEditSubjectScreen> {
 
       final provider = Provider.of<SubjectProvider>(context, listen: false);
       final message = widget.subject == null
-          ? 'Subject added successfully'
-          : 'Subject updated successfully';
+          ? 'تمت إضافة المادة بنجاح'
+          : 'تم تحديث المادة بنجاح';
 
       try {
         if (widget.subject == null) {
@@ -72,12 +72,22 @@ class AddEditSubjectScreenState extends State<AddEditSubjectScreen> {
         Navigator.of(context).pop();
         ScaffoldMessenger.of(
           context,
-        ).showSnackBar(SnackBar(content: Text(message)));
+        ).showSnackBar(
+          SnackBar(
+            content: Text(message),
+            backgroundColor: Colors.green,
+          ),
+        );
       } catch (e) {
         if (!mounted) return;
         ScaffoldMessenger.of(
           context,
-        ).showSnackBar(SnackBar(content: Text('Failed to save subject: $e')));
+        ).showSnackBar(
+          SnackBar(
+            content: Text('فشل حفظ المادة: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
       }
     }
   }
@@ -86,7 +96,7 @@ class AddEditSubjectScreenState extends State<AddEditSubjectScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.subject == null ? 'Add Subject' : 'Edit Subject'),
+        title: Text(widget.subject == null ? 'إضافة مادة' : 'تعديل مادة'),
       ),
       body: SingleChildScrollView(
         child: Padding(
@@ -142,7 +152,7 @@ class AddEditSubjectScreenState extends State<AddEditSubjectScreen> {
                       fontWeight: FontWeight.bold,
                     ),
                   ),
-                  child: const Text('حفظ المادة'),
+                  child: const Text('حفظ'),
                 ),
               ],
             ),

@@ -14,18 +14,31 @@ class AddEditClassScreen extends StatefulWidget {
 
 class AddEditClassScreenState extends State<AddEditClassScreen> {
   final _formKey = GlobalKey<FormState>();
-  late TextEditingController _nameController;
+  String? _selectedClassName;
   late TextEditingController _classIdController;
   late TextEditingController _teacherIdController;
   late TextEditingController _capacityController;
   late TextEditingController _yearTermController;
 
+  final List<String> _classNames = [
+    'الأول الابتدائي',
+    'الثاني الابتدائي',
+    'الثالث الابتدائي',
+    'الرابع الابتدائي',
+    'الخامس الابتدائي',
+    'السادس الابتدائي',
+    'الأول المتوسط',
+    'الثاني المتوسط',
+    'الثالث المتوسط',
+    'الأول الثانوي',
+    'الثاني الثانوي',
+    'الثالث الثانوي',
+  ];
+
   @override
   void initState() {
     super.initState();
-    _nameController = TextEditingController(
-      text: widget.schoolClass?.name ?? '',
-    );
+    _selectedClassName = widget.schoolClass?.name;
     _classIdController = TextEditingController(
       text: widget.schoolClass?.classId ?? '',
     );
@@ -42,7 +55,6 @@ class AddEditClassScreenState extends State<AddEditClassScreen> {
 
   @override
   void dispose() {
-    _nameController.dispose();
     _classIdController.dispose();
     _teacherIdController.dispose();
     _capacityController.dispose();
@@ -54,7 +66,7 @@ class AddEditClassScreenState extends State<AddEditClassScreen> {
     if (_formKey.currentState!.validate()) {
       final schoolClass = SchoolClass(
         id: widget.schoolClass?.id,
-        name: _nameController.text,
+        name: _selectedClassName!,
         classId: _classIdController.text,
         teacherId: _teacherIdController.text.isNotEmpty
             ? _teacherIdController.text
@@ -67,7 +79,7 @@ class AddEditClassScreenState extends State<AddEditClassScreen> {
 
       final provider = Provider.of<ClassProvider>(context, listen: false);
       final message = widget.schoolClass == null
-          ? 'تم إضافة الصف بنجاح'
+          ? 'تمت إضافة الصف بنجاح'
           : 'تم تحديث الصف بنجاح';
 
       try {
@@ -80,12 +92,22 @@ class AddEditClassScreenState extends State<AddEditClassScreen> {
         Navigator.of(context).pop();
         ScaffoldMessenger.of(
           context,
-        ).showSnackBar(SnackBar(content: Text(message)));
+        ).showSnackBar(
+          SnackBar(
+            content: Text(message),
+            backgroundColor: Colors.green,
+          ),
+        );
       } catch (e) {
         if (!mounted) return;
         ScaffoldMessenger.of(
           context,
-        ).showSnackBar(SnackBar(content: Text('فشل حفظ الصف: $e')));
+        ).showSnackBar(
+          SnackBar(
+            content: Text('فشل حفظ الصف: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
       }
     }
   }
@@ -104,14 +126,25 @@ class AddEditClassScreenState extends State<AddEditClassScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                TextFormField(
-                  controller: _nameController,
+                DropdownButtonFormField<String>(
+                  value: _selectedClassName,
                   decoration: const InputDecoration(
                     labelText: 'اسم الصف',
                     border: OutlineInputBorder(),
                   ),
+                  items: _classNames.map((String className) {
+                    return DropdownMenuItem<String>(
+                      value: className,
+                      child: Text(className),
+                    );
+                  }).toList(),
+                  onChanged: (newValue) {
+                    setState(() {
+                      _selectedClassName = newValue;
+                    });
+                  },
                   validator: (value) =>
-                      value!.isEmpty ? 'الرجاء إدخال اسم الصف' : null,
+                      value == null ? 'الرجاء اختيار اسم الصف' : null,
                 ),
                 const SizedBox(height: 16),
                 TextFormField(
@@ -165,7 +198,7 @@ class AddEditClassScreenState extends State<AddEditClassScreen> {
                       fontWeight: FontWeight.bold,
                     ),
                   ),
-                  child: const Text('حفظ الصف'),
+                  child: const Text('حفظ'),
                 ),
               ],
             ),

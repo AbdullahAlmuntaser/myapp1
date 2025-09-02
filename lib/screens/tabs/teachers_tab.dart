@@ -197,12 +197,28 @@ class _TeachersTabState extends State<TeachersTab> {
             child: const Text('إلغاء'),
           ),
           TextButton(
-            onPressed: () {
-              Provider.of<TeacherProvider>(
-                context,
-                listen: false,
-              ).deleteTeacher(teacher.id!);
-              Navigator.of(context).pop();
+            onPressed: () async {
+              final messenger = ScaffoldMessenger.of(context);
+              Navigator.of(context).pop(); // Close the dialog first
+              try {
+                await Provider.of<TeacherProvider>(
+                  context,
+                  listen: false,
+                ).deleteTeacher(teacher.id!);
+                messenger.showSnackBar(
+                  const SnackBar(
+                    content: Text('تم حذف المعلم بنجاح'),
+                    backgroundColor: Colors.green,
+                  ),
+                );
+              } catch (e) {
+                messenger.showSnackBar(
+                  SnackBar(
+                    content: Text('فشل حذف المعلم: $e'),
+                    backgroundColor: Colors.red,
+                  ),
+                );
+              }
             },
             child: const Text('حذف'),
           ),

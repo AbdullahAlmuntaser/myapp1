@@ -75,14 +75,31 @@ class StudentsTabState extends State<StudentsTab> {
     if (!mounted) return;
 
     if (confirm == true) {
-      await Provider.of<StudentProvider>(
-        context,
-        listen: false,
-      ).deleteStudent(id);
-      if (!mounted) return;
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text('تم حذف الطالب بنجاح')));
+      try {
+        await Provider.of<StudentProvider>(
+          context,
+          listen: false,
+        ).deleteStudent(id);
+        if (!mounted) return;
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(
+          const SnackBar(
+            content: Text('تم حذف الطالب بنجاح'),
+            backgroundColor: Colors.green,
+          ),
+        );
+      } catch (e) {
+        if (!mounted) return;
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(
+          SnackBar(
+            content: Text('فشل حذف الطالب: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
     }
   }
 

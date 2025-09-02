@@ -74,6 +74,7 @@ class AddEditStudentScreenState extends State<AddEditStudentScreen> {
     _nameController.dispose();
     _dobController.dispose();
     _phoneController.dispose();
+    _phoneController.dispose();
     _gradeController.dispose();
     _emailController.dispose();
     _passwordController.dispose();
@@ -158,11 +159,19 @@ class AddEditStudentScreenState extends State<AddEditStudentScreen> {
         Navigator.of(context).pop();
         ScaffoldMessenger.of(
           context,
-        ).showSnackBar(SnackBar(content: Text(message)));
+        ).showSnackBar(
+          SnackBar(
+            content: Text(message),
+            backgroundColor: Colors.green,
+          ),
+        );
       } catch (e) {
         if (!mounted) return;
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('فشل حفظ الطالب: ${e.toString()}')),
+          SnackBar(
+            content: Text('فشل حفظ الطالب: ${e.toString()}'),
+            backgroundColor: Colors.red,
+          ),
         );
       }
     }

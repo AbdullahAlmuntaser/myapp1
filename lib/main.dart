@@ -54,23 +54,66 @@ class MyApp extends StatelessWidget {
 }
 
 class AppTheme {
-  static final TextTheme _lightTextTheme = GoogleFonts.latoTextTheme(
-    ThemeData.light().textTheme,
-  );
-  static final TextTheme _darkTextTheme = GoogleFonts.latoTextTheme(
-    ThemeData.dark().textTheme,
+  // Define a primary seed color for a vibrant look
+  static const MaterialColor primarySeedColor = Colors.deepPurple; // Changed to MaterialColor
+
+  // Define a common TextTheme using GoogleFonts.amiri
+  static final TextTheme _appTextTheme = TextTheme(
+    displayLarge: GoogleFonts.amiri(fontSize: 57, fontWeight: FontWeight.bold),
+    displayMedium: GoogleFonts.amiri(fontSize: 45, fontWeight: FontWeight.bold),
+    displaySmall: GoogleFonts.amiri(fontSize: 36, fontWeight: FontWeight.bold),
+    headlineLarge: GoogleFonts.amiri(fontSize: 32, fontWeight: FontWeight.bold),
+    headlineMedium: GoogleFonts.amiri(fontSize: 28, fontWeight: FontWeight.bold),
+    headlineSmall: GoogleFonts.amiri(fontSize: 24, fontWeight: FontWeight.bold),
+    titleLarge: GoogleFonts.amiri(fontSize: 22, fontWeight: FontWeight.w500),
+    titleMedium: GoogleFonts.amiri(fontSize: 16, fontWeight: FontWeight.w500),
+    titleSmall: GoogleFonts.amiri(fontSize: 14, fontWeight: FontWeight.w500),
+    bodyLarge: GoogleFonts.amiri(fontSize: 16),
+    bodyMedium: GoogleFonts.amiri(fontSize: 14),
+    bodySmall: GoogleFonts.amiri(fontSize: 12),
+    labelLarge: GoogleFonts.amiri(fontSize: 14, fontWeight: FontWeight.w500),
+    labelMedium: GoogleFonts.amiri(fontSize: 12, fontWeight: FontWeight.w500),
+    labelSmall: GoogleFonts.amiri(fontSize: 11, fontWeight: FontWeight.w500),
   );
 
   static final ThemeData lightTheme = ThemeData(
     useMaterial3: true,
     colorScheme: ColorScheme.fromSeed(
-      seedColor: Colors.blue,
+      seedColor: primarySeedColor,
       brightness: Brightness.light,
     ),
-    textTheme: _lightTextTheme,
+    textTheme: _appTextTheme, // Use the common text theme
     appBarTheme: AppBarTheme(
-      titleTextStyle: _lightTextTheme.headlineSmall?.copyWith(
+      backgroundColor: primarySeedColor, // Use a vibrant color for AppBar
+      foregroundColor: Colors.white, // White text/icons on AppBar
+      titleTextStyle: _appTextTheme.headlineSmall?.copyWith(
+        color: Colors.white, // Ensure title is white
         fontWeight: FontWeight.bold,
+      ),
+    ),
+    floatingActionButtonTheme: FloatingActionButtonThemeData(
+      backgroundColor: primarySeedColor.shade700,
+      foregroundColor: Colors.white,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+    ),
+    elevatedButtonTheme: ElevatedButtonThemeData(
+      style: ElevatedButton.styleFrom(
+        backgroundColor: primarySeedColor,
+        foregroundColor: Colors.white,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+        textStyle: _appTextTheme.labelLarge,
+      ),
+    ),
+    cardTheme: CardThemeData(
+      elevation: 4, // Add a subtle shadow to cards
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+    ), // Removed const
+    inputDecorationTheme: InputDecorationTheme(
+      border: const OutlineInputBorder(borderRadius: BorderRadius.all(Radius.circular(12))),
+      focusedBorder: OutlineInputBorder(
+        borderRadius: const BorderRadius.all(Radius.circular(12)),
+        borderSide: BorderSide(color: primarySeedColor, width: 2),
       ),
     ),
   );
@@ -78,13 +121,42 @@ class AppTheme {
   static final ThemeData darkTheme = ThemeData(
     useMaterial3: true,
     colorScheme: ColorScheme.fromSeed(
-      seedColor: Colors.blue,
+      seedColor: primarySeedColor,
       brightness: Brightness.dark,
     ),
-    textTheme: _darkTextTheme,
+    textTheme: _appTextTheme, // Use the common text theme
     appBarTheme: AppBarTheme(
-      titleTextStyle: _darkTextTheme.headlineSmall?.copyWith(
+      backgroundColor: Colors.grey[900], // Darker AppBar for dark mode
+      foregroundColor: Colors.white,
+      titleTextStyle: _appTextTheme.headlineSmall?.copyWith(
+        color: Colors.white,
         fontWeight: FontWeight.bold,
+      ),
+    ),
+    floatingActionButtonTheme: FloatingActionButtonThemeData(
+      backgroundColor: primarySeedColor.shade200,
+      foregroundColor: Colors.black,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+    ),
+    elevatedButtonTheme: ElevatedButtonThemeData(
+      style: ElevatedButton.styleFrom(
+        backgroundColor: primarySeedColor.shade200,
+        foregroundColor: Colors.black,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+        textStyle: _appTextTheme.labelLarge,
+      ),
+    ),
+    cardTheme: CardThemeData(
+      elevation: 4,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      color: Colors.grey[800],
+    ), // Removed const
+    inputDecorationTheme: InputDecorationTheme(
+      border: const OutlineInputBorder(borderRadius: BorderRadius.all(Radius.circular(12))),
+      focusedBorder: OutlineInputBorder(
+        borderRadius: const BorderRadius.all(Radius.circular(12)),
+        borderSide: BorderSide(color: primarySeedColor.shade200, width: 2),
       ),
     ),
   );
