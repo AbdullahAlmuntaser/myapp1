@@ -108,8 +108,8 @@ class _GradesOverviewTabState extends State<GradesOverviewTab> {
                                   final index = value.toInt();
                                   if (index >= 0 && index < data.length) {
                                     return SideTitleWidget(
-                                      axisSide: meta.axisSide, // Pass meta.axisSide here
                                       space: 8.0,
+                                      meta: meta, // Keep meta here
                                       child: Text(data[index]['subjectName']!),
                                     );
                                   }

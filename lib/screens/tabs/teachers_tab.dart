@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'dart:developer' as developer; // Added import for logging
 
 import '../../providers/subject_provider.dart';
 import '../../providers/teacher_provider.dart';
@@ -211,10 +212,18 @@ class _TeachersTabState extends State<TeachersTab> {
                     backgroundColor: Colors.green,
                   ),
                 );
-              } catch (e) {
+              } catch (e, s) { // Added stack trace parameter 's'
+                // Log the detailed error and stack trace internally for developers
+                developer.log(
+                  'فشل حذف المعلم',
+                  name: 'teachers_tab',
+                  level: 900, // WARNING
+                  error: e,
+                  stackTrace: s,
+                );
                 messenger.showSnackBar(
-                  SnackBar(
-                    content: Text('فشل حذف المعلم: $e'),
+                  const SnackBar(
+                    content: Text('حدث خطأ غير متوقع أثناء حذف المعلم. الرجاء المحاولة مرة أخرى.'), // User-friendly message
                     backgroundColor: Colors.red,
                   ),
                 );
