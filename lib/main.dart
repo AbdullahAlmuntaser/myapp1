@@ -7,7 +7,9 @@ import 'providers/student_provider.dart';
 import 'providers/teacher_provider.dart';
 import 'providers/class_provider.dart';
 import 'providers/subject_provider.dart';
+import 'providers/grade_provider.dart'; // Import GradeProvider
 import 'providers/theme_provider.dart';
+import 'screens/grades_screen.dart'; // Import GradesScreen
 
 void main() {
   runApp(const MyApp());
@@ -25,6 +27,7 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => TeacherProvider()),
         ChangeNotifierProvider(create: (_) => ClassProvider()),
         ChangeNotifierProvider(create: (_) => SubjectProvider()),
+        ChangeNotifierProvider(create: (_) => GradeProvider()), // Add GradeProvider
       ],
       child: Consumer<ThemeProvider>(
         builder: (context, themeProvider, child) {
@@ -34,6 +37,9 @@ class MyApp extends StatelessWidget {
             darkTheme: AppTheme.darkTheme,
             themeMode: themeProvider.themeMode,
             home: const DashboardScreen(),
+            routes: {
+              GradesScreen.routeName: (context) => const GradesScreen(),
+            },
             debugShowCheckedModeBanner: false,
             // Localization settings for Arabic and RTL support
             localizationsDelegates: const [

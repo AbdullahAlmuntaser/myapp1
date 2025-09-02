@@ -6,6 +6,7 @@ import 'student_model.dart';
 import 'teacher_model.dart';
 import 'class_model.dart';
 import 'subject_model.dart';
+import 'grade_model.dart'; // Import the new Grade model
 
 class DatabaseHelper {
   static final DatabaseHelper _instance = DatabaseHelper._internal();
@@ -25,7 +26,7 @@ class DatabaseHelper {
     final path = join(dbPath.path, 'students.db');
     return await openDatabase(
       path,
-      version: 9, // Increased version to trigger onUpgrade for new subjectIds field in classes
+      version: 10, // Increased version for grades table
       onCreate: _onCreate,
       onUpgrade: _onUpgrade,
     );
@@ -82,6 +83,20 @@ class DatabaseHelper {
         teacherId TEXT
       )
     ''');
+    await db.execute('''
+      CREATE TABLE grades(
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        studentId INTEGER NOT NULL,
+        subjectId INTEGER NOT NULL,
+        classId INTEGER NOT NULL,
+        assessmentType TEXT NOT NULL,
+        gradeValue REAL NOT NULL,
+        weight REAL NOT NULL,
+        FOREIGN KEY (studentId) REFERENCES students (id) ON DELETE CASCADE,
+        FOREIGN KEY (subjectId) REFERENCES subjects (id) ON DELETE CASCADE,
+        FOREIGN KEY (classId) REFERENCES classes (id) ON DELETE CASCADE
+      )
+    ''');
   }
 
   Future<void> _onUpgrade(Database db, int oldVersion, int newVersion) async {
@@ -92,6 +107,7 @@ class DatabaseHelper {
       await db.execute('DROP TABLE IF EXISTS teachers');
       await db.execute('DROP TABLE IF EXISTS classes');
       await db.execute('DROP TABLE IF EXISTS subjects');
+      await db.execute('DROP TABLE IF EXISTS grades'); // Drop grades table on upgrade
       await _onCreate(db, newVersion);
     }
   }
@@ -326,5 +342,88 @@ class DatabaseHelper {
     return List.generate(maps.length, (i) {
       return Subject.fromMap(maps[i]);
     });
+  }
+
+  // --- Grade Methods ---
+
+  Future<int> createGrade(Grade grade) async {
+    final db = await database;
+    return await db.insert(
+      'grades',
+      grade.toMap(),
+      conflictAlgorithm: ConflictAlgorithm.replace,
+    );
+  }
+
+  Future<List<Grade>> getGrades() async {
+    final db = await database;
+    final List<Map<String, dynamic>> maps = await db.query('grades');
+    return List.generate(maps.length, (i) {
+      return Grade.fromMap(maps[i]);
+    });
+  }
+
+  Future<int> updateGrade(Grade grade) async {
+    final db = await database;
+    return await db.update(
+      'grades',
+      grade.toMap(),
+      where: 'id = ?',
+      whereArgs: [grade.id],
+    );
+  }
+
+  Future<int> deleteGrade(int id) async {
+    final db = await database;
+    return await db.delete('grades', where: 'id = ?', whereArgs: [id]);
+  }
+
+  Future<List<Grade>> getGradesByStudent(int studentId) async {
+    final db = await database;
+    final List<Map<String, dynamic>> maps = await db.query(
+      'grades',
+      where: 'studentId = ?',
+      whereArgs: [studentId],
+    );
+    return List.generate(maps.length, (i) {
+      return Grade.fromMap(maps[i]);
+    });
+  }
+
+  Future<List<Grade>> getGradesByClass(int classId) async {
+    final db = await database;
+    final List<Map<String, dynamic>> maps = await db.query(
+      'grades',
+      where: 'classId = ?',
+      whereArgs: [classId],
+    );
+    return List.generate(maps.length, (i) {
+      return Grade.fromMap(maps[i]);
+    });
+  }
+
+  Future<List<Grade>> getGradesBySubject(int subjectId) async {
+    final db = await database;
+    final List<Map<String, dynamic>> maps = await db.query(
+      'grades',
+      where: 'subjectId = ?',
+      whereArgs: [subjectId],
+    );
+    return List.generate(maps.length, (i) {
+      return Grade.fromMap(maps[i]);
+    });
+  }
+
+  Future<List<Map<String, dynamic>>> getAverageGradesBySubject() async {
+    final db = await database;
+    final List<Map<String, dynamic>> result = await db.rawQuery('''
+      SELECT
+        s.name AS subjectName,
+        AVG(g.gradeValue * g.weight) / AVG(g.weight) AS averageGrade
+      FROM grades g
+      JOIN subjects s ON g.subjectId = s.id
+      GROUP BY s.name
+    ''');
+    return result;
   }
 }

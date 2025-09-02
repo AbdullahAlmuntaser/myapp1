@@ -11,6 +11,7 @@ import 'tabs/classes_tab.dart';
 import 'tabs/subjects_tab.dart';
 import 'tabs/settings_tab.dart';
 import 'tabs/reports_tab.dart';
+import 'grades_screen.dart'; // Import GradesScreen
 
 class DashboardScreen extends StatefulWidget {
   const DashboardScreen({super.key});
@@ -27,6 +28,7 @@ class DashboardScreenState extends State<DashboardScreen> {
     TeachersTab(),
     ClassesTab(),
     SubjectsTab(),
+    GradesScreen(), // Add GradesScreen
     SettingsTab(),
     ReportsTab(),
   ];
@@ -81,6 +83,7 @@ class DashboardScreenState extends State<DashboardScreen> {
           BottomNavigationBarItem(icon: Icon(Icons.person), label: 'المعلمون'),
           BottomNavigationBarItem(icon: Icon(Icons.class_), label: 'الفصول'),
           BottomNavigationBarItem(icon: Icon(Icons.book), label: 'المواد'),
+          BottomNavigationBarItem(icon: Icon(Icons.grade), label: 'الدرجات'), // Add Grades item
           BottomNavigationBarItem(icon: Icon(Icons.settings), label: 'الإعدادات'),
           BottomNavigationBarItem(icon: Icon(Icons.bar_chart), label: 'التقارير'),
         ],

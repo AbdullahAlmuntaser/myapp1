@@ -1,0 +1,258 @@
+import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import '../grade_model.dart';
+import '../student_model.dart';
+import '../subject_model.dart';
+import '../class_model.dart';
+import '../providers/grade_provider.dart';
+import '../providers/student_provider.dart';
+import '../providers/subject_provider.dart';
+import '../providers/class_provider.dart';
+
+class AddEditGradeDialog extends StatefulWidget {
+  final Grade? grade; // Null for adding, non-null for editing
+
+  const AddEditGradeDialog({super.key, this.grade});
+
+  @override
+  State<AddEditGradeDialog> createState() => _AddEditGradeDialogState();
+}
+
+class _AddEditGradeDialogState extends State<AddEditGradeDialog> {
+  final _formKey = GlobalKey<FormState>();
+  Student? _selectedStudent;
+  Subject? _selectedSubject;
+  SchoolClass? _selectedClass;
+  String? _selectedAssessmentType;
+  final TextEditingController _gradeValueController = TextEditingController();
+  final TextEditingController _weightController = TextEditingController();
+
+  final List<String> _assessmentTypes = ['واجب', 'اختبار', 'مشروع', 'مشاركة'];
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.grade != null) {
+      // Editing existing grade
+      _gradeValueController.text = widget.grade!.gradeValue.toString();
+      _weightController.text = widget.grade!.weight.toString();
+      _selectedAssessmentType = widget.grade!.assessmentType;
+
+      // Set initial dropdown values based on existing grade
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        final studentProvider = Provider.of<StudentProvider>(context, listen: false);
+        final subjectProvider = Provider.of<SubjectProvider>(context, listen: false);
+        final classProvider = Provider.of<ClassProvider>(context, listen: false);
+
+        setState(() {
+          _selectedStudent = studentProvider.students.firstWhere(
+            (s) => s.id == widget.grade!.studentId,
+            orElse: () => Student(id: -1, name: '', dob: '', phone: '', grade: ''),
+          );
+          _selectedSubject = subjectProvider.subjects.firstWhere(
+            (s) => s.id == widget.grade!.subjectId,
+            orElse: () => Subject(id: -1, name: '', subjectId: ''),
+          );
+          _selectedClass = classProvider.classes.firstWhere(
+            (c) => c.id == widget.grade!.classId,
+            orElse: () => SchoolClass(id: -1, name: '', classId: ''),
+          );
+        });
+      });
+    }
+  }
+
+  @override
+  void dispose() {
+    _gradeValueController.dispose();
+    _weightController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _saveGrade() async {
+    if (!_formKey.currentState!.validate()) {
+      return;
+    }
+
+    if (_selectedStudent == null || _selectedSubject == null || _selectedClass == null || _selectedAssessmentType == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('الرجاء ملء جميع الحقول المطلوبة.')),
+      );
+      return;
+    }
+
+    final gradeProvider = Provider.of<GradeProvider>(context, listen: false);
+
+    final gradeValue = double.parse(_gradeValueController.text);
+    final weight = double.parse(_weightController.text);
+
+    if (widget.grade == null) {
+      // Add new grade
+      final newGrade = Grade(
+        studentId: _selectedStudent!.id!,
+        subjectId: _selectedSubject!.id!,
+        classId: _selectedClass!.id!,
+        assessmentType: _selectedAssessmentType!,
+        gradeValue: gradeValue,
+        weight: weight,
+      );
+      await gradeProvider.addGrade(newGrade);
+    } else {
+      // Update existing grade
+      final updatedGrade = widget.grade!.copyWith(
+        studentId: _selectedStudent!.id!,
+        subjectId: _selectedSubject!.id!,
+        classId: _selectedClass!.id!,
+        assessmentType: _selectedAssessmentType!,
+        gradeValue: gradeValue,
+        weight: weight,
+      );
+      await gradeProvider.updateGrade(updatedGrade);
+    }
+
+    if (!mounted) return;
+    Navigator.of(context).pop();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      title: Text(widget.grade == null ? 'إضافة درجة جديدة' : 'تعديل درجة'),
+      content: SingleChildScrollView(
+        child: Form(
+          key: _formKey,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Consumer<StudentProvider>(
+                builder: (context, studentProvider, child) {
+                  return DropdownButtonFormField<Student>(
+                    decoration: const InputDecoration(labelText: 'الطالب'),
+                    value: _selectedStudent,
+                    items: studentProvider.students.map((student) {
+                      return DropdownMenuItem(
+                        value: student,
+                        child: Text(student.name),
+                      );
+                    }).toList(),
+                    onChanged: (value) {
+                      setState(() {
+                        _selectedStudent = value;
+                      });
+                    },
+                    validator: (value) => value == null ? 'الرجاء اختيار طالب' : null,
+                  );
+                },
+              ),
+              const SizedBox(height: 16),
+              Consumer<SubjectProvider>(
+                builder: (context, subjectProvider, child) {
+                  return DropdownButtonFormField<Subject>(
+                    decoration: const InputDecoration(labelText: 'المادة'),
+                    value: _selectedSubject,
+                    items: subjectProvider.subjects.map((subject) {
+                      return DropdownMenuItem(
+                        value: subject,
+                        child: Text(subject.name),
+                      );
+                    }).toList(),
+                    onChanged: (value) {
+                      setState(() {
+                        _selectedSubject = value;
+                      });
+                    },
+                    validator: (value) => value == null ? 'الرجاء اختيار مادة' : null,
+                  );
+                },
+              ),
+              const SizedBox(height: 16),
+              Consumer<ClassProvider>(
+                builder: (context, classProvider, child) {
+                  return DropdownButtonFormField<SchoolClass>(
+                    decoration: const InputDecoration(labelText: 'الفصل'),
+                    value: _selectedClass,
+                    items: classProvider.classes.map((schoolClass) {
+                      return DropdownMenuItem(
+                        value: schoolClass,
+                        child: Text(schoolClass.name),
+                      );
+                    }).toList(),
+                    onChanged: (value) {
+                      setState(() {
+                        _selectedClass = value;
+                      });
+                    },
+                    validator: (value) => value == null ? 'الرجاء اختيار فصل' : null,
+                  );
+                },
+              ),
+              const SizedBox(height: 16),
+              DropdownButtonFormField<String>(
+                decoration: const InputDecoration(labelText: 'نوع التقييم'),
+                value: _selectedAssessmentType,
+                items: _assessmentTypes.map((type) {
+                  return DropdownMenuItem(
+                    value: type,
+                    child: Text(type),
+                  );
+                }).toList(),
+                onChanged: (value) {
+                  setState(() {
+                    _selectedAssessmentType = value;
+                  });
+                },
+                validator: (value) => value == null ? 'الرجاء اختيار نوع التقييم' : null,
+              ),
+              const SizedBox(height: 16),
+              TextFormField(
+                controller: _gradeValueController,
+                keyboardType: TextInputType.number,
+                decoration: const InputDecoration(
+                  labelText: 'الدرجة',
+                  border: OutlineInputBorder(),
+                ),
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'الرجاء إدخال الدرجة';
+                  }
+                  if (double.tryParse(value) == null) {
+                    return 'الرجاء إدخال رقم صحيح';
+                  }
+                  return null;
+                },
+              ),
+              const SizedBox(height: 16),
+              TextFormField(
+                controller: _weightController,
+                keyboardType: TextInputType.number,
+                decoration: const InputDecoration(
+                  labelText: 'الوزن النسبي',
+                  border: OutlineInputBorder(),
+                ),
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'الرجاء إدخال الوزن النسبي';
+                  }
+                  if (double.tryParse(value) == null) {
+                    return 'الرجاء إدخال رقم صحيح';
+                  }
+                  return null;
+                },
+              ),
+            ],
+          ),
+        ),
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.of(context).pop(),
+          child: const Text('إلغاء'),
+        ),
+        ElevatedButton(
+          onPressed: _saveGrade,
+          child: const Text('حفظ'),
+        ),
+      ],
+    );
+  }
+}
