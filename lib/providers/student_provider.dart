@@ -4,11 +4,12 @@ import '../student_model.dart';
 
 class StudentProvider with ChangeNotifier {
   List<Student> _students = [];
-  
+
   final DatabaseHelper _dbHelper; // Made private and final
 
   // Constructor to allow injecting DatabaseHelper for testing
-  StudentProvider({DatabaseHelper? databaseHelper}) : _dbHelper = databaseHelper ?? DatabaseHelper();
+  StudentProvider({DatabaseHelper? databaseHelper})
+    : _dbHelper = databaseHelper ?? DatabaseHelper();
 
   List<Student> get students => _students;
 

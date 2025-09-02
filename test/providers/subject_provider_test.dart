@@ -36,42 +36,50 @@ void main() {
       verify(mockDatabaseHelper.getSubjects());
     });
 
-    test('searchSubjects should update the list of subjects based on a query',
-        () async {
-      final query = 'Math';
-      final subjects = [
-        Subject(id: 1, name: 'Mathematics', subjectId: 'MATH101'),
-      ];
-      when(mockDatabaseHelper.searchSubjects(query))
-          .thenAnswer((_) async => subjects);
+    test(
+      'searchSubjects should update the list of subjects based on a query',
+      () async {
+        final query = 'Math';
+        final subjects = [
+          Subject(id: 1, name: 'Mathematics', subjectId: 'MATH101'),
+        ];
+        when(
+          mockDatabaseHelper.searchSubjects(query),
+        ).thenAnswer((_) async => subjects);
 
-      await subjectProvider.searchSubjects(query);
+        await subjectProvider.searchSubjects(query);
 
-      expect(subjectProvider.subjects, subjects);
-      verify(mockDatabaseHelper.searchSubjects(query));
-    });
+        expect(subjectProvider.subjects, subjects);
+        verify(mockDatabaseHelper.searchSubjects(query));
+      },
+    );
 
-    test('searchSubjects should fetch all subjects when the query is empty',
-        () async {
-      final subjects = [
-        Subject(id: 1, name: 'Mathematics', subjectId: 'MATH101'),
-        Subject(id: 2, name: 'Science', subjectId: 'SCI101'),
-      ];
-      when(mockDatabaseHelper.getSubjects()).thenAnswer((_) async => subjects);
+    test(
+      'searchSubjects should fetch all subjects when the query is empty',
+      () async {
+        final subjects = [
+          Subject(id: 1, name: 'Mathematics', subjectId: 'MATH101'),
+          Subject(id: 2, name: 'Science', subjectId: 'SCI101'),
+        ];
+        when(
+          mockDatabaseHelper.getSubjects(),
+        ).thenAnswer((_) async => subjects);
 
-      await subjectProvider.searchSubjects('');
+        await subjectProvider.searchSubjects('');
 
-      expect(subjectProvider.subjects, subjects);
-      verify(mockDatabaseHelper.getSubjects());
-    });
+        expect(subjectProvider.subjects, subjects);
+        verify(mockDatabaseHelper.getSubjects());
+      },
+    );
 
     test('addSubject should add a subject and refetch the list', () async {
       final newSubject = Subject(name: 'History', subjectId: 'HIST101');
-      when(mockDatabaseHelper.createSubject(newSubject))
-          .thenAnswer((_) async => 1);
-      when(mockDatabaseHelper.getSubjects()).thenAnswer((_) async => [
-            Subject(id: 1, name: 'History', subjectId: 'HIST101'),
-          ]);
+      when(
+        mockDatabaseHelper.createSubject(newSubject),
+      ).thenAnswer((_) async => 1);
+      when(mockDatabaseHelper.getSubjects()).thenAnswer(
+        (_) async => [Subject(id: 1, name: 'History', subjectId: 'HIST101')],
+      );
 
       await subjectProvider.addSubject(newSubject);
 
@@ -81,35 +89,44 @@ void main() {
       expect(subjectProvider.subjects.first.name, 'History');
     });
 
-    test('updateSubject should update a subject and refetch the list',
-        () async {
-      final updatedSubject = Subject(
-          id: 1, name: 'Advanced Mathematics', subjectId: 'MATH201');
-      when(mockDatabaseHelper.updateSubject(updatedSubject))
-          .thenAnswer((_) async => 1);
-      when(mockDatabaseHelper.getSubjects()).thenAnswer((_) async => [
-            updatedSubject,
-          ]);
+    test(
+      'updateSubject should update a subject and refetch the list',
+      () async {
+        final updatedSubject = Subject(
+          id: 1,
+          name: 'Advanced Mathematics',
+          subjectId: 'MATH201',
+        );
+        when(
+          mockDatabaseHelper.updateSubject(updatedSubject),
+        ).thenAnswer((_) async => 1);
+        when(
+          mockDatabaseHelper.getSubjects(),
+        ).thenAnswer((_) async => [updatedSubject]);
 
-      await subjectProvider.updateSubject(updatedSubject);
+        await subjectProvider.updateSubject(updatedSubject);
 
-      verify(mockDatabaseHelper.updateSubject(updatedSubject));
-      verify(mockDatabaseHelper.getSubjects());
-      expect(subjectProvider.subjects.first, updatedSubject);
-    });
+        verify(mockDatabaseHelper.updateSubject(updatedSubject));
+        verify(mockDatabaseHelper.getSubjects());
+        expect(subjectProvider.subjects.first, updatedSubject);
+      },
+    );
 
-    test('deleteSubject should delete a subject and refetch the list',
-        () async {
-      final subjectId = 1;
-      when(mockDatabaseHelper.deleteSubject(subjectId))
-          .thenAnswer((_) async => 1);
-      when(mockDatabaseHelper.getSubjects()).thenAnswer((_) async => []);
+    test(
+      'deleteSubject should delete a subject and refetch the list',
+      () async {
+        final subjectId = 1;
+        when(
+          mockDatabaseHelper.deleteSubject(subjectId),
+        ).thenAnswer((_) async => 1);
+        when(mockDatabaseHelper.getSubjects()).thenAnswer((_) async => []);
 
-      await subjectProvider.deleteSubject(subjectId);
+        await subjectProvider.deleteSubject(subjectId);
 
-      verify(mockDatabaseHelper.deleteSubject(subjectId));
-      verify(mockDatabaseHelper.getSubjects());
-      expect(subjectProvider.subjects, isEmpty);
-    });
+        verify(mockDatabaseHelper.deleteSubject(subjectId));
+        verify(mockDatabaseHelper.getSubjects());
+        expect(subjectProvider.subjects, isEmpty);
+      },
+    );
   });
 }

@@ -23,9 +23,15 @@ class AddEditSubjectScreenState extends State<AddEditSubjectScreen> {
   void initState() {
     super.initState();
     _nameController = TextEditingController(text: widget.subject?.name ?? '');
-    _subjectIdController = TextEditingController(text: widget.subject?.subjectId ?? '');
-    _descriptionController = TextEditingController(text: widget.subject?.description ?? '');
-    _teacherIdController = TextEditingController(text: widget.subject?.teacherId ?? '');
+    _subjectIdController = TextEditingController(
+      text: widget.subject?.subjectId ?? '',
+    );
+    _descriptionController = TextEditingController(
+      text: widget.subject?.description ?? '',
+    );
+    _teacherIdController = TextEditingController(
+      text: widget.subject?.teacherId ?? '',
+    );
   }
 
   @override
@@ -43,8 +49,12 @@ class AddEditSubjectScreenState extends State<AddEditSubjectScreen> {
         id: widget.subject?.id,
         name: _nameController.text,
         subjectId: _subjectIdController.text,
-        description: _descriptionController.text.isNotEmpty ? _descriptionController.text : null,
-        teacherId: _teacherIdController.text.isNotEmpty ? _teacherIdController.text : null,
+        description: _descriptionController.text.isNotEmpty
+            ? _descriptionController.text
+            : null,
+        teacherId: _teacherIdController.text.isNotEmpty
+            ? _teacherIdController.text
+            : null,
       );
 
       final provider = Provider.of<SubjectProvider>(context, listen: false);
@@ -60,12 +70,14 @@ class AddEditSubjectScreenState extends State<AddEditSubjectScreen> {
         }
         if (!mounted) return;
         Navigator.of(context).pop();
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(message)));
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(message)));
       } catch (e) {
         if (!mounted) return;
-        ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Failed to save subject: $e')),
-          );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Failed to save subject: $e')));
       }
     }
   }
@@ -86,32 +98,49 @@ class AddEditSubjectScreenState extends State<AddEditSubjectScreen> {
               children: [
                 TextFormField(
                   controller: _nameController,
-                  decoration: const InputDecoration(labelText: 'اسم المادة', border: OutlineInputBorder()),
-                  validator: (value) => value!.isEmpty ? 'الرجاء إدخال اسم المادة' : null,
+                  decoration: const InputDecoration(
+                    labelText: 'اسم المادة',
+                    border: OutlineInputBorder(),
+                  ),
+                  validator: (value) =>
+                      value!.isEmpty ? 'الرجاء إدخال اسم المادة' : null,
                 ),
                 const SizedBox(height: 16),
                 TextFormField(
                   controller: _subjectIdController,
-                  decoration: const InputDecoration(labelText: 'معرف المادة (فريد)', border: OutlineInputBorder()),
-                  validator: (value) => value!.isEmpty ? 'الرجاء إدخال معرف مادة فريد' : null,
+                  decoration: const InputDecoration(
+                    labelText: 'معرف المادة (فريد)',
+                    border: OutlineInputBorder(),
+                  ),
+                  validator: (value) =>
+                      value!.isEmpty ? 'الرجاء إدخال معرف مادة فريد' : null,
                 ),
                 const SizedBox(height: 16),
                 TextFormField(
                   controller: _descriptionController,
-                  decoration: const InputDecoration(labelText: 'الوصف (اختياري)', border: OutlineInputBorder()),
+                  decoration: const InputDecoration(
+                    labelText: 'الوصف (اختياري)',
+                    border: OutlineInputBorder(),
+                  ),
                   maxLines: 3,
                 ),
                 const SizedBox(height: 16),
                 TextFormField(
                   controller: _teacherIdController,
-                  decoration: const InputDecoration(labelText: 'معرف المعلم المسؤول (اختياري)', border: OutlineInputBorder()),
+                  decoration: const InputDecoration(
+                    labelText: 'معرف المعلم المسؤول (اختياري)',
+                    border: OutlineInputBorder(),
+                  ),
                 ),
                 const SizedBox(height: 32),
                 ElevatedButton(
                   onPressed: _saveSubject,
                   style: ElevatedButton.styleFrom(
                     padding: const EdgeInsets.symmetric(vertical: 16),
-                    textStyle: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)
+                    textStyle: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                   child: const Text('حفظ المادة'),
                 ),

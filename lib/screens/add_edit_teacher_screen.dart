@@ -12,7 +12,7 @@ class AddEditTeacherScreen extends StatefulWidget {
   const AddEditTeacherScreen({super.key, this.teacher});
 
   @override
-  _AddEditTeacherScreenState createState() => _AddEditTeacherScreenState();
+  State<AddEditTeacherScreen> createState() => _AddEditTeacherScreenState();
 }
 
 class _AddEditTeacherScreenState extends State<AddEditTeacherScreen> {
@@ -31,11 +31,13 @@ class _AddEditTeacherScreenState extends State<AddEditTeacherScreen> {
     _emailController = TextEditingController(text: widget.teacher?.email ?? '');
     _passwordController = TextEditingController();
     _phoneController = TextEditingController(text: widget.teacher?.phone ?? '');
-    _qualificationController = TextEditingController(text: widget.teacher?.qualificationType ?? '');
+    _qualificationController =
+        TextEditingController(text: widget.teacher?.qualificationType ?? '');
 
     if (widget.teacher != null) {
       // Fetch subjects for the existing teacher
-      final subjectProvider = Provider.of<SubjectProvider>(context, listen: false);
+      final subjectProvider =
+          Provider.of<SubjectProvider>(context, listen: false);
       final teacherSubjects = widget.teacher!.subject.split(',');
       _selectedSubjects = subjectProvider.subjects
           .where((subject) => teacherSubjects.contains(subject.name))
@@ -55,7 +57,8 @@ class _AddEditTeacherScreenState extends State<AddEditTeacherScreen> {
 
   void _saveTeacher() {
     if (_formKey.currentState!.validate()) {
-      final teacherProvider = Provider.of<TeacherProvider>(context, listen: false);
+      final teacherProvider =
+          Provider.of<TeacherProvider>(context, listen: false);
       final subjects = _selectedSubjects.map((s) => s.name).join(',');
 
       final newTeacher = Teacher(
@@ -85,7 +88,7 @@ class _AddEditTeacherScreenState extends State<AddEditTeacherScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.teacher == null ? 'Add Teacher' : 'Edit Teacher'),
+        title: Text(widget.teacher == null ? 'إضافة معلم' : 'تعديل معلم'),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -95,62 +98,65 @@ class _AddEditTeacherScreenState extends State<AddEditTeacherScreen> {
             children: [
               TextFormField(
                 controller: _nameController,
-                decoration: const InputDecoration(labelText: 'Full Name'),
+                decoration: const InputDecoration(labelText: 'الاسم الكامل'),
                 validator: (value) {
                   if (value == null || value.isEmpty) {
-                    return 'Please enter the teacher\'s name';
+                    return 'يرجى إدخال اسم المعلم';
                   }
                   return null;
                 },
               ),
               TextFormField(
                 controller: _emailController,
-                decoration: const InputDecoration(labelText: 'Email'),
+                decoration: const InputDecoration(labelText: 'البريد الإلكتروني'),
                 validator: (value) {
                   if (value == null || value.isEmpty) {
-                    return 'Please enter an email';
+                    return 'يرجى إدخال البريد الإلكتروني';
                   }
                   if (!RegExp(r'^[^@]+@[^@]+\.[^@]+').hasMatch(value)) {
-                    return 'Please enter a valid email address';
+                    return 'يرجى إدخال بريد إلكتروني صحيح';
                   }
                   return null;
                 },
               ),
               TextFormField(
                 controller: _passwordController,
-                decoration: const InputDecoration(labelText: 'Password'),
+                decoration: const InputDecoration(labelText: 'كلمة المرور'),
                 obscureText: true,
                 validator: (value) {
-                  if (widget.teacher == null && (value == null || value.isEmpty)) {
-                    return 'Please enter a password';
+                  if (widget.teacher == null &&
+                      (value == null || value.isEmpty)) {
+                    return 'يرجى إدخال كلمة المرور';
                   }
                   return null;
                 },
               ),
-               TextFormField(
+              TextFormField(
                 controller: _phoneController,
-                decoration: const InputDecoration(labelText: 'Phone'),
+                decoration: const InputDecoration(labelText: 'رقم الهاتف'),
                 validator: (value) {
                   if (value == null || value.isEmpty) {
-                    return 'Please enter a phone number';
+                    return 'يرجى إدخال رقم الهاتف';
                   }
                   return null;
                 },
               ),
-               TextFormField(
+              TextFormField(
                 controller: _qualificationController,
-                decoration: const InputDecoration(labelText: 'Qualification'),
+                decoration: const InputDecoration(labelText: 'المؤهل العلمي'),
                 validator: (value) {
                   if (value == null || value.isEmpty) {
-                    return 'Please enter a qualification';
+                    return 'يرجى إدخال المؤهل العلمي';
                   }
                   return null;
                 },
               ),
               const SizedBox(height: 20),
               MultiSelectDialogField<Subject>(
-                items: allSubjects.map((s) => MultiSelectItem<Subject>(s, s.name)).toList(),
-                title: const Text('Subjects'),
+                items: allSubjects
+                    .map((s) => MultiSelectItem<Subject>(s, s.name))
+                    .toList(),
+                title: const Text('المواد'),
                 selectedColor: Theme.of(context).primaryColor,
                 onConfirm: (values) {
                   setState(() {
@@ -159,13 +165,15 @@ class _AddEditTeacherScreenState extends State<AddEditTeacherScreen> {
                 },
                 initialValue: _selectedSubjects,
                 chipDisplay: MultiSelectChipDisplay(
-                  items: _selectedSubjects.map((s) => MultiSelectItem<Subject>(s, s.name)).toList(),
+                  items: _selectedSubjects
+                      .map((s) => MultiSelectItem<Subject>(s, s.name))
+                      .toList(),
                 ),
               ),
               const SizedBox(height: 20),
               ElevatedButton(
                 onPressed: _saveTeacher,
-                child: const Text('Save Teacher'),
+                child: const Text('حفظ'),
               ),
             ],
           ),

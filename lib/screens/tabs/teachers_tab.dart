@@ -10,7 +10,7 @@ class TeachersTab extends StatefulWidget {
   const TeachersTab({super.key});
 
   @override
-  _TeachersTabState createState() => _TeachersTabState();
+  State<TeachersTab> createState() => _TeachersTabState();
 }
 
 class _TeachersTabState extends State<TeachersTab> {
@@ -34,16 +34,20 @@ class _TeachersTabState extends State<TeachersTab> {
   }
 
   void _onSearchChanged() {
-    Provider.of<TeacherProvider>(context, listen: false)
-        .searchTeachers(_searchController.text, subject: _selectedSubject);
+    Provider.of<TeacherProvider>(
+      context,
+      listen: false,
+    ).searchTeachers(_searchController.text, subject: _selectedSubject);
   }
 
   void _onFilterChanged(String? subject) {
     setState(() {
       _selectedSubject = subject;
     });
-    Provider.of<TeacherProvider>(context, listen: false)
-        .searchTeachers(_searchController.text, subject: _selectedSubject);
+    Provider.of<TeacherProvider>(
+      context,
+      listen: false,
+    ).searchTeachers(_searchController.text, subject: _selectedSubject);
   }
 
   @override
@@ -63,7 +67,7 @@ class _TeachersTabState extends State<TeachersTab> {
                   child: TextFormField(
                     controller: _searchController,
                     decoration: const InputDecoration(
-                      labelText: 'Search Teachers',
+                      labelText: 'البحث عن معلمين',
                       prefixIcon: Icon(Icons.search),
                       border: OutlineInputBorder(),
                     ),
@@ -72,19 +76,19 @@ class _TeachersTabState extends State<TeachersTab> {
                 const SizedBox(width: 10),
                 DropdownButton<String>(
                   value: _selectedSubject,
-                  hint: const Text('Filter by Subject'),
+                  hint: const Text('التصفية حسب المادة'),
                   onChanged: (value) => _onFilterChanged(value),
                   items: [
                     const DropdownMenuItem<String>(
                       value: null,
-                      child: Text('All Subjects'),
+                      child: Text('كل المواد'),
                     ),
                     ...subjectProvider.subjects.map((subject) {
                       return DropdownMenuItem<String>(
                         value: subject.name,
                         child: Text(subject.name),
                       );
-                    }).toList(),
+                    }),
                   ],
                 ),
               ],
@@ -92,7 +96,7 @@ class _TeachersTabState extends State<TeachersTab> {
           ),
           Expanded(
             child: teacherProvider.teachers.isEmpty
-                ? const Center(child: Text('No teachers found.'))
+                ? const Center(child: Text('لم يتم العثور على معلمين.'))
                 : isLargeScreen
                     ? _buildDataTable(teacherProvider.teachers)
                     : _buildListView(teacherProvider.teachers),
@@ -122,9 +126,7 @@ class _TeachersTabState extends State<TeachersTab> {
         return Card(
           margin: const EdgeInsets.all(8.0),
           child: ListTile(
-            leading: CircleAvatar(
-              child: Text(teacher.name[0]),
-            ),
+            leading: CircleAvatar(child: Text(teacher.name[0])),
             title: Text(teacher.name),
             subtitle: Text(teacher.subject),
             trailing: PopupMenuButton<String>(
@@ -136,8 +138,8 @@ class _TeachersTabState extends State<TeachersTab> {
                 }
               },
               itemBuilder: (context) => [
-                const PopupMenuItem(value: 'edit', child: Text('Edit')),
-                const PopupMenuItem(value: 'delete', child: Text('Delete')),
+                const PopupMenuItem(value: 'edit', child: Text('تعديل')),
+                const PopupMenuItem(value: 'delete', child: Text('حذف')),
               ],
             ),
           ),
@@ -149,11 +151,11 @@ class _TeachersTabState extends State<TeachersTab> {
   Widget _buildDataTable(List<Teacher> teachers) {
     return DataTable(
       columns: const [
-        DataColumn(label: Text('Name')),
-        DataColumn(label: Text('Subjects')),
-        DataColumn(label: Text('Email')),
-        DataColumn(label: Text('Phone')),
-        DataColumn(label: Text('Actions')),
+        DataColumn(label: Text('الاسم')),
+        DataColumn(label: Text('المواد')),
+        DataColumn(label: Text('البريد الإلكتروني')),
+        DataColumn(label: Text('رقم الهاتف')),
+        DataColumn(label: Text('الإجراءات')),
       ],
       rows: teachers.map((teacher) {
         return DataRow(
@@ -172,8 +174,8 @@ class _TeachersTabState extends State<TeachersTab> {
                   }
                 },
                 itemBuilder: (context) => [
-                  const PopupMenuItem(value: 'edit', child: Text('Edit')),
-                  const PopupMenuItem(value: 'delete', child: Text('Delete')),
+                  const PopupMenuItem(value: 'edit', child: Text('تعديل')),
+                  const PopupMenuItem(value: 'delete', child: Text('حذف')),
                 ],
               ),
             ),
@@ -187,20 +189,22 @@ class _TeachersTabState extends State<TeachersTab> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Delete Teacher'),
-        content: const Text('Are you sure you want to delete this teacher?'),
+        title: const Text('حذف معلم'),
+        content: const Text('هل أنت متأكد أنك تريد حذف هذا المعلم؟'),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(),
-            child: const Text('Cancel'),
+            child: const Text('إلغاء'),
           ),
           TextButton(
             onPressed: () {
-              Provider.of<TeacherProvider>(context, listen: false)
-                  .deleteTeacher(teacher.id!);
+              Provider.of<TeacherProvider>(
+                context,
+                listen: false,
+              ).deleteTeacher(teacher.id!);
               Navigator.of(context).pop();
             },
-            child: const Text('Delete'),
+            child: const Text('حذف'),
           ),
         ],
       ),

@@ -6,7 +6,8 @@ class SubjectProvider with ChangeNotifier {
   List<Subject> _subjects = [];
   final DatabaseHelper _dbHelper;
 
-  SubjectProvider({DatabaseHelper? databaseHelper}) : _dbHelper = databaseHelper ?? DatabaseHelper();
+  SubjectProvider({DatabaseHelper? databaseHelper})
+    : _dbHelper = databaseHelper ?? DatabaseHelper();
 
   List<Subject> get subjects => _subjects;
 

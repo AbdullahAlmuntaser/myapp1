@@ -32,8 +32,10 @@ class ClassesTabState extends State<ClassesTab> {
   }
 
   void _filterClasses() {
-    Provider.of<ClassProvider>(context, listen: false)
-        .searchClasses(_searchController.text);
+    Provider.of<ClassProvider>(
+      context,
+      listen: false,
+    ).searchClasses(_searchController.text);
   }
 
   void _navigateToAddEditScreen([SchoolClass? schoolClass]) {
@@ -68,18 +70,16 @@ class ClassesTabState extends State<ClassesTab> {
     if (confirm == true) {
       await Provider.of<ClassProvider>(context, listen: false).deleteClass(id);
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('تم حذف الفصل بنجاح')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('تم حذف الفصل بنجاح')));
     }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('لوحة تحكم الفصول'),
-      ),
+      appBar: AppBar(title: const Text('لوحة تحكم الفصول')),
       body: Column(
         children: [
           Padding(
@@ -106,19 +106,28 @@ class ClassesTabState extends State<ClassesTab> {
                   itemBuilder: (context, index) {
                     final schoolClass = classProvider.classes[index];
                     return Card(
-                      margin: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 6.0),
+                      margin: const EdgeInsets.symmetric(
+                        horizontal: 12.0,
+                        vertical: 6.0,
+                      ),
                       child: ListTile(
                         title: Text(schoolClass.name),
                         subtitle: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text('معرف الفصل: ${schoolClass.classId}'),
-                            if (schoolClass.teacherId != null && schoolClass.teacherId!.isNotEmpty)
-                              Text('معرف المعلم المسؤول: ${schoolClass.teacherId}'),
+                            if (schoolClass.teacherId != null &&
+                                schoolClass.teacherId!.isNotEmpty)
+                              Text(
+                                'معرف المعلم المسؤول: ${schoolClass.teacherId}',
+                              ),
                             if (schoolClass.capacity != null)
                               Text('السعة: ${schoolClass.capacity}'),
-                            if (schoolClass.yearTerm != null && schoolClass.yearTerm!.isNotEmpty)
-                              Text('السنة/الفصل الدراسي: ${schoolClass.yearTerm}'),
+                            if (schoolClass.yearTerm != null &&
+                                schoolClass.yearTerm!.isNotEmpty)
+                              Text(
+                                'السنة/الفصل الدراسي: ${schoolClass.yearTerm}',
+                              ),
                           ],
                         ),
                         trailing: Row(
@@ -126,7 +135,8 @@ class ClassesTabState extends State<ClassesTab> {
                           children: [
                             IconButton(
                               icon: const Icon(Icons.edit),
-                              onPressed: () => _navigateToAddEditScreen(schoolClass),
+                              onPressed: () =>
+                                  _navigateToAddEditScreen(schoolClass),
                               tooltip: 'تعديل',
                             ),
                             IconButton(

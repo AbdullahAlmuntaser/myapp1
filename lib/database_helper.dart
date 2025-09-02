@@ -25,7 +25,8 @@ class DatabaseHelper {
     final path = join(dbPath.path, 'students.db');
     return await openDatabase(
       path,
-      version: 8, // Increased version to trigger onUpgrade for new student fields
+      version:
+          8, // Increased version to trigger onUpgrade for new student fields
       onCreate: _onCreate,
       onUpgrade: _onUpgrade,
     );
@@ -50,7 +51,7 @@ class DatabaseHelper {
         status INTEGER NOT NULL DEFAULT 1
       )
     ''');
-     await db.execute('''
+    await db.execute('''
       CREATE TABLE teachers(
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         name TEXT NOT NULL,
@@ -98,7 +99,11 @@ class DatabaseHelper {
 
   Future<int> createStudent(Student student) async {
     final db = await database;
-    return await db.insert('students', student.toMap(), conflictAlgorithm: ConflictAlgorithm.replace);
+    return await db.insert(
+      'students',
+      student.toMap(),
+      conflictAlgorithm: ConflictAlgorithm.replace,
+    );
   }
 
   Future<List<Student>> getStudents() async {
@@ -121,14 +126,13 @@ class DatabaseHelper {
 
   Future<int> deleteStudent(int id) async {
     final db = await database;
-    return await db.delete(
-      'students',
-      where: 'id = ?',
-      whereArgs: [id],
-    );
+    return await db.delete('students', where: 'id = ?', whereArgs: [id]);
   }
 
-  Future<List<Student>> searchStudents(String nameQuery, {String? classId}) async {
+  Future<List<Student>> searchStudents(
+    String nameQuery, {
+    String? classId,
+  }) async {
     final db = await database;
     List<String> whereClauses = [];
     List<dynamic> whereArgs = [];
@@ -144,11 +148,15 @@ class DatabaseHelper {
       whereArgs.add(classId);
     }
 
-    String whereString = whereClauses.isEmpty ? '' : 'WHERE ${whereClauses.join(' AND ')}';
+    String whereString = whereClauses.isEmpty
+        ? ''
+        : 'WHERE ${whereClauses.join(' AND ')}';
 
     final List<Map<String, dynamic>> maps = await db.query(
       'students',
-      where: whereString.isEmpty ? null : whereString.substring(6), // Remove "WHERE " prefix if exists
+      where: whereString.isEmpty
+          ? null
+          : whereString.substring(6), // Remove "WHERE " prefix if exists
       whereArgs: whereArgs.isEmpty ? null : whereArgs,
     );
     return List.generate(maps.length, (i) {
@@ -197,11 +205,7 @@ class DatabaseHelper {
 
   Future<int> deleteTeacher(int id) async {
     final db = await database;
-    return await db.delete(
-      'teachers',
-      where: 'id = ?',
-      whereArgs: [id],
-    );
+    return await db.delete('teachers', where: 'id = ?', whereArgs: [id]);
   }
 
   Future<List<Teacher>> searchTeachers(String name, {String? subject}) async {
@@ -235,7 +239,11 @@ class DatabaseHelper {
 
   Future<int> createClass(SchoolClass schoolClass) async {
     final db = await database;
-    return await db.insert('classes', schoolClass.toMap(), conflictAlgorithm: ConflictAlgorithm.replace);
+    return await db.insert(
+      'classes',
+      schoolClass.toMap(),
+      conflictAlgorithm: ConflictAlgorithm.replace,
+    );
   }
 
   Future<List<SchoolClass>> getClasses() async {
@@ -258,11 +266,7 @@ class DatabaseHelper {
 
   Future<int> deleteClass(int id) async {
     final db = await database;
-    return await db.delete(
-      'classes',
-      where: 'id = ?',
-      whereArgs: [id],
-    );
+    return await db.delete('classes', where: 'id = ?', whereArgs: [id]);
   }
 
   Future<List<SchoolClass>> searchClasses(String query) async {
@@ -281,7 +285,11 @@ class DatabaseHelper {
 
   Future<int> createSubject(Subject subject) async {
     final db = await database;
-    return await db.insert('subjects', subject.toMap(), conflictAlgorithm: ConflictAlgorithm.replace);
+    return await db.insert(
+      'subjects',
+      subject.toMap(),
+      conflictAlgorithm: ConflictAlgorithm.replace,
+    );
   }
 
   Future<List<Subject>> getSubjects() async {
@@ -304,11 +312,7 @@ class DatabaseHelper {
 
   Future<int> deleteSubject(int id) async {
     final db = await database;
-    return await db.delete(
-      'subjects',
-      where: 'id = ?',
-      whereArgs: [id],
-    );
+    return await db.delete('subjects', where: 'id = ?', whereArgs: [id]);
   }
 
   Future<List<Subject>> searchSubjects(String query) async {

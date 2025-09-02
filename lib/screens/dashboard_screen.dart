@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../providers/student_provider.dart';
@@ -54,7 +53,9 @@ class DashboardScreenState extends State<DashboardScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('لوحة التحكم الرئيسية'), // Centralized title for the dashboard
+        title: const Text(
+          'لوحة التحكم الرئيسية',
+        ), // Centralized title for the dashboard
         actions: [
           Consumer<ThemeProvider>(
             builder: (context, themeProvider, child) {
@@ -69,27 +70,13 @@ class DashboardScreenState extends State<DashboardScreen> {
           ),
         ],
       ),
-      body: Center(
-        child: _widgetOptions.elementAt(_selectedIndex),
-      ),
+      body: Center(child: _widgetOptions.elementAt(_selectedIndex)),
       bottomNavigationBar: BottomNavigationBar(
         items: const <BottomNavigationBarItem>[
-          BottomNavigationBarItem(
-            icon: Icon(Icons.school),
-            label: 'الطلاب',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.person),
-            label: 'المعلمون',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.class_),
-            label: 'الفصول',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.book),
-            label: 'المواد',
-          ),
+          BottomNavigationBarItem(icon: Icon(Icons.school), label: 'الطلاب'),
+          BottomNavigationBarItem(icon: Icon(Icons.person), label: 'المعلمون'),
+          BottomNavigationBarItem(icon: Icon(Icons.class_), label: 'الفصول'),
+          BottomNavigationBarItem(icon: Icon(Icons.book), label: 'المواد'),
         ],
         currentIndex: _selectedIndex,
         onTap: _onItemTapped,

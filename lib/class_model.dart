@@ -1,8 +1,8 @@
-
 class SchoolClass {
   final int? id;
   final String name;
-  final String classId; // Unique identifier for the class (e.g., "10A", "Grade5B")
+  final String
+  classId; // Unique identifier for the class (e.g., "10A", "Grade5B")
   final String? teacherId; // ID of the responsible teacher
   final int? capacity; // Maximum number of students
   final String? yearTerm; // Academic year or term

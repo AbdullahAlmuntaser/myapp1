@@ -63,19 +63,29 @@ class AppTheme {
 
   static final ThemeData lightTheme = ThemeData(
     useMaterial3: true,
-    colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue, brightness: Brightness.light),
+    colorScheme: ColorScheme.fromSeed(
+      seedColor: Colors.blue,
+      brightness: Brightness.light,
+    ),
     textTheme: _lightTextTheme,
     appBarTheme: AppBarTheme(
-      titleTextStyle: _lightTextTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold),
+      titleTextStyle: _lightTextTheme.headlineSmall?.copyWith(
+        fontWeight: FontWeight.bold,
+      ),
     ),
   );
 
   static final ThemeData darkTheme = ThemeData(
     useMaterial3: true,
-    colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue, brightness: Brightness.dark),
+    colorScheme: ColorScheme.fromSeed(
+      seedColor: Colors.blue,
+      brightness: Brightness.dark,
+    ),
     textTheme: _darkTextTheme,
-     appBarTheme: AppBarTheme(
-      titleTextStyle: _darkTextTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold),
+    appBarTheme: AppBarTheme(
+      titleTextStyle: _darkTextTheme.headlineSmall?.copyWith(
+        fontWeight: FontWeight.bold,
+      ),
     ),
   );
 }

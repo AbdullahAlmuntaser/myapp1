@@ -1,8 +1,8 @@
-
 class Subject {
   final int? id;
   final String name;
-  final String subjectId; // Unique identifier for the subject (e.g., "MATH101", "ARAB102")
+  final String
+  subjectId; // Unique identifier for the subject (e.g., "MATH101", "ARAB102")
   final String? description;
   final String? teacherId; // ID of the teacher responsible for this subject
 

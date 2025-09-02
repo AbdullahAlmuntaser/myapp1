@@ -40,13 +40,25 @@ class AddEditStudentScreenState extends State<AddEditStudentScreen> {
     _phoneController = TextEditingController(text: widget.student?.phone ?? '');
     _gradeController = TextEditingController(text: widget.student?.grade ?? '');
     _emailController = TextEditingController(text: widget.student?.email ?? '');
-    _passwordController = TextEditingController(text: widget.student?.password ?? '');
+    _passwordController = TextEditingController(
+      text: widget.student?.password ?? '',
+    );
     // New controllers initialization
-    _academicNumberController = TextEditingController(text: widget.student?.academicNumber ?? '');
-    _sectionController = TextEditingController(text: widget.student?.section ?? '');
-    _parentNameController = TextEditingController(text: widget.student?.parentName ?? '');
-    _parentPhoneController = TextEditingController(text: widget.student?.parentPhone ?? '');
-    _addressController = TextEditingController(text: widget.student?.address ?? '');
+    _academicNumberController = TextEditingController(
+      text: widget.student?.academicNumber ?? '',
+    );
+    _sectionController = TextEditingController(
+      text: widget.student?.section ?? '',
+    );
+    _parentNameController = TextEditingController(
+      text: widget.student?.parentName ?? '',
+    );
+    _parentPhoneController = TextEditingController(
+      text: widget.student?.parentPhone ?? '',
+    );
+    _addressController = TextEditingController(
+      text: widget.student?.address ?? '',
+    );
 
     _selectedClassId = widget.student?.classId; // Initialize selected class ID
     _status = widget.student?.status ?? true; // Initialize status
@@ -83,7 +95,9 @@ class AddEditStudentScreenState extends State<AddEditStudentScreen> {
         return Theme(
           data: ThemeData.light().copyWith(
             primaryColor: Theme.of(context).primaryColor,
-            colorScheme: ColorScheme.light(primary: Theme.of(context).primaryColor),
+            colorScheme: ColorScheme.light(
+              primary: Theme.of(context).primaryColor,
+            ),
             buttonTheme: ButtonThemeData(textTheme: ButtonTextTheme.primary),
           ),
           child: child!,
@@ -107,13 +121,25 @@ class AddEditStudentScreenState extends State<AddEditStudentScreen> {
         phone: _phoneController.text,
         grade: _gradeController.text,
         email: _emailController.text.isNotEmpty ? _emailController.text : null,
-        password: _passwordController.text.isNotEmpty ? _passwordController.text : null,
+        password: _passwordController.text.isNotEmpty
+            ? _passwordController.text
+            : null,
         classId: _selectedClassId, // Use selected class ID
-        academicNumber: _academicNumberController.text.isNotEmpty ? _academicNumberController.text : null,
-        section: _sectionController.text.isNotEmpty ? _sectionController.text : null,
-        parentName: _parentNameController.text.isNotEmpty ? _parentNameController.text : null,
-        parentPhone: _parentPhoneController.text.isNotEmpty ? _parentPhoneController.text : null,
-        address: _addressController.text.isNotEmpty ? _addressController.text : null,
+        academicNumber: _academicNumberController.text.isNotEmpty
+            ? _academicNumberController.text
+            : null,
+        section: _sectionController.text.isNotEmpty
+            ? _sectionController.text
+            : null,
+        parentName: _parentNameController.text.isNotEmpty
+            ? _parentNameController.text
+            : null,
+        parentPhone: _parentPhoneController.text.isNotEmpty
+            ? _parentPhoneController.text
+            : null,
+        address: _addressController.text.isNotEmpty
+            ? _addressController.text
+            : null,
         status: _status,
       );
 
@@ -130,12 +156,14 @@ class AddEditStudentScreenState extends State<AddEditStudentScreen> {
         }
         if (!mounted) return;
         Navigator.of(context).pop();
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(message)));
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(message)));
       } catch (e) {
         if (!mounted) return;
         ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('فشل حفظ الطالب: ${e.toString()}')),
-          );
+          SnackBar(content: Text('فشل حفظ الطالب: ${e.toString()}')),
+        );
       }
     }
   }
@@ -156,15 +184,23 @@ class AddEditStudentScreenState extends State<AddEditStudentScreen> {
               children: [
                 TextFormField(
                   controller: _nameController,
-                  decoration: const InputDecoration(labelText: 'الاسم الكامل', border: OutlineInputBorder()),
-                  validator: (value) => value!.isEmpty ? 'الرجاء إدخال الاسم' : null,
+                  decoration: const InputDecoration(
+                    labelText: 'الاسم الكامل',
+                    border: OutlineInputBorder(),
+                  ),
+                  validator: (value) =>
+                      value!.isEmpty ? 'الرجاء إدخال الاسم' : null,
                 ),
                 const SizedBox(height: 16),
                 TextFormField(
                   controller: _academicNumberController,
-                  decoration: const InputDecoration(labelText: 'الرقم الأكاديمي', border: OutlineInputBorder()),
+                  decoration: const InputDecoration(
+                    labelText: 'الرقم الأكاديمي',
+                    border: OutlineInputBorder(),
+                  ),
                   keyboardType: TextInputType.number,
-                  validator: (value) => value!.isEmpty ? 'الرجاء إدخال الرقم الأكاديمي' : null,
+                  validator: (value) =>
+                      value!.isEmpty ? 'الرجاء إدخال الرقم الأكاديمي' : null,
                 ),
                 const SizedBox(height: 16),
                 TextFormField(
@@ -176,31 +212,45 @@ class AddEditStudentScreenState extends State<AddEditStudentScreen> {
                   ),
                   readOnly: true,
                   onTap: _selectDate,
-                   validator: (value) => value!.isEmpty ? 'الرجاء اختيار تاريخ الميلاد' : null,
+                  validator: (value) =>
+                      value!.isEmpty ? 'الرجاء اختيار تاريخ الميلاد' : null,
                 ),
                 const SizedBox(height: 16),
                 TextFormField(
                   controller: _phoneController,
-                  decoration: const InputDecoration(labelText: 'رقم الهاتف', border: OutlineInputBorder()),
+                  decoration: const InputDecoration(
+                    labelText: 'رقم الهاتف',
+                    border: OutlineInputBorder(),
+                  ),
                   keyboardType: TextInputType.phone,
-                   validator: (value) => value!.isEmpty ? 'الرجاء إدخال رقم الهاتف' : null,
+                  validator: (value) =>
+                      value!.isEmpty ? 'الرجاء إدخال رقم الهاتف' : null,
                 ),
                 const SizedBox(height: 16),
                 TextFormField(
                   controller: _gradeController,
-                  decoration: const InputDecoration(labelText: 'الدرجة/الصف', border: OutlineInputBorder()),
-                   validator: (value) => value!.isEmpty ? 'الرجاء إدخال الدرجة/الصف' : null,
+                  decoration: const InputDecoration(
+                    labelText: 'الدرجة/الصف',
+                    border: OutlineInputBorder(),
+                  ),
+                  validator: (value) =>
+                      value!.isEmpty ? 'الرجاء إدخال الدرجة/الصف' : null,
                 ),
                 const SizedBox(height: 16),
                 TextFormField(
                   controller: _emailController,
-                  decoration: const InputDecoration(labelText: 'البريد الإلكتروني', border: OutlineInputBorder()),
+                  decoration: const InputDecoration(
+                    labelText: 'البريد الإلكتروني',
+                    border: OutlineInputBorder(),
+                  ),
                   keyboardType: TextInputType.emailAddress,
                   validator: (value) {
                     if (value == null || value.isEmpty) {
                       return 'الرجاء إدخال البريد الإلكتروني';
                     }
-                    if (!RegExp(r"^[a-zA-Z0-9.a-zA-Z0-9.!#$%&'*+-/=?^_`{|}~]+@[a-zA-Z0-9]+\.[a-zA-Z]+").hasMatch(value)) {
+                    if (!RegExp(
+                      r"^[a-zA-Z0-9.a-zA-Z0-9.!#$%&'*+-/=?^_`{|}~]+@[a-zA-Z0-9]+\.[a-zA-Z]+",
+                    ).hasMatch(value)) {
                       return 'الرجاء إدخال عنوان بريد إلكتروني صحيح';
                     }
                     return null;
@@ -209,9 +259,13 @@ class AddEditStudentScreenState extends State<AddEditStudentScreen> {
                 const SizedBox(height: 16),
                 TextFormField(
                   controller: _passwordController,
-                  decoration: const InputDecoration(labelText: 'كلمة المرور', border: OutlineInputBorder()),
+                  decoration: const InputDecoration(
+                    labelText: 'كلمة المرور',
+                    border: OutlineInputBorder(),
+                  ),
                   obscureText: true,
-                  validator: (value) => value!.isEmpty ? 'الرجاء إدخال كلمة المرور' : null,
+                  validator: (value) =>
+                      value!.isEmpty ? 'الرجاء إدخال كلمة المرور' : null,
                 ),
                 const SizedBox(height: 16),
                 // Dropdown for Class ID
@@ -235,30 +289,44 @@ class AddEditStudentScreenState extends State<AddEditStudentScreen> {
                           _selectedClassId = newValue;
                         });
                       },
-                      validator: (value) => value == null || value.isEmpty ? 'الرجاء اختيار فصل' : null,
+                      validator: (value) => value == null || value.isEmpty
+                          ? 'الرجاء اختيار فصل'
+                          : null,
                     );
                   },
                 ),
                 const SizedBox(height: 16),
                 TextFormField(
                   controller: _sectionController,
-                  decoration: const InputDecoration(labelText: 'الشعبة (اختياري)', border: OutlineInputBorder()),
+                  decoration: const InputDecoration(
+                    labelText: 'الشعبة (اختياري)',
+                    border: OutlineInputBorder(),
+                  ),
                 ),
                 const SizedBox(height: 16),
                 TextFormField(
                   controller: _parentNameController,
-                  decoration: const InputDecoration(labelText: 'اسم ولي الأمر (اختياري)', border: OutlineInputBorder()),
+                  decoration: const InputDecoration(
+                    labelText: 'اسم ولي الأمر (اختياري)',
+                    border: OutlineInputBorder(),
+                  ),
                 ),
                 const SizedBox(height: 16),
                 TextFormField(
                   controller: _parentPhoneController,
-                  decoration: const InputDecoration(labelText: 'هاتف ولي الأمر (اختياري)', border: OutlineInputBorder()),
+                  decoration: const InputDecoration(
+                    labelText: 'هاتف ولي الأمر (اختياري)',
+                    border: OutlineInputBorder(),
+                  ),
                   keyboardType: TextInputType.phone,
                 ),
                 const SizedBox(height: 16),
                 TextFormField(
                   controller: _addressController,
-                  decoration: const InputDecoration(labelText: 'العنوان (اختياري)', border: OutlineInputBorder()),
+                  decoration: const InputDecoration(
+                    labelText: 'العنوان (اختياري)',
+                    border: OutlineInputBorder(),
+                  ),
                   maxLines: 2,
                 ),
                 const SizedBox(height: 16),
@@ -277,7 +345,10 @@ class AddEditStudentScreenState extends State<AddEditStudentScreen> {
                   onPressed: _saveStudent,
                   style: ElevatedButton.styleFrom(
                     padding: const EdgeInsets.symmetric(vertical: 16),
-                    textStyle: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)
+                    textStyle: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                   child: const Text('حفظ الطالب'),
                 ),

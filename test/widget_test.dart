@@ -28,7 +28,9 @@ void main() {
     );
   }
 
-  testWidgets('Shows "No students found" message when list is empty', (WidgetTester tester) async {
+  testWidgets('Shows "No students found" message when list is empty', (
+    WidgetTester tester,
+  ) async {
     // Arrange
     when(mockDatabaseHelper.getStudents()).thenAnswer((_) async => []);
 
@@ -42,9 +44,19 @@ void main() {
     expect(find.byKey(const Key('students_tab_view')), findsOneWidget);
   });
 
-  testWidgets('Shows a list of students when data is available', (WidgetTester tester) async {
+  testWidgets('Shows a list of students when data is available', (
+    WidgetTester tester,
+  ) async {
     // Arrange
-    final studentList = [Student(id: 1, name: 'First Student', dob: '2001-01-01', phone: '111', grade: 'B')];
+    final studentList = [
+      Student(
+        id: 1,
+        name: 'First Student',
+        dob: '2001-01-01',
+        phone: '111',
+        grade: 'B',
+      ),
+    ];
     when(mockDatabaseHelper.getStudents()).thenAnswer((_) async => studentList);
 
     // Act
@@ -57,7 +69,9 @@ void main() {
     expect(find.text('Grade: B | DOB: 2001-01-01'), findsOneWidget);
   });
 
-   testWidgets('Tapping FAB navigates to AddEditStudentScreen', (WidgetTester tester) async {
+  testWidgets('Tapping FAB navigates to AddEditStudentScreen', (
+    WidgetTester tester,
+  ) async {
     // Arrange
     when(mockDatabaseHelper.getStudents()).thenAnswer((_) async => []);
     await tester.pumpWidget(createHomeScreen());

@@ -23,7 +23,10 @@ class StudentsTabState extends State<StudentsTab> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted) {
         Provider.of<StudentProvider>(context, listen: false).fetchStudents();
-        Provider.of<ClassProvider>(context, listen: false).fetchClasses(); // Fetch classes
+        Provider.of<ClassProvider>(
+          context,
+          listen: false,
+        ).fetchClasses(); // Fetch classes
       }
     });
     _searchController.addListener(_filterStudents);
@@ -36,8 +39,10 @@ class StudentsTabState extends State<StudentsTab> {
   }
 
   void _filterStudents() {
-    Provider.of<StudentProvider>(context, listen: false)
-        .searchStudents(_searchController.text, classId: _selectedClassId);
+    Provider.of<StudentProvider>(
+      context,
+      listen: false,
+    ).searchStudents(_searchController.text, classId: _selectedClassId);
   }
 
   void _navigateToAddEditScreen([Student? student]) {
@@ -70,18 +75,22 @@ class StudentsTabState extends State<StudentsTab> {
     if (!mounted) return;
 
     if (confirm == true) {
-      await Provider.of<StudentProvider>(context, listen: false).deleteStudent(id);
+      await Provider.of<StudentProvider>(
+        context,
+        listen: false,
+      ).deleteStudent(id);
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('تم حذف الطالب بنجاح')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('تم حذف الطالب بنجاح')));
     }
   }
 
   @override
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
-    final isLargeScreen = screenWidth > 600; // Define breakpoint for large screens
+    final isLargeScreen =
+        screenWidth > 600; // Define breakpoint for large screens
 
     return Scaffold(
       key: const Key('students_tab_view'),
@@ -115,15 +124,18 @@ class StudentsTabState extends State<StudentsTab> {
                       child: DropdownButton<String>(
                         value: _selectedClassId,
                         hint: const Text('الفصل'),
-                        items: [const DropdownMenuItem<String>(
-                                value: null,
-                                child: Text('جميع الفصول'),
-                              ),
-                              ...classProvider.classes.map((c) => DropdownMenuItem<String>(
-                                value: c.classId,
-                                child: Text(c.name),
-                              )),
-                             ].toList(),
+                        items: [
+                          const DropdownMenuItem<String>(
+                            value: null,
+                            child: Text('جميع الفصول'),
+                          ),
+                          ...classProvider.classes.map(
+                            (c) => DropdownMenuItem<String>(
+                              value: c.classId,
+                              child: Text(c.name),
+                            ),
+                          ),
+                        ].toList(),
                         onChanged: (String? newValue) {
                           setState(() {
                             _selectedClassId = newValue;
@@ -167,7 +179,9 @@ class StudentsTabState extends State<StudentsTab> {
         return Card(
           margin: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 6.0),
           child: ListTile(
-            leading: const CircleAvatar(child: Icon(Icons.person)), // Placeholder for student image
+            leading: const CircleAvatar(
+              child: Icon(Icons.person),
+            ), // Placeholder for student image
             title: Text(student.name),
             subtitle: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -175,7 +189,12 @@ class StudentsTabState extends State<StudentsTab> {
                 Text('الرقم الأكاديمي: ${student.academicNumber ?? 'N/A'}'),
                 Text('الصف: ${student.grade}'),
                 if (student.classId != null)
-                  Text('الفصل: ${Provider.of<ClassProvider>(context, listen: false).classes.firstWhere((c) => c.classId == student.classId, orElse: () => SchoolClass(name: 'غير معروف', classId: '')).name}'),
+                  Text(
+                    'الفصل: ${Provider.of<ClassProvider>(context, listen: false).classes.firstWhere(
+                      (c) => c.classId == student.classId,
+                      orElse: () => SchoolClass(name: 'غير معروف', classId: ''),
+                    ).name}',
+                  ),
                 Text('الحالة: ${student.status ? 'نشط' : 'غير نشط'}'),
               ],
             ),
@@ -188,14 +207,8 @@ class StudentsTabState extends State<StudentsTab> {
                 }
               },
               itemBuilder: (context) => [
-                const PopupMenuItem(
-                  value: 'edit',
-                  child: Text('تعديل'),
-                ),
-                const PopupMenuItem(
-                  value: 'delete',
-                  child: Text('حذف'),
-                ),
+                const PopupMenuItem(value: 'edit', child: Text('تعديل')),
+                const PopupMenuItem(value: 'delete', child: Text('حذف')),
               ],
             ),
           ),
@@ -219,8 +232,13 @@ class StudentsTabState extends State<StudentsTab> {
           DataColumn(label: Text('الإجراءات')),
         ],
         rows: students.map((student) {
-          final className = Provider.of<ClassProvider>(context, listen: false).classes.firstWhere(
-            (c) => c.classId == student.classId, orElse: () => SchoolClass(name: 'غير معروف', classId: '')).name;
+          final className = Provider.of<ClassProvider>(context, listen: false)
+              .classes
+              .firstWhere(
+                (c) => c.classId == student.classId,
+                orElse: () => SchoolClass(name: 'غير معروف', classId: ''),
+              )
+              .name;
 
           return DataRow(
             cells: [
@@ -231,20 +249,22 @@ class StudentsTabState extends State<StudentsTab> {
               DataCell(Text(className)),
               DataCell(Text(student.parentName ?? 'N/A')),
               DataCell(Text(student.status ? 'نشط' : 'غير نشط')),
-              DataCell(Row(
-                children: [
-                  IconButton(
-                    icon: const Icon(Icons.edit),
-                    onPressed: () => _navigateToAddEditScreen(student),
-                    tooltip: 'تعديل',
-                  ),
-                  IconButton(
-                    icon: const Icon(Icons.delete),
-                    onPressed: () => _deleteStudent(student.id!),
-                    tooltip: 'حذف',
-                  ),
-                ],
-              )),
+              DataCell(
+                Row(
+                  children: [
+                    IconButton(
+                      icon: const Icon(Icons.edit),
+                      onPressed: () => _navigateToAddEditScreen(student),
+                      tooltip: 'تعديل',
+                    ),
+                    IconButton(
+                      icon: const Icon(Icons.delete),
+                      onPressed: () => _deleteStudent(student.id!),
+                      tooltip: 'حذف',
+                    ),
+                  ],
+                ),
+              ),
             ],
           );
         }).toList(),

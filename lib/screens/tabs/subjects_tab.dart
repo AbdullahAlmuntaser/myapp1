@@ -32,8 +32,10 @@ class SubjectsTabState extends State<SubjectsTab> {
   }
 
   void _filterSubjects() {
-    Provider.of<SubjectProvider>(context, listen: false)
-        .searchSubjects(_searchController.text);
+    Provider.of<SubjectProvider>(
+      context,
+      listen: false,
+    ).searchSubjects(_searchController.text);
   }
 
   void _navigateToAddEditScreen([Subject? subject]) {
@@ -66,20 +68,21 @@ class SubjectsTabState extends State<SubjectsTab> {
     if (!mounted) return;
 
     if (confirm == true) {
-      await Provider.of<SubjectProvider>(context, listen: false).deleteSubject(id);
+      await Provider.of<SubjectProvider>(
+        context,
+        listen: false,
+      ).deleteSubject(id);
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('تم حذف المادة بنجاح')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('تم حذف المادة بنجاح')));
     }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('لوحة تحكم المواد'),
-      ),
+      appBar: AppBar(title: const Text('لوحة تحكم المواد')),
       body: Column(
         children: [
           Padding(
@@ -106,16 +109,21 @@ class SubjectsTabState extends State<SubjectsTab> {
                   itemBuilder: (context, index) {
                     final subject = subjectProvider.subjects[index];
                     return Card(
-                      margin: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 6.0),
+                      margin: const EdgeInsets.symmetric(
+                        horizontal: 12.0,
+                        vertical: 6.0,
+                      ),
                       child: ListTile(
                         title: Text(subject.name),
                         subtitle: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text('معرف المادة: ${subject.subjectId}'),
-                            if (subject.description != null && subject.description!.isNotEmpty)
+                            if (subject.description != null &&
+                                subject.description!.isNotEmpty)
                               Text('الوصف: ${subject.description}'),
-                            if (subject.teacherId != null && subject.teacherId!.isNotEmpty)
+                            if (subject.teacherId != null &&
+                                subject.teacherId!.isNotEmpty)
                               Text('معرف المعلم المسؤول: ${subject.teacherId}'),
                           ],
                         ),
@@ -124,7 +132,8 @@ class SubjectsTabState extends State<SubjectsTab> {
                           children: [
                             IconButton(
                               icon: const Icon(Icons.edit),
-                              onPressed: () => _navigateToAddEditScreen(subject),
+                              onPressed: () =>
+                                  _navigateToAddEditScreen(subject),
                               tooltip: 'تعديل',
                             ),
                             IconButton(

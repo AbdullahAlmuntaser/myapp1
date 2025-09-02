@@ -23,11 +23,21 @@ class AddEditClassScreenState extends State<AddEditClassScreen> {
   @override
   void initState() {
     super.initState();
-    _nameController = TextEditingController(text: widget.schoolClass?.name ?? '');
-    _classIdController = TextEditingController(text: widget.schoolClass?.classId ?? '');
-    _teacherIdController = TextEditingController(text: widget.schoolClass?.teacherId ?? '');
-    _capacityController = TextEditingController(text: widget.schoolClass?.capacity?.toString() ?? '');
-    _yearTermController = TextEditingController(text: widget.schoolClass?.yearTerm ?? '');
+    _nameController = TextEditingController(
+      text: widget.schoolClass?.name ?? '',
+    );
+    _classIdController = TextEditingController(
+      text: widget.schoolClass?.classId ?? '',
+    );
+    _teacherIdController = TextEditingController(
+      text: widget.schoolClass?.teacherId ?? '',
+    );
+    _capacityController = TextEditingController(
+      text: widget.schoolClass?.capacity?.toString() ?? '',
+    );
+    _yearTermController = TextEditingController(
+      text: widget.schoolClass?.yearTerm ?? '',
+    );
   }
 
   @override
@@ -46,9 +56,13 @@ class AddEditClassScreenState extends State<AddEditClassScreen> {
         id: widget.schoolClass?.id,
         name: _nameController.text,
         classId: _classIdController.text,
-        teacherId: _teacherIdController.text.isNotEmpty ? _teacherIdController.text : null,
+        teacherId: _teacherIdController.text.isNotEmpty
+            ? _teacherIdController.text
+            : null,
         capacity: int.tryParse(_capacityController.text),
-        yearTerm: _yearTermController.text.isNotEmpty ? _yearTermController.text : null,
+        yearTerm: _yearTermController.text.isNotEmpty
+            ? _yearTermController.text
+            : null,
       );
 
       final provider = Provider.of<ClassProvider>(context, listen: false);
@@ -64,12 +78,14 @@ class AddEditClassScreenState extends State<AddEditClassScreen> {
         }
         if (!mounted) return;
         Navigator.of(context).pop();
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(message)));
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(message)));
       } catch (e) {
         if (!mounted) return;
-        ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('فشل حفظ الصف: $e')),
-          );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('فشل حفظ الصف: $e')));
       }
     }
   }
@@ -90,24 +106,38 @@ class AddEditClassScreenState extends State<AddEditClassScreen> {
               children: [
                 TextFormField(
                   controller: _nameController,
-                  decoration: const InputDecoration(labelText: 'اسم الصف', border: OutlineInputBorder()),
-                  validator: (value) => value!.isEmpty ? 'الرجاء إدخال اسم الصف' : null,
+                  decoration: const InputDecoration(
+                    labelText: 'اسم الصف',
+                    border: OutlineInputBorder(),
+                  ),
+                  validator: (value) =>
+                      value!.isEmpty ? 'الرجاء إدخال اسم الصف' : null,
                 ),
                 const SizedBox(height: 16),
                 TextFormField(
                   controller: _classIdController,
-                  decoration: const InputDecoration(labelText: 'معرف الصف (فريد)', border: OutlineInputBorder()),
-                  validator: (value) => value!.isEmpty ? 'الرجاء إدخال معرف صف فريد' : null,
+                  decoration: const InputDecoration(
+                    labelText: 'معرف الصف (فريد)',
+                    border: OutlineInputBorder(),
+                  ),
+                  validator: (value) =>
+                      value!.isEmpty ? 'الرجاء إدخال معرف صف فريد' : null,
                 ),
                 const SizedBox(height: 16),
                 TextFormField(
                   controller: _teacherIdController,
-                  decoration: const InputDecoration(labelText: 'معرف المعلم المسؤول (اختياري)', border: OutlineInputBorder()),
+                  decoration: const InputDecoration(
+                    labelText: 'معرف المعلم المسؤول (اختياري)',
+                    border: OutlineInputBorder(),
+                  ),
                 ),
                 const SizedBox(height: 16),
                 TextFormField(
                   controller: _capacityController,
-                  decoration: const InputDecoration(labelText: 'السعة (عدد الطلاب) (اختياري)', border: OutlineInputBorder()),
+                  decoration: const InputDecoration(
+                    labelText: 'السعة (عدد الطلاب) (اختياري)',
+                    border: OutlineInputBorder(),
+                  ),
                   keyboardType: TextInputType.number,
                   validator: (value) {
                     if (value == null || value.isEmpty) return null;
@@ -120,14 +150,20 @@ class AddEditClassScreenState extends State<AddEditClassScreen> {
                 const SizedBox(height: 16),
                 TextFormField(
                   controller: _yearTermController,
-                  decoration: const InputDecoration(labelText: 'السنة/الفصل الدراسي (اختياري)', border: OutlineInputBorder()),
+                  decoration: const InputDecoration(
+                    labelText: 'السنة/الفصل الدراسي (اختياري)',
+                    border: OutlineInputBorder(),
+                  ),
                 ),
                 const SizedBox(height: 32),
                 ElevatedButton(
                   onPressed: _saveClass,
                   style: ElevatedButton.styleFrom(
                     padding: const EdgeInsets.symmetric(vertical: 16),
-                    textStyle: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)
+                    textStyle: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                   child: const Text('حفظ الصف'),
                 ),

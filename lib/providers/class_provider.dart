@@ -6,7 +6,8 @@ class ClassProvider with ChangeNotifier {
   List<SchoolClass> _classes = [];
   final DatabaseHelper _dbHelper;
 
-  ClassProvider({DatabaseHelper? databaseHelper}) : _dbHelper = databaseHelper ?? DatabaseHelper();
+  ClassProvider({DatabaseHelper? databaseHelper})
+    : _dbHelper = databaseHelper ?? DatabaseHelper();
 
   List<SchoolClass> get classes => _classes;
 

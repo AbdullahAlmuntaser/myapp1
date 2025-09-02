@@ -1,4 +1,3 @@
-
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
@@ -16,10 +15,16 @@ void main() {
 
   setUp(() {
     mockDatabaseHelper = MockDatabaseHelper();
-    studentProvider = StudentProvider(databaseHelper: mockDatabaseHelper); 
+    studentProvider = StudentProvider(databaseHelper: mockDatabaseHelper);
   });
 
-  final tStudent = Student(id: 1, name: 'Test Student', dob: '2000-01-01', phone: '12345', grade: 'A');
+  final tStudent = Student(
+    id: 1,
+    name: 'Test Student',
+    dob: '2000-01-01',
+    phone: '12345',
+    grade: 'A',
+  );
   final tStudentList = [tStudent];
 
   test('initial students list should be empty', () {
@@ -29,8 +34,10 @@ void main() {
   group('fetchStudents', () {
     test('should get students from the database', () async {
       // arrange
-      when(mockDatabaseHelper.getStudents()).thenAnswer((_) async => tStudentList);
-      
+      when(
+        mockDatabaseHelper.getStudents(),
+      ).thenAnswer((_) async => tStudentList);
+
       // act
       await studentProvider.fetchStudents();
 
@@ -45,7 +52,9 @@ void main() {
     test('should call createStudent and then fetch students', () async {
       // arrange
       when(mockDatabaseHelper.createStudent(any)).thenAnswer((_) async => 1);
-      when(mockDatabaseHelper.getStudents()).thenAnswer((_) async => tStudentList);
+      when(
+        mockDatabaseHelper.getStudents(),
+      ).thenAnswer((_) async => tStudentList);
 
       // act
       await studentProvider.addStudent(tStudent);
@@ -61,7 +70,9 @@ void main() {
     test('should call updateStudent and then fetch students', () async {
       // arrange
       when(mockDatabaseHelper.updateStudent(any)).thenAnswer((_) async => 1);
-      when(mockDatabaseHelper.getStudents()).thenAnswer((_) async => tStudentList);
+      when(
+        mockDatabaseHelper.getStudents(),
+      ).thenAnswer((_) async => tStudentList);
 
       // act
       await studentProvider.updateStudent(tStudent);
@@ -77,7 +88,9 @@ void main() {
     test('should call deleteStudent and then fetch students', () async {
       // arrange
       when(mockDatabaseHelper.deleteStudent(any)).thenAnswer((_) async => 1);
-      when(mockDatabaseHelper.getStudents()).thenAnswer((_) async => []); // After deleting, list should be empty
+      when(
+        mockDatabaseHelper.getStudents(),
+      ).thenAnswer((_) async => []); // After deleting, list should be empty
 
       // act
       await studentProvider.deleteStudent(tStudent.id!);
@@ -93,7 +106,9 @@ void main() {
     test('should call searchStudents when query is not empty', () async {
       // arrange
       final searchResult = [tStudent];
-      when(mockDatabaseHelper.searchStudents('Test')).thenAnswer((_) async => searchResult);
+      when(
+        mockDatabaseHelper.searchStudents('Test'),
+      ).thenAnswer((_) async => searchResult);
 
       // act
       await studentProvider.searchStudents('Test');
@@ -105,7 +120,9 @@ void main() {
 
     test('should call fetchStudents when query is empty', () async {
       // arrange
-      when(mockDatabaseHelper.getStudents()).thenAnswer((_) async => tStudentList);
+      when(
+        mockDatabaseHelper.getStudents(),
+      ).thenAnswer((_) async => tStudentList);
 
       // act
       await studentProvider.searchStudents('');
