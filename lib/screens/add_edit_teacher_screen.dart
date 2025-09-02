@@ -1,8 +1,10 @@
-
 import 'package:flutter/material.dart';
+import 'package:multi_select_flutter/multi_select_flutter.dart';
 import 'package:provider/provider.dart';
-import '../../providers/teacher_provider.dart';
-import '../../teacher_model.dart';
+import '../providers/subject_provider.dart';
+import '../providers/teacher_provider.dart';
+import '../teacher_model.dart';
+import '../subject_model.dart';
 
 class AddEditTeacherScreen extends StatefulWidget {
   final Teacher? teacher;
@@ -10,154 +12,162 @@ class AddEditTeacherScreen extends StatefulWidget {
   const AddEditTeacherScreen({super.key, this.teacher});
 
   @override
-  AddEditTeacherScreenState createState() => AddEditTeacherScreenState();
+  _AddEditTeacherScreenState createState() => _AddEditTeacherScreenState();
 }
 
-class AddEditTeacherScreenState extends State<AddEditTeacherScreen> {
+class _AddEditTeacherScreenState extends State<AddEditTeacherScreen> {
   final _formKey = GlobalKey<FormState>();
   late TextEditingController _nameController;
-  late TextEditingController _subjectController;
-  late TextEditingController _phoneController;
   late TextEditingController _emailController;
   late TextEditingController _passwordController;
-  late TextEditingController _qualificationTypeController;
-  late TextEditingController _responsibleClassIdController;
+  late TextEditingController _phoneController;
+  late TextEditingController _qualificationController;
+  List<Subject> _selectedSubjects = [];
 
   @override
   void initState() {
     super.initState();
     _nameController = TextEditingController(text: widget.teacher?.name ?? '');
-    _subjectController = TextEditingController(text: widget.teacher?.subject ?? '');
-    _phoneController = TextEditingController(text: widget.teacher?.phone ?? '');
     _emailController = TextEditingController(text: widget.teacher?.email ?? '');
-    _passwordController = TextEditingController(text: widget.teacher?.password ?? '');
-    _qualificationTypeController = TextEditingController(text: widget.teacher?.qualificationType ?? '');
-    _responsibleClassIdController = TextEditingController(text: widget.teacher?.responsibleClassId ?? '');
+    _passwordController = TextEditingController();
+    _phoneController = TextEditingController(text: widget.teacher?.phone ?? '');
+    _qualificationController = TextEditingController(text: widget.teacher?.qualificationType ?? '');
+
+    if (widget.teacher != null) {
+      // Fetch subjects for the existing teacher
+      final subjectProvider = Provider.of<SubjectProvider>(context, listen: false);
+      final teacherSubjects = widget.teacher!.subject.split(',');
+      _selectedSubjects = subjectProvider.subjects
+          .where((subject) => teacherSubjects.contains(subject.name))
+          .toList();
+    }
   }
 
   @override
   void dispose() {
     _nameController.dispose();
-    _subjectController.dispose();
-    _phoneController.dispose();
     _emailController.dispose();
     _passwordController.dispose();
-    _qualificationTypeController.dispose();
-    _responsibleClassIdController.dispose();
+    _phoneController.dispose();
+    _qualificationController.dispose();
     super.dispose();
   }
 
-  Future<void> _saveTeacher() async {
+  void _saveTeacher() {
     if (_formKey.currentState!.validate()) {
-      final teacher = Teacher(
+      final teacherProvider = Provider.of<TeacherProvider>(context, listen: false);
+      final subjects = _selectedSubjects.map((s) => s.name).join(',');
+
+      final newTeacher = Teacher(
         id: widget.teacher?.id,
         name: _nameController.text,
-        subject: _subjectController.text,
+        email: _emailController.text,
+        password: _passwordController.text,
         phone: _phoneController.text,
-        email: _emailController.text.isNotEmpty ? _emailController.text : null,
-        password: _passwordController.text.isNotEmpty ? _passwordController.text : null,
-        qualificationType: _qualificationTypeController.text.isNotEmpty ? _qualificationTypeController.text : null,
-        responsibleClassId: _responsibleClassIdController.text.isNotEmpty ? _responsibleClassIdController.text : null,
+        qualificationType: _qualificationController.text,
+        subject: subjects,
+        responsibleClassId: widget.teacher?.responsibleClassId,
       );
 
-      final provider = Provider.of<TeacherProvider>(context, listen: false);
-      try {
-        if (widget.teacher == null) {
-          await provider.addTeacher(teacher);
-        } else {
-          await provider.updateTeacher(teacher);
-        }
-        if (!mounted) return;
-        Navigator.of(context).pop();
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(widget.teacher == null ? 'Teacher added successfully' : 'Teacher updated successfully')),
-        );
-      } catch (e) {
-        if (!mounted) return;
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Failed to save teacher: $e')),
-        );
+      if (widget.teacher == null) {
+        teacherProvider.addTeacher(newTeacher);
+      } else {
+        teacherProvider.updateTeacher(newTeacher);
       }
+      Navigator.of(context).pop();
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    final subjectProvider = Provider.of<SubjectProvider>(context);
+    final allSubjects = subjectProvider.subjects;
+
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.teacher == null ? 'Add Teacher' : 'Edit Teacher'),
       ),
-      body: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Form(
-            key: _formKey,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                TextFormField(
-                  controller: _nameController,
-                  decoration: const InputDecoration(labelText: 'الاسم', border: OutlineInputBorder()),
-                  validator: (value) => value!.isEmpty ? 'الرجاء إدخال الاسم' : null,
+      body: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Form(
+          key: _formKey,
+          child: ListView(
+            children: [
+              TextFormField(
+                controller: _nameController,
+                decoration: const InputDecoration(labelText: 'Full Name'),
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Please enter the teacher\'s name';
+                  }
+                  return null;
+                },
+              ),
+              TextFormField(
+                controller: _emailController,
+                decoration: const InputDecoration(labelText: 'Email'),
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Please enter an email';
+                  }
+                  if (!RegExp(r'^[^@]+@[^@]+\.[^@]+').hasMatch(value)) {
+                    return 'Please enter a valid email address';
+                  }
+                  return null;
+                },
+              ),
+              TextFormField(
+                controller: _passwordController,
+                decoration: const InputDecoration(labelText: 'Password'),
+                obscureText: true,
+                validator: (value) {
+                  if (widget.teacher == null && (value == null || value.isEmpty)) {
+                    return 'Please enter a password';
+                  }
+                  return null;
+                },
+              ),
+               TextFormField(
+                controller: _phoneController,
+                decoration: const InputDecoration(labelText: 'Phone'),
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Please enter a phone number';
+                  }
+                  return null;
+                },
+              ),
+               TextFormField(
+                controller: _qualificationController,
+                decoration: const InputDecoration(labelText: 'Qualification'),
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Please enter a qualification';
+                  }
+                  return null;
+                },
+              ),
+              const SizedBox(height: 20),
+              MultiSelectDialogField<Subject>(
+                items: allSubjects.map((s) => MultiSelectItem<Subject>(s, s.name)).toList(),
+                title: const Text('Subjects'),
+                selectedColor: Theme.of(context).primaryColor,
+                onConfirm: (values) {
+                  setState(() {
+                    _selectedSubjects = values;
+                  });
+                },
+                initialValue: _selectedSubjects,
+                chipDisplay: MultiSelectChipDisplay(
+                  items: _selectedSubjects.map((s) => MultiSelectItem<Subject>(s, s.name)).toList(),
                 ),
-                const SizedBox(height: 16),
-                TextFormField(
-                  controller: _subjectController,
-                  decoration: const InputDecoration(labelText: 'المادة/التخصص', border: OutlineInputBorder()),
-                  validator: (value) => value!.isEmpty ? 'الرجاء إدخال المادة/التخصص' : null,
-                ),
-                const SizedBox(height: 16),
-                TextFormField(
-                  controller: _phoneController,
-                  decoration: const InputDecoration(labelText: 'رقم الهاتف', border: OutlineInputBorder()),
-                  keyboardType: TextInputType.phone,
-                  validator: (value) => value!.isEmpty ? 'الرجاء إدخال رقم الهاتف' : null,
-                ),
-                const SizedBox(height: 16),
-                TextFormField(
-                  controller: _emailController,
-                  decoration: const InputDecoration(labelText: 'البريد الإلكتروني', border: OutlineInputBorder()),
-                  keyboardType: TextInputType.emailAddress,
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'الرجاء إدخال البريد الإلكتروني';
-                    }
-                    if (!RegExp(r"^[a-zA-Z0-9.a-zA-Z0-9.!#$%&'*+-/=?^_`{|}~]+@[a-zA-Z0-9]+\.[a-zA-Z]+").hasMatch(value)) {
-                      return 'الرجاء إدخال عنوان بريد إلكتروني صحيح';
-                    }
-                    return null;
-                  },
-                ),
-                const SizedBox(height: 16),
-                TextFormField(
-                  controller: _passwordController,
-                  decoration: const InputDecoration(labelText: 'كلمة المرور', border: OutlineInputBorder()),
-                  obscureText: true,
-                  validator: (value) => value!.isEmpty ? 'الرجاء إدخال كلمة المرور' : null,
-                ),
-                const SizedBox(height: 16),
-                TextFormField(
-                  controller: _qualificationTypeController,
-                  decoration: const InputDecoration(labelText: 'نوع المؤهل', border: OutlineInputBorder()),
-                  validator: (value) => value!.isEmpty ? 'الرجاء إدخال نوع المؤهل' : null,
-                ),
-                const SizedBox(height: 16),
-                TextFormField(
-                  controller: _responsibleClassIdController,
-                  decoration: const InputDecoration(labelText: 'معرف الفصل المسؤول عنه', border: OutlineInputBorder()),
-                  validator: (value) => value!.isEmpty ? 'الرجاء إدخال معرف الفصل المسؤول عنه' : null,
-                ),
-                const SizedBox(height: 32),
-                ElevatedButton(
-                  onPressed: _saveTeacher,
-                  style: ElevatedButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(vertical: 16),
-                    textStyle: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)
-                  ),
-                  child: const Text('حفظ المعلم'),
-                ),
-              ],
-            ),
+              ),
+              const SizedBox(height: 20),
+              ElevatedButton(
+                onPressed: _saveTeacher,
+                child: const Text('Save Teacher'),
+              ),
+            ],
           ),
         ),
       ),

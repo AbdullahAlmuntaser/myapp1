@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 import '../database_helper.dart';
 import '../teacher_model.dart';
@@ -14,15 +13,6 @@ class TeacherProvider with ChangeNotifier {
     notifyListeners();
   }
 
-  Future<void> searchTeachers(String query) async {
-    if (query.isEmpty) {
-      await fetchTeachers();
-    } else {
-      _teachers = await _dbHelper.searchTeachers(query);
-      notifyListeners();
-    }
-  }
-
   Future<void> addTeacher(Teacher teacher) async {
     await _dbHelper.createTeacher(teacher);
     await fetchTeachers();
@@ -36,5 +26,10 @@ class TeacherProvider with ChangeNotifier {
   Future<void> deleteTeacher(int id) async {
     await _dbHelper.deleteTeacher(id);
     await fetchTeachers();
+  }
+
+  Future<void> searchTeachers(String name, {String? subject}) async {
+    _teachers = await _dbHelper.searchTeachers(name, subject: subject);
+    notifyListeners();
   }
 }

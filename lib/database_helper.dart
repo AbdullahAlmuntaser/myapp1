@@ -204,14 +204,29 @@ class DatabaseHelper {
     );
   }
 
-  Future<List<Teacher>> searchTeachers(String name) async {
+  Future<List<Teacher>> searchTeachers(String name, {String? subject}) async {
     final db = await database;
+    List<String> whereClauses = [];
+    List<dynamic> whereArgs = [];
+
+    if (name.isNotEmpty) {
+      whereClauses.add('name LIKE ?');
+      whereArgs.add('%$name%');
+    }
+
+    if (subject != null && subject.isNotEmpty) {
+      whereClauses.add('subject LIKE ?');
+      whereArgs.add('%$subject%');
+    }
+
+    String whereString = whereClauses.isEmpty ? '' : whereClauses.join(' AND ');
+
     final List<Map<String, dynamic>> maps = await db.query(
       'teachers',
-      where: 'name LIKE ?',
-      whereArgs: ['%$name%'],
+      where: whereString.isEmpty ? null : whereString,
+      whereArgs: whereArgs.isEmpty ? null : whereArgs,
     );
-     return List.generate(maps.length, (i) {
+    return List.generate(maps.length, (i) {
       return Teacher.fromMap(maps[i]);
     });
   }
