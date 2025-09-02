@@ -25,8 +25,7 @@ class DatabaseHelper {
     final path = join(dbPath.path, 'students.db');
     return await openDatabase(
       path,
-      version:
-          8, // Increased version to trigger onUpgrade for new student fields
+      version: 9, // Increased version to trigger onUpgrade for new subjectIds field in classes
       onCreate: _onCreate,
       onUpgrade: _onUpgrade,
     );
@@ -70,7 +69,8 @@ class DatabaseHelper {
         classId TEXT NOT NULL UNIQUE,
         teacherId TEXT,
         capacity INTEGER,
-        yearTerm TEXT
+        yearTerm TEXT,
+        subjectIds TEXT -- New column for subject IDs
       )
     ''');
     await db.execute('''
@@ -85,8 +85,9 @@ class DatabaseHelper {
   }
 
   Future<void> _onUpgrade(Database db, int oldVersion, int newVersion) async {
+    // For development, dropping and recreating tables is acceptable.
+    // For production, consider more robust migration strategies.
     if (oldVersion < newVersion) {
-      // Drop all tables and recreate them to apply new schema
       await db.execute('DROP TABLE IF EXISTS students');
       await db.execute('DROP TABLE IF EXISTS teachers');
       await db.execute('DROP TABLE IF EXISTS classes');

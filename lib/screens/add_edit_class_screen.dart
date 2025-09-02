@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:multi_select_flutter/multi_select_flutter.dart'; // Added import
 import '../../providers/class_provider.dart';
 import '../../class_model.dart';
+import '../../subject_model.dart'; // Added import
+import '../../providers/subject_provider.dart'; // Added import
 
 class AddEditClassScreen extends StatefulWidget {
   final SchoolClass? schoolClass;
@@ -19,6 +22,9 @@ class AddEditClassScreenState extends State<AddEditClassScreen> {
   late TextEditingController _teacherIdController;
   late TextEditingController _capacityController;
   late TextEditingController _yearTermController;
+
+  List<Subject> _selectedSubjects = []; // Added for multi-select subjects
+  List<Subject> _allSubjects = []; // To store all available subjects
 
   final List<String> _classNames = [
     'الأول الابتدائي',
@@ -51,6 +57,23 @@ class AddEditClassScreenState extends State<AddEditClassScreen> {
     _yearTermController = TextEditingController(
       text: widget.schoolClass?.yearTerm ?? '',
     );
+
+    // Fetch all subjects and initialize _selectedSubjects
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final subjectProvider =
+          Provider.of<SubjectProvider>(context, listen: false);
+      _allSubjects = subjectProvider.subjects;
+
+      if (widget.schoolClass != null &&
+          widget.schoolClass!.subjectIds != null) {
+        _selectedSubjects = _allSubjects
+            .where((subject) =>
+                widget.schoolClass!.subjectIds!.contains(subject.subjectId))
+            .toList();
+      }
+      // Force a rebuild to display the selected subjects
+      setState(() {});
+    });
   }
 
   @override
@@ -75,6 +98,7 @@ class AddEditClassScreenState extends State<AddEditClassScreen> {
         yearTerm: _yearTermController.text.isNotEmpty
             ? _yearTermController.text
             : null,
+        subjectIds: _selectedSubjects.map((s) => s.subjectId).toList(), // Save selected subject IDs
       );
 
       final provider = Provider.of<ClassProvider>(context, listen: false);
@@ -140,7 +164,7 @@ class AddEditClassScreenState extends State<AddEditClassScreen> {
                   }).toList(),
                   onChanged: (newValue) {
                     setState(() {
-                      _selectedClassName = newValue;
+                      _selectedClassName = newValue; // Corrected state update
                     });
                   },
                   validator: (value) =>
@@ -187,6 +211,35 @@ class AddEditClassScreenState extends State<AddEditClassScreen> {
                     labelText: 'السنة/الفصل الدراسي (اختياري)',
                     border: OutlineInputBorder(),
                   ),
+                ),
+                const SizedBox(height: 16),
+                Consumer<SubjectProvider>(
+                  builder: (context, subjectProvider, child) {
+                    _allSubjects = subjectProvider.subjects; // Ensure _allSubjects is up-to-date
+                    return MultiSelectDialogField<Subject>(
+                      items: _allSubjects
+                          .map((s) => MultiSelectItem<Subject>(s, s.name))
+                          .toList(),
+                      title: const Text('المواد الدراسية'),
+                      selectedColor: Theme.of(context).primaryColor,
+                      onConfirm: (values) {
+                        setState(() {
+                          _selectedSubjects = values;
+                        });
+                      },
+                      chipDisplay: MultiSelectChipDisplay(
+                        items: _selectedSubjects
+                            .map((s) => MultiSelectItem<Subject>(s, s.name))
+                            .toList(),
+                      ),
+                      validator: (values) {
+                        if (values == null || values.isEmpty) {
+                          return 'الرجاء اختيار مادة واحدة على الأقل';
+                        }
+                        return null;
+                      },
+                    );
+                  },
                 ),
                 const SizedBox(height: 32),
                 ElevatedButton(
