@@ -76,7 +76,7 @@ class _GradesOverviewTabState extends State<GradesOverviewTab> {
                     if (snapshot.connectionState == ConnectionState.waiting) {
                       return const Center(child: CircularProgressIndicator());
                     } else if (snapshot.hasError) {
-                      return Center(child: Text('Error: ${snapshot.error}'));
+                      return Center(child: Text('خطأ: ${snapshot.error}')); // Translated "Error:" to "خطأ:"
                     } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
                       return const Center(child: Text('لا توجد بيانات لعرض الرسم البياني.'));
                     } else {
@@ -108,10 +108,10 @@ class _GradesOverviewTabState extends State<GradesOverviewTab> {
                                   final index = value.toInt();
                                   if (index >= 0 && index < data.length) {
                                     return SideTitleWidget(
+                                      axisSide: meta.axisSide, // Add axisSide back
                                       space: 8.0,
-                                      meta: meta, // Keep meta here
                                       child: Text(data[index]['subjectName']!),
-                                    );
+                                    ); 
                                   }
                                   return const Text('');
                                 },

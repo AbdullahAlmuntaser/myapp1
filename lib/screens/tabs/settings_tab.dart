@@ -54,7 +54,7 @@ class SettingsTab extends StatelessWidget {
                   context: context,
                   applicationName: 'نظام إدارة الطلاب',
                   applicationVersion: '1.0.0',
-                  applicationLegalese: '© 2023 My App. All rights reserved.',
+                  applicationLegalese: '© 2023 تطبيقي. جميع الحقوق محفوظة.',
                 );
               },
             ),

@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'dart:developer' as developer; // Added import for logging
+
 import '../../providers/student_provider.dart';
 import '../../student_model.dart';
 import '../add_edit_student_screen.dart';
@@ -89,13 +91,21 @@ class StudentsTabState extends State<StudentsTab> {
             backgroundColor: Colors.green,
           ),
         );
-      } catch (e) {
+      } catch (e, s) { // Added stack trace parameter 's'
         if (!mounted) return;
+        // Log the detailed error and stack trace internally for developers
+        developer.log(
+          'فشل حذف الطالب',
+          name: 'students_tab',
+          level: 900, // WARNING
+          error: e,
+          stackTrace: s,
+        );
         ScaffoldMessenger.of(
           context,
         ).showSnackBar(
-          SnackBar(
-            content: Text('فشل حذف الطالب: $e'),
+          const SnackBar(
+            content: Text('حدث خطأ غير متوقع أثناء حذف الطالب. الرجاء المحاولة مرة أخرى.'), // User-friendly message
             backgroundColor: Colors.red,
           ),
         );
