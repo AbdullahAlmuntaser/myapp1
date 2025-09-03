@@ -2,11 +2,14 @@ import 'dart:async';
 import 'package:path/path.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:path_provider/path_provider.dart';
+
 import 'student_model.dart';
 import 'teacher_model.dart';
 import 'class_model.dart';
 import 'subject_model.dart';
-import 'grade_model.dart'; // Import the new Grade model
+import 'grade_model.dart';
+import 'attendance_model.dart';
+import 'timetable_model.dart';
 
 class DatabaseHelper {
   static final DatabaseHelper _instance = DatabaseHelper._internal();
@@ -23,10 +26,10 @@ class DatabaseHelper {
 
   Future<Database> _initDB() async {
     final dbPath = await getApplicationDocumentsDirectory();
-    final path = join(dbPath.path, 'students.db');
+    final path = join(dbPath.path, 'school_management.db');
     return await openDatabase(
       path,
-      version: 10, // Increased version for grades table
+      version: 12, // Increased version for timetable table
       onCreate: _onCreate,
       onUpgrade: _onUpgrade,
     );
@@ -42,7 +45,7 @@ class DatabaseHelper {
         grade TEXT NOT NULL,
         email TEXT UNIQUE,
         password TEXT,
-        classId TEXT,
+        classId INTEGER,
         academicNumber TEXT,
         section TEXT,
         parentName TEXT,
@@ -57,10 +60,10 @@ class DatabaseHelper {
         name TEXT NOT NULL,
         subject TEXT NOT NULL,
         phone TEXT NOT NULL,
-        email TEXT,
+        email TEXT UNIQUE,
         password TEXT,
         qualificationType TEXT,
-        responsibleClassId TEXT
+        responsibleClassId INTEGER
       )
     ''');
     await db.execute('''
@@ -68,10 +71,10 @@ class DatabaseHelper {
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         name TEXT NOT NULL,
         classId TEXT NOT NULL UNIQUE,
-        teacherId TEXT,
+        teacherId INTEGER,
         capacity INTEGER,
         yearTerm TEXT,
-        subjectIds TEXT -- New column for subject IDs
+        subjectIds TEXT -- Stored as comma-separated string or JSON string
       )
     ''');
     await db.execute('''
@@ -80,7 +83,7 @@ class DatabaseHelper {
         name TEXT NOT NULL,
         subjectId TEXT NOT NULL UNIQUE,
         description TEXT,
-        teacherId TEXT
+        teacherId INTEGER
       )
     ''');
     await db.execute('''
@@ -97,6 +100,37 @@ class DatabaseHelper {
         FOREIGN KEY (classId) REFERENCES classes (id) ON DELETE CASCADE
       )
     ''');
+    await db.execute('''
+      CREATE TABLE attendance(
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        studentId INTEGER NOT NULL,
+        classId INTEGER NOT NULL,
+        subjectId INTEGER NOT NULL,
+        teacherId INTEGER NOT NULL,
+        date TEXT NOT NULL,
+        lessonNumber INTEGER NOT NULL,
+        status TEXT NOT NULL, -- 'present', 'absent', 'late', 'excused'
+        FOREIGN KEY (studentId) REFERENCES students (id) ON DELETE CASCADE,
+        FOREIGN KEY (classId) REFERENCES classes (id) ON DELETE CASCADE,
+        FOREIGN KEY (subjectId) REFERENCES subjects (id) ON DELETE CASCADE,
+        FOREIGN KEY (teacherId) REFERENCES teachers (id) ON DELETE CASCADE
+      )
+    ''');
+    await db.execute('''
+      CREATE TABLE timetable(
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        classId INTEGER NOT NULL,
+        subjectId INTEGER NOT NULL,
+        teacherId INTEGER NOT NULL,
+        dayOfWeek TEXT NOT NULL, -- 'Sunday', 'Monday', etc.
+        lessonNumber INTEGER NOT NULL,
+        startTime TEXT NOT NULL, -- 'HH:MM'
+        endTime TEXT NOT NULL, -- 'HH:MM'
+        FOREIGN KEY (classId) REFERENCES classes (id) ON DELETE CASCADE,
+        FOREIGN KEY (subjectId) REFERENCES subjects (id) ON DELETE CASCADE,
+        FOREIGN KEY (teacherId) REFERENCES teachers (id) ON DELETE CASCADE
+      )
+    ''');
   }
 
   Future<void> _onUpgrade(Database db, int oldVersion, int newVersion) async {
@@ -107,7 +141,9 @@ class DatabaseHelper {
       await db.execute('DROP TABLE IF EXISTS teachers');
       await db.execute('DROP TABLE IF EXISTS classes');
       await db.execute('DROP TABLE IF EXISTS subjects');
-      await db.execute('DROP TABLE IF EXISTS grades'); // Drop grades table on upgrade
+      await db.execute('DROP TABLE IF EXISTS grades');
+      await db.execute('DROP TABLE IF EXISTS attendance');
+      await db.execute('DROP TABLE IF EXISTS timetable');
       await _onCreate(db, newVersion);
     }
   }
@@ -167,13 +203,13 @@ class DatabaseHelper {
 
     String whereString = whereClauses.isEmpty
         ? ''
-        : 'WHERE ${whereClauses.join(' AND ')}';
+        : whereClauses.join(' AND ');
 
     final List<Map<String, dynamic>> maps = await db.query(
       'students',
       where: whereString.isEmpty
           ? null
-          : whereString.substring(6), // Remove "WHERE " prefix if exists
+          : whereString,
       whereArgs: whereArgs.isEmpty ? null : whereArgs,
     );
     return List.generate(maps.length, (i) {
@@ -425,5 +461,174 @@ class DatabaseHelper {
       GROUP BY s.name
     ''');
     return result;
+  }
+
+  // --- Attendance Methods ---
+
+  Future<int> createAttendance(Attendance attendance) async {
+    final db = await database;
+    return await db.insert(
+      'attendance',
+      attendance.toMap(),
+      conflictAlgorithm: ConflictAlgorithm.replace,
+    );
+  }
+
+  Future<List<Attendance>> getAttendances() async {
+    final db = await database;
+    final List<Map<String, dynamic>> maps = await db.query('attendance');
+    return List.generate(maps.length, (i) {
+      return Attendance.fromMap(maps[i]);
+    });
+  }
+
+  Future<int> updateAttendance(Attendance attendance) async {
+    final db = await database;
+    return await db.update(
+      'attendance',
+      attendance.toMap(),
+      where: 'id = ?',
+      whereArgs: [attendance.id],
+    );
+  }
+
+  Future<int> deleteAttendance(int id) async {
+    final db = await database;
+    return await db.delete('attendance', where: 'id = ?', whereArgs: [id]);
+  }
+
+  Future<List<Attendance>> getAttendancesByFilters({
+    String? date,
+    int? classId,
+    int? subjectId,
+    int? teacherId,
+    int? studentId,
+    int? lessonNumber,
+  }) async {
+    final db = await database;
+    List<String> whereClauses = [];
+    List<dynamic> whereArgs = [];
+
+    if (date != null && date.isNotEmpty) {
+      whereClauses.add('date = ?');
+      whereArgs.add(date);
+    }
+    if (classId != null) {
+      whereClauses.add('classId = ?');
+      whereArgs.add(classId);
+    }
+    if (subjectId != null) {
+      whereClauses.add('subjectId = ?');
+      whereArgs.add(subjectId);
+    }
+    if (teacherId != null) {
+      whereClauses.add('teacherId = ?');
+      whereArgs.add(teacherId);
+    }
+    if (studentId != null) {
+      whereClauses.add('studentId = ?');
+      whereArgs.add(studentId);
+    }
+    if (lessonNumber != null) {
+      whereClauses.add('lessonNumber = ?');
+      whereArgs.add(lessonNumber);
+    }
+
+    String whereString = whereClauses.isEmpty ? '' : whereClauses.join(' AND ');
+
+    final List<Map<String, dynamic>> maps = await db.query(
+      'attendance',
+      where: whereString.isEmpty ? null : whereString,
+      whereArgs: whereArgs.isEmpty ? null : whereArgs,
+    );
+    return List.generate(maps.length, (i) {
+      return Attendance.fromMap(maps[i]);
+    });
+  }
+
+  // --- Timetable Methods ---
+
+  Future<int> insertTimetableEntry(Map<String, dynamic> entry) async {
+    final db = await database;
+    return await db.insert(
+      'timetable',
+      entry,
+      conflictAlgorithm: ConflictAlgorithm.replace,
+    );
+  }
+
+  Future<List<Map<String, dynamic>>> getTimetableEntries() async {
+    final db = await database;
+    return await db.query('timetable');
+  }
+
+  Future<List<Map<String, dynamic>>> getTimetableEntriesByClass(int classId) async {
+    final db = await database;
+    return await db.query(
+      'timetable',
+      where: 'classId = ?',
+      whereArgs: [classId],
+      orderBy: 'dayOfWeek ASC, lessonNumber ASC',
+    );
+  }
+
+  Future<List<Map<String, dynamic>>> getTimetableEntriesByTeacher(int teacherId) async {
+    final db = await database;
+    return await db.query(
+      'timetable',
+      where: 'teacherId = ?',
+      whereArgs: [teacherId],
+      orderBy: 'dayOfWeek ASC, lessonNumber ASC',
+    );
+  }
+
+  Future<int> updateTimetableEntry(Map<String, dynamic> entry) async {
+    final db = await database;
+    return await db.update(
+      'timetable',
+      entry,
+      where: 'id = ?',
+      whereArgs: [entry['id']],
+    );
+  }
+
+  Future<int> deleteTimetableEntry(int id) async {
+    final db = await database;
+    return await db.delete('timetable', where: 'id = ?', whereArgs: [id]);
+  }
+
+  Future<List<TimetableEntry>> getTimetableEntriesByFilters({
+    int? classId,
+    String? dayOfWeek,
+    int? teacherId,
+  }) async {
+    final db = await database;
+    List<String> whereClauses = [];
+    List<dynamic> whereArgs = [];
+
+    if (classId != null) {
+      whereClauses.add('classId = ?');
+      whereArgs.add(classId);
+    }
+    if (dayOfWeek != null && dayOfWeek.isNotEmpty) {
+      whereClauses.add('dayOfWeek = ?');
+      whereArgs.add(dayOfWeek);
+    }
+    if (teacherId != null) {
+      whereClauses.add('teacherId = ?');
+      whereArgs.add(teacherId);
+    }
+
+    String whereString = whereClauses.isEmpty ? '' : whereClauses.join(' AND ');
+
+    final List<Map<String, dynamic>> maps = await db.query(
+      'timetable',
+      where: whereString.isEmpty ? null : whereString,
+      whereArgs: whereArgs.isEmpty ? null : whereArgs,
+      orderBy: 'lessonNumber ASC', // Order by lesson number for correct display
+    );
+    return List.generate(maps.length, (i) {
+      return TimetableEntry.fromMap(maps[i]);
+    });
   }
 }

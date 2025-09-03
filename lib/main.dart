@@ -7,9 +7,12 @@ import 'providers/student_provider.dart';
 import 'providers/teacher_provider.dart';
 import 'providers/class_provider.dart';
 import 'providers/subject_provider.dart';
-import 'providers/grade_provider.dart'; // Import GradeProvider
+import 'providers/grade_provider.dart';
 import 'providers/theme_provider.dart';
-import 'screens/grades_screen.dart'; // Import GradesScreen
+import 'providers/attendance_provider.dart';
+import 'providers/timetable_provider.dart'; // Import TimetableProvider
+import 'screens/grades_screen.dart';
+import 'screens/attendance_screen.dart';
 
 void main() {
   runApp(const MyApp());
@@ -27,7 +30,9 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => TeacherProvider()),
         ChangeNotifierProvider(create: (_) => ClassProvider()),
         ChangeNotifierProvider(create: (_) => SubjectProvider()),
-        ChangeNotifierProvider(create: (_) => GradeProvider()), // Add GradeProvider
+        ChangeNotifierProvider(create: (_) => GradeProvider()),
+        ChangeNotifierProvider(create: (_) => AttendanceProvider()),
+        ChangeNotifierProvider(create: (_) => TimetableProvider()), // Add TimetableProvider
       ],
       child: Consumer<ThemeProvider>(
         builder: (context, themeProvider, child) {
@@ -39,19 +44,19 @@ class MyApp extends StatelessWidget {
             home: const DashboardScreen(),
             routes: {
               GradesScreen.routeName: (context) => const GradesScreen(),
+              AttendanceScreen.routeName: (context) => const AttendanceScreen(),
             },
             debugShowCheckedModeBanner: false,
-            // Localization settings for Arabic and RTL support
             localizationsDelegates: const [
               GlobalMaterialLocalizations.delegate,
               GlobalWidgetsLocalizations.delegate,
               GlobalCupertinoLocalizations.delegate,
             ],
             supportedLocales: const [
-              Locale('en', ''), // English
-              Locale('ar', ''), // Arabic
+              Locale('en', ''),
+              Locale('ar', ''),
             ],
-            locale: const Locale('ar', ''), // Set default locale to Arabic
+            locale: const Locale('ar', ''),
           );
         },
       ),
@@ -60,10 +65,8 @@ class MyApp extends StatelessWidget {
 }
 
 class AppTheme {
-  // Define a primary seed color for a vibrant look
-  static const MaterialColor primarySeedColor = Colors.deepPurple; // Changed to MaterialColor
+  static const MaterialColor primarySeedColor = Colors.deepPurple;
 
-  // Define a common TextTheme using GoogleFonts.amiri
   static final TextTheme _appTextTheme = TextTheme(
     displayLarge: GoogleFonts.amiri(fontSize: 57, fontWeight: FontWeight.bold),
     displayMedium: GoogleFonts.amiri(fontSize: 45, fontWeight: FontWeight.bold),
@@ -88,12 +91,12 @@ class AppTheme {
       seedColor: primarySeedColor,
       brightness: Brightness.light,
     ),
-    textTheme: _appTextTheme, // Use the common text theme
+    textTheme: _appTextTheme,
     appBarTheme: AppBarTheme(
-      backgroundColor: primarySeedColor, // Use a vibrant color for AppBar
-      foregroundColor: Colors.white, // White text/icons on AppBar
+      backgroundColor: primarySeedColor,
+      foregroundColor: Colors.white,
       titleTextStyle: _appTextTheme.headlineSmall?.copyWith(
-        color: Colors.white, // Ensure title is white
+        color: Colors.white,
         fontWeight: FontWeight.bold,
       ),
     ),
@@ -112,9 +115,9 @@ class AppTheme {
       ),
     ),
     cardTheme: CardThemeData(
-      elevation: 4, // Add a subtle shadow to cards
+      elevation: 4,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-    ), // Removed const
+    ),
     inputDecorationTheme: InputDecorationTheme(
       border: const OutlineInputBorder(borderRadius: BorderRadius.all(Radius.circular(12))),
       focusedBorder: OutlineInputBorder(
@@ -130,9 +133,9 @@ class AppTheme {
       seedColor: primarySeedColor,
       brightness: Brightness.dark,
     ),
-    textTheme: _appTextTheme, // Use the common text theme
+    textTheme: _appTextTheme,
     appBarTheme: AppBarTheme(
-      backgroundColor: Colors.grey[900], // Darker AppBar for dark mode
+      backgroundColor: Colors.grey[900],
       foregroundColor: Colors.white,
       titleTextStyle: _appTextTheme.headlineSmall?.copyWith(
         color: Colors.white,
@@ -157,7 +160,7 @@ class AppTheme {
       elevation: 4,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       color: Colors.grey[800],
-    ), // Removed const
+    ),
     inputDecorationTheme: InputDecorationTheme(
       border: const OutlineInputBorder(borderRadius: BorderRadius.all(Radius.circular(12))),
       focusedBorder: OutlineInputBorder(
