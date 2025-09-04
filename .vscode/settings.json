@@ -1,4 +1,10 @@
 {
   "IDX.agenticWorkspace": true,
-  "workbench.editor.defaultBinaryEditor": "default"
+  "workbench.editor.defaultBinaryEditor": "default",
+  "workbench.editor.autoLockGroups": {
+    "default": true,
+    "repl": true,
+    "workbench.editors.gettingStartedInput": true,
+    "workbench.input.interactive": true
+  }
 }
