@@ -12,7 +12,8 @@ import 'tabs/subjects_tab.dart';
 import 'tabs/settings_tab.dart';
 import 'tabs/reports_tab.dart';
 import 'grades_screen.dart';
-import 'timetable_screen.dart'; // Import TimetableScreen
+import 'timetable_screen.dart';
+import 'attendance_screen.dart'; // Import AttendanceScreen
 
 class DashboardScreen extends StatefulWidget {
   const DashboardScreen({super.key});
@@ -26,10 +27,11 @@ class DashboardScreenState extends State<DashboardScreen> {
 
   static const List<Widget> _widgetOptions = <Widget>[
     StudentsTab(),
+    AttendanceScreen(), // Add AttendanceScreen
     TeachersTab(),
     ClassesTab(),
     SubjectsTab(),
-    TimetableScreen(), // Add TimetableScreen
+    TimetableScreen(),
     GradesScreen(),
     SettingsTab(),
     ReportsTab(),
@@ -81,10 +83,11 @@ class DashboardScreenState extends State<DashboardScreen> {
       bottomNavigationBar: BottomNavigationBar(
         items: const <BottomNavigationBarItem>[
           BottomNavigationBarItem(icon: Icon(Icons.school), label: 'الطلاب'),
+          BottomNavigationBarItem(icon: Icon(Icons.check_circle), label: 'الحضور'), // Add Attendance item
           BottomNavigationBarItem(icon: Icon(Icons.person), label: 'المعلمون'),
           BottomNavigationBarItem(icon: Icon(Icons.class_), label: 'الفصول'),
           BottomNavigationBarItem(icon: Icon(Icons.book), label: 'المواد'),
-          BottomNavigationBarItem(icon: Icon(Icons.calendar_today), label: 'الجدول'), // Add Timetable item
+          BottomNavigationBarItem(icon: Icon(Icons.calendar_today), label: 'الجدول'),
           BottomNavigationBarItem(icon: Icon(Icons.grade), label: 'الدرجات'),
           BottomNavigationBarItem(icon: Icon(Icons.settings), label: 'الإعدادات'),
           BottomNavigationBarItem(icon: Icon(Icons.bar_chart), label: 'التقارير'),
@@ -93,7 +96,6 @@ class DashboardScreenState extends State<DashboardScreen> {
         onTap: _onItemTapped,
         selectedItemColor: Theme.of(context).primaryColor,
         unselectedItemColor: Colors.grey,
-        // Ensure all icons are visible by adjusting type if many items
         type: BottomNavigationBarType.fixed,
       ),
     );
