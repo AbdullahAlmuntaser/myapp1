@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'dart:developer' as developer; // Added import for logging
+
 import '../../providers/subject_provider.dart';
 import '../../subject_model.dart';
 import '../add_edit_subject_screen.dart';
@@ -68,14 +70,38 @@ class SubjectsTabState extends State<SubjectsTab> {
     if (!mounted) return;
 
     if (confirm == true) {
-      await Provider.of<SubjectProvider>(
-        context,
-        listen: false,
-      ).deleteSubject(id);
-      if (!mounted) return;
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text('تم حذف المادة بنجاح')));
+      try {
+        await Provider.of<SubjectProvider>(
+          context,
+          listen: false,
+        ).deleteSubject(id);
+        if (!mounted) return;
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(
+          const SnackBar(
+            content: Text('تم حذف المادة بنجاح'),
+            backgroundColor: Colors.green,
+          ),
+        );
+      } catch (e, s) { // Added stack trace parameter 's'
+        if (!mounted) return;
+        developer.log(
+          'فشل حذف المادة',
+          name: 'subjects_tab',
+          level: 900, // WARNING
+          error: e,
+          stackTrace: s,
+        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(
+          const SnackBar(
+            content: Text('حدث خطأ غير متوقع أثناء حذف المادة. الرجاء المحاولة مرة أخرى.'), // User-friendly message
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
     }
   }
 
