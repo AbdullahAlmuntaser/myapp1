@@ -8,8 +8,13 @@ class GradeProvider with ChangeNotifier {
 
   List<Grade> get grades => _grades;
 
-  GradeProvider() {
-    fetchGrades();
+  // Remove fetchGrades() from constructor
+  // GradeProvider() {
+  //   fetchGrades();
+  // }
+
+  Future<void> initialize() async {
+    await fetchGrades();
   }
 
   Future<void> fetchGrades() async {

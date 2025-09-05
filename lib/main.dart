@@ -10,17 +10,21 @@ import 'providers/subject_provider.dart';
 import 'providers/grade_provider.dart';
 import 'providers/theme_provider.dart';
 import 'providers/attendance_provider.dart';
-import 'providers/timetable_provider.dart'; // Import TimetableProvider
-import 'screens/grades_screen.dart';
-import 'screens/attendance_screen.dart';
-// import 'package:firebase_core/firebase_core.dart';
-// import 'firebase_options.dart';
+import 'providers/timetable_provider.dart';
+import 'database_helper.dart'; // Import DatabaseHelper
+import 'screens/grades_screen.dart'; // Import GradesScreen
+import 'screens/attendance_screen.dart'; // Import AttendanceScreen
+
+// Define an interface for initializable providers
+abstract class InitializableProvider {
+  Future<void> initialize();
+}
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  // await Firebase.initializeApp(
-  //   options: DefaultFirebaseOptions.currentPlatform,
-  // );
+  // Ensure the database is initialized once and globally accessible
+  // No need to await here, it will be awaited by providers when they access `database`
+  DatabaseHelper(); 
   runApp(const MyApp());
 }
 
@@ -38,7 +42,7 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => SubjectProvider()),
         ChangeNotifierProvider(create: (_) => GradeProvider()),
         ChangeNotifierProvider(create: (_) => AttendanceProvider()),
-        ChangeNotifierProvider(create: (_) => TimetableProvider()), // Add TimetableProvider
+        ChangeNotifierProvider(create: (_) => TimetableProvider()),
       ],
       child: Consumer<ThemeProvider>(
         builder: (context, themeProvider, child) {
@@ -47,8 +51,9 @@ class MyApp extends StatelessWidget {
             theme: AppTheme.lightTheme,
             darkTheme: AppTheme.darkTheme,
             themeMode: themeProvider.themeMode,
-            home: const DashboardScreen(),
+            home: const AppInitializer(), // Use AppInitializer as the home screen
             routes: {
+              // Moved route definitions here.
               GradesScreen.routeName: (context) => const GradesScreen(),
               AttendanceScreen.routeName: (context) => const AttendanceScreen(),
             },
@@ -67,6 +72,64 @@ class MyApp extends StatelessWidget {
         },
       ),
     );
+  }
+}
+
+class AppInitializer extends StatefulWidget {
+  const AppInitializer({super.key});
+
+  @override
+  State<AppInitializer> createState() => _AppInitializerState();
+}
+
+class _AppInitializerState extends State<AppInitializer> {
+  bool _isInitialized = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _initializeProviders();
+  }
+
+  Future<void> _initializeProviders() async {
+    // Access providers after the widget tree is built and providers are available
+    final studentProvider = Provider.of<StudentProvider>(context, listen: false);
+    final teacherProvider = Provider.of<TeacherProvider>(context, listen: false);
+    final classProvider = Provider.of<ClassProvider>(context, listen: false);
+    final subjectProvider = Provider.of<SubjectProvider>(context, listen: false);
+    final gradeProvider = Provider.of<GradeProvider>(context, listen: false);
+    final attendanceProvider = Provider.of<AttendanceProvider>(context, listen: false);
+    final timetableProvider = Provider.of<TimetableProvider>(context, listen: false);
+
+    // Call fetch methods on each provider that needs to fetch initial data
+    await Future.wait([
+      studentProvider.fetchStudents(),
+      teacherProvider.fetchTeachers(),
+      classProvider.fetchClasses(),
+      subjectProvider.fetchSubjects(),
+      gradeProvider.initialize(), 
+      attendanceProvider.initialize(), 
+      timetableProvider.fetchTimetableEntries(),
+    ]);
+
+    // After all initial data is fetched, set initialized state
+    if (mounted) {
+      setState(() {
+        _isInitialized = true;
+      });
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (!_isInitialized) {
+      return const Scaffold(
+        body: Center(
+          child: CircularProgressIndicator(),
+        ),
+      );
+    }
+    return const DashboardScreen();
   }
 }
 

@@ -8,8 +8,13 @@ class AttendanceProvider with ChangeNotifier {
 
   List<Attendance> get attendances => _attendances;
 
-  AttendanceProvider() {
-    fetchAttendances();
+  // Remove fetchAttendances() from constructor
+  // AttendanceProvider() {
+  //   fetchAttendances();
+  // }
+
+  Future<void> initialize() async {
+    await fetchAttendances();
   }
 
   Future<void> fetchAttendances({
