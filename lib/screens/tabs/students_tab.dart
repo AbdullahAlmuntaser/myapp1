@@ -1,12 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'dart:developer' as developer; // Added import for logging
 
 import '../../providers/student_provider.dart';
 import '../../student_model.dart';
 import '../add_edit_student_screen.dart';
-import '../../providers/class_provider.dart'; // Added import for ClassProvider
-import '../../class_model.dart'; // Added import for SchoolClass
+import '../../providers/class_provider.dart';
+import '../../class_model.dart';
 
 class StudentsTab extends StatefulWidget {
   const StudentsTab({super.key});
@@ -17,18 +16,28 @@ class StudentsTab extends StatefulWidget {
 
 class StudentsTabState extends State<StudentsTab> {
   final TextEditingController _searchController = TextEditingController();
-  String? _selectedClassId; // To filter students by class
+  String? _selectedClassId;
+  bool _isLoading = false;
 
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
       if (mounted) {
-        Provider.of<StudentProvider>(context, listen: false).fetchStudents();
-        Provider.of<ClassProvider>(
-          context,
-          listen: false,
-        ).fetchClasses(); // Fetch classes
+        setState(() {
+          _isLoading = true;
+        });
+        try {
+          await Provider.of<StudentProvider>(context, listen: false).fetchStudents();
+          if (!mounted) return; // Check mounted after async operation
+          await Provider.of<ClassProvider>(context, listen: false).fetchClasses();
+        } finally {
+          if (mounted) {
+            setState(() {
+              _isLoading = false;
+            });
+          }
+        }
       }
     });
     _searchController.addListener(_filterStudents);
@@ -40,11 +49,23 @@ class StudentsTabState extends State<StudentsTab> {
     super.dispose();
   }
 
-  void _filterStudents() {
-    Provider.of<StudentProvider>(
-      context,
-      listen: false,
-    ).searchStudents(_searchController.text, classId: _selectedClassId);
+  void _filterStudents() async {
+    setState(() {
+      _isLoading = true;
+    });
+    try {
+      if (!mounted) return;
+      await Provider.of<StudentProvider>(
+        context,
+        listen: false,
+      ).searchStudents(_searchController.text, classId: _selectedClassId);
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
+    }
   }
 
   void _navigateToAddEditScreen([Student? student]) {
@@ -77,6 +98,9 @@ class StudentsTabState extends State<StudentsTab> {
     if (!mounted) return;
 
     if (confirm == true) {
+      setState(() {
+        _isLoading = true;
+      });
       try {
         await Provider.of<StudentProvider>(
           context,
@@ -91,24 +115,22 @@ class StudentsTabState extends State<StudentsTab> {
             backgroundColor: Colors.green,
           ),
         );
-      } catch (e, s) { // Added stack trace parameter 's'
+      } catch (e) {
         if (!mounted) return;
-        // Log the detailed error and stack trace internally for developers
-        developer.log(
-          'فشل حذف الطالب',
-          name: 'students_tab',
-          level: 900, // WARNING
-          error: e,
-          stackTrace: s,
-        );
         ScaffoldMessenger.of(
           context,
         ).showSnackBar(
-          const SnackBar(
-            content: Text('حدث خطأ غير متوقع أثناء حذف الطالب. الرجاء المحاولة مرة أخرى.'), // User-friendly message
+          SnackBar(
+            content: Text('فشل حذف الطالب: $e'),
             backgroundColor: Colors.red,
           ),
         );
+      } finally {
+        if (mounted) {
+          setState(() {
+            _isLoading = false;
+          });
+        }
       }
     }
   }
@@ -141,7 +163,8 @@ class StudentsTabState extends State<StudentsTab> {
                         borderRadius: BorderRadius.all(Radius.circular(12.0)),
                       ),
                     ),
-                    onChanged: (value) => _filterStudents(),
+                    onChanged: _isLoading ? null : (value) => _filterStudents(),
+                    enabled: !_isLoading, // Disable when loading
                   ),
                 ),
                 const SizedBox(width: 12),
@@ -163,7 +186,7 @@ class StudentsTabState extends State<StudentsTab> {
                             ),
                           ),
                         ].toList(),
-                        onChanged: (String? newValue) {
+                        onChanged: _isLoading ? null : (String? newValue) {
                           setState(() {
                             _selectedClassId = newValue;
                             _filterStudents();
@@ -177,21 +200,23 @@ class StudentsTabState extends State<StudentsTab> {
             ),
           ),
           Expanded(
-            child: Consumer<StudentProvider>(
-              builder: (context, studentProvider, child) {
-                if (studentProvider.students.isEmpty) {
-                  return const Center(child: Text('لا يوجد طلاب حالياً.'));
-                }
-                return isLargeScreen
-                    ? _buildWebLayout(studentProvider.students)
-                    : _buildMobileLayout(studentProvider.students);
-              },
-            ),
+            child: _isLoading
+                ? const Center(child: CircularProgressIndicator())
+                : Consumer<StudentProvider>(
+                    builder: (context, studentProvider, child) {
+                      if (studentProvider.students.isEmpty) {
+                        return const Center(child: Text('لا يوجد طلاب حالياً.'));
+                      }
+                      return isLargeScreen
+                          ? _buildWebLayout(studentProvider.students)
+                          : _buildMobileLayout(studentProvider.students);
+                    },
+                  ),
           ),
         ],
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () => _navigateToAddEditScreen(),
+        onPressed: _isLoading ? null : () => _navigateToAddEditScreen(),
         tooltip: 'إضافة طالب جديد',
         child: const Icon(Icons.add),
       ),
@@ -208,7 +233,7 @@ class StudentsTabState extends State<StudentsTab> {
           child: ListTile(
             leading: const CircleAvatar(
               child: Icon(Icons.person),
-            ), // Placeholder for student image
+            ),
             title: Text(student.name),
             subtitle: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -234,8 +259,8 @@ class StudentsTabState extends State<StudentsTab> {
                 }
               },
               itemBuilder: (context) => [
-                const PopupMenuItem(value: 'edit', child: Text('تعديل')),
-                const PopupMenuItem(value: 'delete', child: Text('حذف')),
+                PopupMenuItem(enabled: !_isLoading, value: 'edit', child: const Text('تعديل')), // child is last
+                PopupMenuItem(enabled: !_isLoading, value: 'delete', child: const Text('حذف')), // child is last
               ],
             ),
           ),
@@ -281,12 +306,12 @@ class StudentsTabState extends State<StudentsTab> {
                   children: [
                     IconButton(
                       icon: const Icon(Icons.edit),
-                      onPressed: () => _navigateToAddEditScreen(student),
+                      onPressed: _isLoading ? null : () => _navigateToAddEditScreen(student),
                       tooltip: 'تعديل',
                     ),
                     IconButton(
                       icon: const Icon(Icons.delete),
-                      onPressed: () => _deleteStudent(student.id!),
+                      onPressed: _isLoading ? null : () => _deleteStudent(student.id!),
                       tooltip: 'حذف',
                     ),
                   ],

@@ -48,7 +48,15 @@ This document outlines the plan and progress for creating a comprehensive School
 
 This section details the next set of improvements and new features to be implemented.
 
-### 1. Attendance Screen Improvements (`lib/screens/attendance_screen.dart`)
+### 1. Codebase Refinements
+
+This section addresses recent code quality improvements and bug fixes.
+
+- **Removed Unused Imports:** Eliminated unnecessary `dart:developer` imports from `lib/screens/tabs/classes_tab.dart`, `lib/screens/tabs/students_tab.dart`, and `lib/screens/tabs/teachers_tab.dart`.
+- **Improved Asynchronous Context Handling:** Added `mounted` checks before using `BuildContext` across asynchronous operations in `lib/screens/tabs/classes_tab.dart`, `lib/screens/tabs/students_tab.dart`, and `lib/screens/tabs/teachers_tab.dart` to prevent `use_build_context_synchronously` warnings.
+- **Widget Property Ordering:** Corrected the order of `child` arguments in `PopupMenuItem` widgets within `lib/screens/tabs/students_tab.dart` and `lib/screens/tabs/teachers_tab.dart` to adhere to `sort_child_properties_last` linting rules.
+
+### 2. Attendance Screen Improvements (`lib/screens/attendance_screen.dart`)
 
 This plan focuses on enhancing the user experience, usability, and robustness of the existing attendance screen.
 
@@ -60,7 +68,7 @@ This plan focuses on enhancing the user experience, usability, and robustness of
 -   **Improved User Guidance for Filter Selection:** Disable the student attendance status dropdowns for individual students until all necessary primary filters (date, class, subject, teacher, and lesson number) have been selected. This prevents users from attempting to set attendance without complete context.
 -   **Refine Date Picker Label:** Simplify the display of the selected date in the `ElevatedButton.icon` to directly show the formatted `_selectedDate`, making it more concise and readable.
 
-### 2. Timetable Screen Implementation
+### 3. Timetable Screen Implementation
 
 This plan outlines the creation of a new, dedicated screen for viewing and managing school timetables.
 

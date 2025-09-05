@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:multi_select_flutter/multi_select_flutter.dart';
 import 'package:provider/provider.dart';
+import 'dart:developer' as developer; // Added for logging
+
 import '../providers/subject_provider.dart';
 import '../providers/teacher_provider.dart';
 import '../teacher_model.dart';
@@ -55,7 +57,7 @@ class _AddEditTeacherScreenState extends State<AddEditTeacherScreen> {
     super.dispose();
   }
 
-  void _saveTeacher() {
+  Future<void> _saveTeacher() async { // Made async
     if (_formKey.currentState!.validate()) {
       final teacherProvider =
           Provider.of<TeacherProvider>(context, listen: false);
@@ -72,12 +74,39 @@ class _AddEditTeacherScreenState extends State<AddEditTeacherScreen> {
         responsibleClassId: widget.teacher?.responsibleClassId,
       );
 
-      if (widget.teacher == null) {
-        teacherProvider.addTeacher(newTeacher);
-      } else {
-        teacherProvider.updateTeacher(newTeacher);
+      String message;
+      try {
+        if (widget.teacher == null) {
+          await teacherProvider.addTeacher(newTeacher);
+          message = 'تمت إضافة المعلم بنجاح';
+        } else {
+          await teacherProvider.updateTeacher(newTeacher);
+          message = 'تم تحديث المعلم بنجاح';
+        }
+        if (!mounted) return;
+        Navigator.of(context).pop();
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(message),
+            backgroundColor: Colors.green,
+          ),
+        );
+      } catch (e, s) { // Added stack trace for logging
+        if (!mounted) return;
+        developer.log(
+          'فشل حفظ المعلم',
+          name: 'add_edit_teacher_screen',
+          level: 900, // WARNING
+          error: e,
+          stackTrace: s,
+        );
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('فشل حفظ المعلم: ${e.toString()}'),
+            backgroundColor: Colors.red,
+          ),
+        );
       }
-      Navigator.of(context).pop();
     }
   }
 

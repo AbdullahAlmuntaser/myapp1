@@ -15,13 +15,25 @@ class SubjectsTab extends StatefulWidget {
 
 class SubjectsTabState extends State<SubjectsTab> {
   final TextEditingController _searchController = TextEditingController();
+  bool _isLoading = false;
 
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
       if (mounted) {
-        Provider.of<SubjectProvider>(context, listen: false).fetchSubjects();
+        setState(() {
+          _isLoading = true;
+        });
+        try {
+          await Provider.of<SubjectProvider>(context, listen: false).fetchSubjects();
+        } finally {
+          if (mounted) {
+            setState(() {
+              _isLoading = false;
+            });
+          }
+        }
       }
     });
     _searchController.addListener(_filterSubjects);
@@ -33,11 +45,22 @@ class SubjectsTabState extends State<SubjectsTab> {
     super.dispose();
   }
 
-  void _filterSubjects() {
-    Provider.of<SubjectProvider>(
-      context,
-      listen: false,
-    ).searchSubjects(_searchController.text);
+  void _filterSubjects() async { // Made async
+    setState(() {
+      _isLoading = true;
+    });
+    try {
+      await Provider.of<SubjectProvider>(
+        context,
+        listen: false,
+      ).searchSubjects(_searchController.text);
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
+    }
   }
 
   void _navigateToAddEditScreen([Subject? subject]) {
@@ -60,7 +83,7 @@ class SubjectsTabState extends State<SubjectsTab> {
             child: const Text('إلغاء'),
           ),
           TextButton(
-            onPressed: () => Navigator.of(context).pop(true),
+            onPressed: _isLoading ? null : () => Navigator.of(context).pop(true), // Disable when loading
             child: const Text('حذف'),
           ),
         ],
@@ -70,6 +93,9 @@ class SubjectsTabState extends State<SubjectsTab> {
     if (!mounted) return;
 
     if (confirm == true) {
+      setState(() {
+        _isLoading = true;
+      });
       try {
         await Provider.of<SubjectProvider>(
           context,
@@ -101,6 +127,12 @@ class SubjectsTabState extends State<SubjectsTab> {
             backgroundColor: Colors.red,
           ),
         );
+      } finally {
+        if (mounted) {
+          setState(() {
+            _isLoading = false;
+          });
+        }
       }
     }
   }
@@ -122,64 +154,67 @@ class SubjectsTabState extends State<SubjectsTab> {
                   borderRadius: BorderRadius.all(Radius.circular(12.0)),
                 ),
               ),
+              onChanged: _isLoading ? null : (value) => _filterSubjects(), // Disable when loading
+              enabled: !_isLoading, // Disable when loading
             ),
           ),
           Expanded(
-            child: Consumer<SubjectProvider>(
-              builder: (context, subjectProvider, child) {
-                if (subjectProvider.subjects.isEmpty) {
-                  return const Center(child: Text('لا توجد مواد حالياً.'));
-                }
-                return ListView.builder(
-                  itemCount: subjectProvider.subjects.length,
-                  itemBuilder: (context, index) {
-                    final subject = subjectProvider.subjects[index];
-                    return Card(
-                      margin: const EdgeInsets.symmetric(
-                        horizontal: 12.0,
-                        vertical: 6.0,
-                      ),
-                      child: ListTile(
-                        title: Text(subject.name),
-                        subtitle: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text('معرف المادة: ${subject.subjectId}'),
-                            if (subject.description != null &&
-                                subject.description!.isNotEmpty)
-                              Text('الوصف: ${subject.description}'),
-                            if (subject.teacherId != null &&
-                                subject.teacherId!.isNotEmpty)
-                              Text('معرف المعلم المسؤول: ${subject.teacherId}'),
-                          ],
-                        ),
-                        trailing: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            IconButton(
-                              icon: const Icon(Icons.edit),
-                              onPressed: () =>
-                                  _navigateToAddEditScreen(subject),
-                              tooltip: 'تعديل',
+            child: _isLoading
+                ? const Center(child: CircularProgressIndicator()) // Show loading indicator
+                : Consumer<SubjectProvider>(
+                    builder: (context, subjectProvider, child) {
+                      if (subjectProvider.subjects.isEmpty) {
+                        return const Center(child: Text('لا توجد مواد حالياً.'));
+                      }
+                      return ListView.builder(
+                        itemCount: subjectProvider.subjects.length,
+                        itemBuilder: (context, index) {
+                          final subject = subjectProvider.subjects[index];
+                          return Card(
+                            margin: const EdgeInsets.symmetric(
+                              horizontal: 12.0,
+                              vertical: 6.0,
                             ),
-                            IconButton(
-                              icon: const Icon(Icons.delete),
-                              onPressed: () => _deleteSubject(subject.id!),
-                              tooltip: 'حذف',
+                            child: ListTile(
+                              title: Text(subject.name),
+                              subtitle: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text('معرف المادة: ${subject.subjectId}'),
+                                  if (subject.description != null &&
+                                      subject.description!.isNotEmpty)
+                                    Text('الوصف: ${subject.description}'),
+                                  if (subject.teacherId != null &&
+                                      subject.teacherId!.isNotEmpty)
+                                    Text('معرف المعلم المسؤول: ${subject.teacherId}'),
+                                ],
+                              ),
+                              trailing: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  IconButton(
+                                    icon: const Icon(Icons.edit),
+                                    onPressed: _isLoading ? null : () => _navigateToAddEditScreen(subject),
+                                    tooltip: 'تعديل',
+                                  ),
+                                  IconButton(
+                                    icon: const Icon(Icons.delete),
+                                    onPressed: _isLoading ? null : () => _deleteSubject(subject.id!),
+                                    tooltip: 'حذف',
+                                  ),
+                                ],
+                              ),
                             ),
-                          ],
-                        ),
-                      ),
-                    );
-                  },
-                );
-              },
-            ),
+                          );
+                        },
+                      );
+                    },
+                  ),
           ),
         ],
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () => _navigateToAddEditScreen(),
+        onPressed: _isLoading ? null : () => _navigateToAddEditScreen(), // Disable when loading
         tooltip: 'إضافة مادة جديدة',
         child: const Icon(Icons.add),
       ),

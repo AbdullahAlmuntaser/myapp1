@@ -80,7 +80,7 @@ class DatabaseHelper {
     await db.execute('''
       CREATE TABLE subjects(
         id INTEGER PRIMARY KEY AUTOINCREMENT,
-        name TEXT NOT NULL,
+        name TEXT NOT NULL UNIQUE,
         subjectId TEXT NOT NULL UNIQUE,
         description TEXT,
         teacherId INTEGER
@@ -380,6 +380,34 @@ class DatabaseHelper {
     });
   }
 
+  Future<Subject?> getSubjectByName(String name) async {
+    final db = await database;
+    final List<Map<String, dynamic>> maps = await db.query(
+      'subjects',
+      where: 'name = ?',
+      whereArgs: [name],
+    );
+    if (maps.isNotEmpty) {
+      return Subject.fromMap(maps.first);
+    } else {
+      return null;
+    }
+  }
+
+  Future<Subject?> getSubjectBySubjectId(String subjectId) async {
+    final db = await database;
+    final List<Map<String, dynamic>> maps = await db.query(
+      'subjects',
+      where: 'subjectId = ?',
+      whereArgs: [subjectId],
+    );
+    if (maps.isNotEmpty) {
+      return Subject.fromMap(maps.first);
+    } else {
+      return null;
+    }
+  }
+
   // --- Grade Methods ---
 
   Future<int> createGrade(Grade grade) async {
@@ -630,5 +658,16 @@ class DatabaseHelper {
     return List.generate(maps.length, (i) {
       return TimetableEntry.fromMap(maps[i]);
     });
+  }
+
+  Future<void> clearAllData() async {
+    final db = await database;
+    await db.delete('students');
+    await db.delete('teachers');
+    await db.delete('classes');
+    await db.delete('subjects');
+    await db.delete('grades');
+    await db.delete('attendance');
+    await db.delete('timetable');
   }
 }

@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'dart:developer' as developer; // Added import for logging
 
 import '../../providers/subject_provider.dart';
 import '../../providers/teacher_provider.dart';
@@ -17,14 +16,31 @@ class TeachersTab extends StatefulWidget {
 class _TeachersTabState extends State<TeachersTab> {
   final TextEditingController _searchController = TextEditingController();
   String? _selectedSubject;
+  bool _isLoading = false;
 
   @override
   void initState() {
     super.initState();
     _searchController.addListener(_onSearchChanged);
-    // Load initial data
-    Provider.of<TeacherProvider>(context, listen: false).fetchTeachers();
-    Provider.of<SubjectProvider>(context, listen: false).fetchSubjects();
+    _loadInitialData();
+  }
+
+  Future<void> _loadInitialData() async {
+    setState(() {
+      _isLoading = true;
+    });
+    try {
+      if (!mounted) return; // Check mounted before using context
+      await Provider.of<TeacherProvider>(context, listen: false).fetchTeachers();
+      if (!mounted) return; // Check mounted before using context
+      await Provider.of<SubjectProvider>(context, listen: false).fetchSubjects();
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
+    }
   }
 
   @override
@@ -34,21 +50,43 @@ class _TeachersTabState extends State<TeachersTab> {
     super.dispose();
   }
 
-  void _onSearchChanged() {
-    Provider.of<TeacherProvider>(
-      context,
-      listen: false,
-    ).searchTeachers(_searchController.text, subject: _selectedSubject);
+  void _onSearchChanged() async {
+    setState(() {
+      _isLoading = true;
+    });
+    try {
+      if (!mounted) return; // Check mounted before using context
+      await Provider.of<TeacherProvider>(
+        context,
+        listen: false,
+      ).searchTeachers(_searchController.text, subject: _selectedSubject);
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
+    }
   }
 
-  void _onFilterChanged(String? subject) {
+  void _onFilterChanged(String? subject) async {
     setState(() {
       _selectedSubject = subject;
+      _isLoading = true;
     });
-    Provider.of<TeacherProvider>(
-      context,
-      listen: false,
-    ).searchTeachers(_searchController.text, subject: _selectedSubject);
+    try {
+      if (!mounted) return; // Check mounted before using context
+      await Provider.of<TeacherProvider>(
+        context,
+        listen: false,
+      ).searchTeachers(_searchController.text, subject: _selectedSubject);
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
+    }
   }
 
   @override
@@ -72,13 +110,15 @@ class _TeachersTabState extends State<TeachersTab> {
                       prefixIcon: Icon(Icons.search),
                       border: OutlineInputBorder(),
                     ),
+                    onChanged: _isLoading ? null : (value) => _onSearchChanged(),
+                    enabled: !_isLoading,
                   ),
                 ),
                 const SizedBox(width: 10),
                 DropdownButton<String>(
                   value: _selectedSubject,
                   hint: const Text('التصفية حسب المادة'),
-                  onChanged: (value) => _onFilterChanged(value),
+                  onChanged: _isLoading ? null : (value) => _onFilterChanged(value),
                   items: [
                     const DropdownMenuItem<String>(
                       value: null,
@@ -96,16 +136,18 @@ class _TeachersTabState extends State<TeachersTab> {
             ),
           ),
           Expanded(
-            child: teacherProvider.teachers.isEmpty
-                ? const Center(child: Text('لم يتم العثور على معلمين.'))
-                : isLargeScreen
-                    ? _buildDataTable(teacherProvider.teachers)
-                    : _buildListView(teacherProvider.teachers),
+            child: _isLoading
+                ? const Center(child: CircularProgressIndicator())
+                : teacherProvider.teachers.isEmpty
+                    ? const Center(child: Text('لم يتم العثور على معلمين.'))
+                    : isLargeScreen
+                        ? _buildDataTable(teacherProvider.teachers)
+                        : _buildListView(teacherProvider.teachers),
           ),
         ],
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () => _navigateToAddEditScreen(null),
+        onPressed: _isLoading ? null : () => _navigateToAddEditScreen(null),
         child: const Icon(Icons.add),
       ),
     );
@@ -131,7 +173,7 @@ class _TeachersTabState extends State<TeachersTab> {
             title: Text(teacher.name),
             subtitle: Text(teacher.subject),
             trailing: PopupMenuButton<String>(
-              onSelected: (value) {
+              onSelected: _isLoading ? null : (value) {
                 if (value == 'edit') {
                   _navigateToAddEditScreen(teacher);
                 } else if (value == 'delete') {
@@ -139,8 +181,8 @@ class _TeachersTabState extends State<TeachersTab> {
                 }
               },
               itemBuilder: (context) => [
-                const PopupMenuItem(value: 'edit', child: Text('تعديل')),
-                const PopupMenuItem(value: 'delete', child: Text('حذف')),
+                PopupMenuItem(value: 'edit', enabled: !_isLoading, child: const Text('تعديل')),
+                PopupMenuItem(value: 'delete', enabled: !_isLoading, child: const Text('حذف')),
               ],
             ),
           ),
@@ -167,7 +209,7 @@ class _TeachersTabState extends State<TeachersTab> {
             DataCell(Text(teacher.phone)),
             DataCell(
               PopupMenuButton<String>(
-                onSelected: (value) {
+                onSelected: _isLoading ? null : (value) {
                   if (value == 'edit') {
                     _navigateToAddEditScreen(teacher);
                   } else if (value == 'delete') {
@@ -175,8 +217,8 @@ class _TeachersTabState extends State<TeachersTab> {
                   }
                 },
                 itemBuilder: (context) => [
-                  const PopupMenuItem(value: 'edit', child: Text('تعديل')),
-                  const PopupMenuItem(value: 'delete', child: Text('حذف')),
+                  PopupMenuItem(value: 'edit', enabled: !_isLoading, child: const Text('تعديل')),
+                  PopupMenuItem(value: 'delete', enabled: !_isLoading, child: const Text('حذف')),
                 ],
               ),
             ),
@@ -186,53 +228,63 @@ class _TeachersTabState extends State<TeachersTab> {
     );
   }
 
-  void _deleteTeacher(Teacher teacher) {
-    showDialog(
+  void _deleteTeacher(Teacher teacher) async {
+    // Ensure dialog context is not used after async gap, use rootNavigator if needed.
+    final bool? confirm = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('حذف معلم'),
         content: const Text('هل أنت متأكد أنك تريد حذف هذا المعلم؟'),
         actions: [
           TextButton(
-            onPressed: () => Navigator.of(context).pop(),
+            onPressed: () => Navigator.of(context).pop(false),
             child: const Text('إلغاء'),
           ),
           TextButton(
-            onPressed: () async {
-              final messenger = ScaffoldMessenger.of(context);
-              Navigator.of(context).pop(); // Close the dialog first
-              try {
-                await Provider.of<TeacherProvider>(
-                  context,
-                  listen: false,
-                ).deleteTeacher(teacher.id!);
-                messenger.showSnackBar(
-                  const SnackBar(
-                    content: Text('تم حذف المعلم بنجاح'),
-                    backgroundColor: Colors.green,
-                  ),
-                );
-              } catch (e, s) { // Added stack trace parameter 's'
-                // Log the detailed error and stack trace internally for developers
-                developer.log(
-                  'فشل حذف المعلم',
-                  name: 'teachers_tab',
-                  level: 900, // WARNING
-                  error: e,
-                  stackTrace: s,
-                );
-                messenger.showSnackBar(
-                  const SnackBar(
-                    content: Text('حدث خطأ غير متوقع أثناء حذف المعلم. الرجاء المحاولة مرة أخرى.'), // User-friendly message
-                    backgroundColor: Colors.red,
-                  ),
-                );
-              }
-            },
+            onPressed: _isLoading ? null : () => Navigator.of(context).pop(true),
             child: const Text('حذف'),
           ),
         ],
       ),
     );
+
+    if (!mounted) return;
+
+    if (confirm == true) {
+      setState(() {
+        _isLoading = true;
+      });
+      try {
+        if (!mounted) return;
+        final messenger = ScaffoldMessenger.of(context);
+        await Provider.of<TeacherProvider>(
+          context,
+          listen: false,
+        ).deleteTeacher(teacher.id!);
+        if (!mounted) return;
+        messenger.showSnackBar(
+          const SnackBar(
+            content: Text('تم حذف المعلم بنجاح'),
+            backgroundColor: Colors.green,
+          ),
+        );
+      } catch (e) {
+        if (!mounted) return;
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(
+          SnackBar(
+            content: Text('فشل حذف المعلم: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      } finally {
+        if (mounted) {
+          setState(() {
+            _isLoading = false;
+          });
+        }
+      }
+    }
   }
 }

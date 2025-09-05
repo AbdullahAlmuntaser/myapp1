@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+
 import '../../providers/class_provider.dart';
 import '../../class_model.dart';
 import '../add_edit_class_screen.dart';
-import '../../providers/subject_provider.dart'; // Added import
-import '../../subject_model.dart'; // Added import
+import '../../providers/subject_provider.dart';
+import '../../subject_model.dart';
 
 class ClassesTab extends StatefulWidget {
   const ClassesTab({super.key});
@@ -15,14 +16,30 @@ class ClassesTab extends StatefulWidget {
 
 class ClassesTabState extends State<ClassesTab> {
   final TextEditingController _searchController = TextEditingController();
+  bool _isLoading = false;
 
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
       if (mounted) {
-        Provider.of<ClassProvider>(context, listen: false).fetchClasses();
-        Provider.of<SubjectProvider>(context, listen: false).fetchSubjects(); // Fetch subjects
+        setState(() {
+          _isLoading = true;
+        });
+        try {
+          // Check mounted before using context after async operation
+          if (!mounted) return;
+          await Provider.of<ClassProvider>(context, listen: false).fetchClasses();
+          // Check mounted before using context after async operation
+          if (!mounted) return;
+          await Provider.of<SubjectProvider>(context, listen: false).fetchSubjects();
+        } finally {
+          if (mounted) {
+            setState(() {
+              _isLoading = false;
+            });
+          }
+        }
       }
     });
     _searchController.addListener(_filterClasses);
@@ -34,11 +51,23 @@ class ClassesTabState extends State<ClassesTab> {
     super.dispose();
   }
 
-  void _filterClasses() {
-    Provider.of<ClassProvider>(
-      context,
-      listen: false,
-    ).searchClasses(_searchController.text);
+  void _filterClasses() async {
+    setState(() {
+      _isLoading = true;
+    });
+    try {
+      if (!mounted) return; // Check mounted before using context after async operation
+      await Provider.of<ClassProvider>(
+        context,
+        listen: false,
+      ).searchClasses(_searchController.text);
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
+    }
   }
 
   void _navigateToAddEditScreen([SchoolClass? schoolClass]) {
@@ -71,6 +100,9 @@ class ClassesTabState extends State<ClassesTab> {
     if (!mounted) return;
 
     if (confirm == true) {
+      setState(() {
+        _isLoading = true;
+      });
       try {
         await Provider.of<ClassProvider>(context, listen: false).deleteClass(id);
         if (!mounted) return;
@@ -92,6 +124,12 @@ class ClassesTabState extends State<ClassesTab> {
             backgroundColor: Colors.red,
           ),
         );
+      } finally {
+        if (mounted) {
+          setState(() {
+            _isLoading = false;
+          });
+        }
       }
     }
   }
@@ -131,24 +169,28 @@ class ClassesTabState extends State<ClassesTab> {
                   borderRadius: BorderRadius.all(Radius.circular(12.0)),
                 ),
               ),
+              onChanged: _isLoading ? null : (value) => _filterClasses(),
+              enabled: !_isLoading, // Disable when loading
             ),
           ),
           Expanded(
-            child: Consumer2<ClassProvider, SubjectProvider>(
-              builder: (context, classProvider, subjectProvider, child) {
-                if (classProvider.classes.isEmpty) {
-                  return const Center(child: Text('لا توجد فصول حالياً.'));
-                }
-                return isLargeScreen
-                    ? _buildDataTable(classProvider.classes, subjectProvider.subjects)
-                    : _buildListView(classProvider.classes, subjectProvider.subjects);
-              },
-            ),
+            child: _isLoading
+                ? const Center(child: CircularProgressIndicator())
+                : Consumer2<ClassProvider, SubjectProvider>(
+                    builder: (context, classProvider, subjectProvider, child) {
+                      if (classProvider.classes.isEmpty) {
+                        return const Center(child: Text('لا توجد فصول حالياً.'));
+                      }
+                      return isLargeScreen
+                          ? _buildDataTable(classProvider.classes, subjectProvider.subjects)
+                          : _buildListView(classProvider.classes, subjectProvider.subjects);
+                    },
+                  ),
           ),
         ],
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () => _navigateToAddEditScreen(),
+        onPressed: _isLoading ? null : () => _navigateToAddEditScreen(), // Disable when loading
         tooltip: 'إضافة فصل جديد',
         child: const Icon(Icons.add),
       ),
@@ -195,13 +237,12 @@ class ClassesTabState extends State<ClassesTab> {
               children: [
                 IconButton(
                   icon: const Icon(Icons.edit),
-                  onPressed: () =>
-                      _navigateToAddEditScreen(schoolClass),
+                  onPressed: _isLoading ? null : () => _navigateToAddEditScreen(schoolClass),
                   tooltip: 'تعديل',
                 ),
                 IconButton(
                   icon: const Icon(Icons.delete),
-                  onPressed: () => _deleteClass(schoolClass.id!),
+                  onPressed: _isLoading ? null : () => _deleteClass(schoolClass.id!),
                   tooltip: 'حذف',
                 ),
               ],
@@ -243,12 +284,12 @@ class ClassesTabState extends State<ClassesTab> {
                   children: [
                     IconButton(
                       icon: const Icon(Icons.edit),
-                      onPressed: () => _navigateToAddEditScreen(schoolClass),
+                      onPressed: _isLoading ? null : () => _navigateToAddEditScreen(schoolClass),
                       tooltip: 'تعديل',
                     ),
                     IconButton(
                       icon: const Icon(Icons.delete),
-                      onPressed: () => _deleteClass(schoolClass.id!),
+                      onPressed: _isLoading ? null : () => _deleteClass(schoolClass.id!),
                       tooltip: 'حذف',
                     ),
                   ],
