@@ -6,11 +6,14 @@
 import 'dart:async' as _i4;
 
 import 'package:mockito/mockito.dart' as _i1;
+import 'package:myapp/attendance_model.dart' as _i10;
 import 'package:myapp/class_model.dart' as _i7;
 import 'package:myapp/database_helper.dart' as _i3;
+import 'package:myapp/grade_model.dart' as _i9;
 import 'package:myapp/student_model.dart' as _i5;
 import 'package:myapp/subject_model.dart' as _i8;
 import 'package:myapp/teacher_model.dart' as _i6;
+import 'package:myapp/timetable_model.dart' as _i11;
 import 'package:sqflite/sqflite.dart' as _i2;
 
 // ignore_for_file: type=lint
@@ -231,4 +234,204 @@ class MockDatabaseHelper extends _i1.Mock implements _i3.DatabaseHelper {
             returnValue: _i4.Future<List<_i8.Subject>>.value(<_i8.Subject>[]),
           )
           as _i4.Future<List<_i8.Subject>>);
+
+  @override
+  _i4.Future<int> createGrade(_i9.Grade? grade) =>
+      (super.noSuchMethod(
+            Invocation.method(#createGrade, [grade]),
+            returnValue: _i4.Future<int>.value(0),
+          )
+          as _i4.Future<int>);
+
+  @override
+  _i4.Future<List<_i9.Grade>> getGrades() =>
+      (super.noSuchMethod(
+            Invocation.method(#getGrades, []),
+            returnValue: _i4.Future<List<_i9.Grade>>.value(<_i9.Grade>[]),
+          )
+          as _i4.Future<List<_i9.Grade>>);
+
+  @override
+  _i4.Future<int> updateGrade(_i9.Grade? grade) =>
+      (super.noSuchMethod(
+            Invocation.method(#updateGrade, [grade]),
+            returnValue: _i4.Future<int>.value(0),
+          )
+          as _i4.Future<int>);
+
+  @override
+  _i4.Future<int> deleteGrade(int? id) =>
+      (super.noSuchMethod(
+            Invocation.method(#deleteGrade, [id]),
+            returnValue: _i4.Future<int>.value(0),
+          )
+          as _i4.Future<int>);
+
+  @override
+  _i4.Future<List<_i9.Grade>> getGradesByStudent(int? studentId) =>
+      (super.noSuchMethod(
+            Invocation.method(#getGradesByStudent, [studentId]),
+            returnValue: _i4.Future<List<_i9.Grade>>.value(<_i9.Grade>[]),
+          )
+          as _i4.Future<List<_i9.Grade>>);
+
+  @override
+  _i4.Future<List<_i9.Grade>> getGradesByClass(int? classId) =>
+      (super.noSuchMethod(
+            Invocation.method(#getGradesByClass, [classId]),
+            returnValue: _i4.Future<List<_i9.Grade>>.value(<_i9.Grade>[]),
+          )
+          as _i4.Future<List<_i9.Grade>>);
+
+  @override
+  _i4.Future<List<_i9.Grade>> getGradesBySubject(int? subjectId) =>
+      (super.noSuchMethod(
+            Invocation.method(#getGradesBySubject, [subjectId]),
+            returnValue: _i4.Future<List<_i9.Grade>>.value(<_i9.Grade>[]),
+          )
+          as _i4.Future<List<_i9.Grade>>);
+
+  @override
+  _i4.Future<List<Map<String, dynamic>>> getAverageGradesBySubject() =>
+      (super.noSuchMethod(
+            Invocation.method(#getAverageGradesBySubject, []),
+            returnValue: _i4.Future<List<Map<String, dynamic>>>.value(
+              <Map<String, dynamic>>[],
+            ),
+          )
+          as _i4.Future<List<Map<String, dynamic>>>);
+
+  @override
+  _i4.Future<int> createAttendance(_i10.Attendance? attendance) =>
+      (super.noSuchMethod(
+            Invocation.method(#createAttendance, [attendance]),
+            returnValue: _i4.Future<int>.value(0),
+          )
+          as _i4.Future<int>);
+
+  @override
+  _i4.Future<List<_i10.Attendance>> getAttendances() =>
+      (super.noSuchMethod(
+            Invocation.method(#getAttendances, []),
+            returnValue: _i4.Future<List<_i10.Attendance>>.value(
+              <_i10.Attendance>[],
+            ),
+          )
+          as _i4.Future<List<_i10.Attendance>>);
+
+  @override
+  _i4.Future<int> updateAttendance(_i10.Attendance? attendance) =>
+      (super.noSuchMethod(
+            Invocation.method(#updateAttendance, [attendance]),
+            returnValue: _i4.Future<int>.value(0),
+          )
+          as _i4.Future<int>);
+
+  @override
+  _i4.Future<int> deleteAttendance(int? id) =>
+      (super.noSuchMethod(
+            Invocation.method(#deleteAttendance, [id]),
+            returnValue: _i4.Future<int>.value(0),
+          )
+          as _i4.Future<int>);
+
+  @override
+  _i4.Future<List<_i10.Attendance>> getAttendancesByFilters({
+    String? date,
+    int? classId,
+    int? subjectId,
+    int? teacherId,
+    int? studentId,
+    int? lessonNumber,
+  }) =>
+      (super.noSuchMethod(
+            Invocation.method(#getAttendancesByFilters, [], {
+              #date: date,
+              #classId: classId,
+              #subjectId: subjectId,
+              #teacherId: teacherId,
+              #studentId: studentId,
+              #lessonNumber: lessonNumber,
+            }),
+            returnValue: _i4.Future<List<_i10.Attendance>>.value(
+              <_i10.Attendance>[],
+            ),
+          )
+          as _i4.Future<List<_i10.Attendance>>);
+
+  @override
+  _i4.Future<int> insertTimetableEntry(Map<String, dynamic>? entry) =>
+      (super.noSuchMethod(
+            Invocation.method(#insertTimetableEntry, [entry]),
+            returnValue: _i4.Future<int>.value(0),
+          )
+          as _i4.Future<int>);
+
+  @override
+  _i4.Future<List<Map<String, dynamic>>> getTimetableEntries() =>
+      (super.noSuchMethod(
+            Invocation.method(#getTimetableEntries, []),
+            returnValue: _i4.Future<List<Map<String, dynamic>>>.value(
+              <Map<String, dynamic>>[],
+            ),
+          )
+          as _i4.Future<List<Map<String, dynamic>>>);
+
+  @override
+  _i4.Future<List<Map<String, dynamic>>> getTimetableEntriesByClass(
+    int? classId,
+  ) =>
+      (super.noSuchMethod(
+            Invocation.method(#getTimetableEntriesByClass, [classId]),
+            returnValue: _i4.Future<List<Map<String, dynamic>>>.value(
+              <Map<String, dynamic>>[],
+            ),
+          )
+          as _i4.Future<List<Map<String, dynamic>>>);
+
+  @override
+  _i4.Future<List<Map<String, dynamic>>> getTimetableEntriesByTeacher(
+    int? teacherId,
+  ) =>
+      (super.noSuchMethod(
+            Invocation.method(#getTimetableEntriesByTeacher, [teacherId]),
+            returnValue: _i4.Future<List<Map<String, dynamic>>>.value(
+              <Map<String, dynamic>>[],
+            ),
+          )
+          as _i4.Future<List<Map<String, dynamic>>>);
+
+  @override
+  _i4.Future<int> updateTimetableEntry(Map<String, dynamic>? entry) =>
+      (super.noSuchMethod(
+            Invocation.method(#updateTimetableEntry, [entry]),
+            returnValue: _i4.Future<int>.value(0),
+          )
+          as _i4.Future<int>);
+
+  @override
+  _i4.Future<int> deleteTimetableEntry(int? id) =>
+      (super.noSuchMethod(
+            Invocation.method(#deleteTimetableEntry, [id]),
+            returnValue: _i4.Future<int>.value(0),
+          )
+          as _i4.Future<int>);
+
+  @override
+  _i4.Future<List<_i11.TimetableEntry>> getTimetableEntriesByFilters({
+    int? classId,
+    String? dayOfWeek,
+    int? teacherId,
+  }) =>
+      (super.noSuchMethod(
+            Invocation.method(#getTimetableEntriesByFilters, [], {
+              #classId: classId,
+              #dayOfWeek: dayOfWeek,
+              #teacherId: teacherId,
+            }),
+            returnValue: _i4.Future<List<_i11.TimetableEntry>>.value(
+              <_i11.TimetableEntry>[],
+            ),
+          )
+          as _i4.Future<List<_i11.TimetableEntry>>);
 }

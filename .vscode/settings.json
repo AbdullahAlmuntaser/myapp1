@@ -1,6 +1,6 @@
 {
     "IDX.agenticWorkspace": true,
-    "IDX.aI.showChatInEditorTab": false,
+    "IDX.aI.showChatInEditorTab": true,
     "workbench.editor.centeredLayoutFixedWidth": true,
     "workbench.layoutControl.enabled": true,
     "workbench.editor.splitInGroupLayout": "horizontal",
@@ -15,5 +15,6 @@
     "workbench.editor.centeredLayout": true,
     "workbench.layout.bottomPanel.collapsed": true,
     "editor.minimap.enabled": false,
-    "workbench.sideBar.location": "left"
+    "workbench.sideBar.location": "left",
+    "workbench.editor.restoreViewState": true
 }
