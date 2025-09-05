@@ -1,0 +1,19 @@
+{
+    "IDX.agenticWorkspace": true,
+    "IDX.aI.showChatInEditorTab": false,
+    "workbench.editor.centeredLayoutFixedWidth": true,
+    "workbench.layoutControl.enabled": true,
+    "workbench.editor.splitInGroupLayout": "horizontal",
+    "workbench.editor.centeredLayoutAutoResize": true,
+    "window.commandCenter": true,
+    "documentationAgent.optOut": true,
+    "agentManagement.securityReview.optOut": true,
+    "workbench.colorTheme": "Default Dark+",
+    "workbench.editor.tabsSizing": "shrink",
+    "workbench.editor.tabSide": "left",
+    "gemini.chat.location": "sidebar",
+    "workbench.editor.centeredLayout": true,
+    "workbench.layout.bottomPanel.collapsed": true,
+    "editor.minimap.enabled": false,
+    "workbench.sideBar.location": "left"
+}
