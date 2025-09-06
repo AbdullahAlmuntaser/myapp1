@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../services/local_auth_service.dart';
 import 'register_screen.dart'; // We'll create this next
+import 'dart:developer' as developer; // Import for logging
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -17,6 +18,7 @@ class _LoginScreenState extends State<LoginScreen> {
   String? _errorMessage;
 
   Future<void> _login() async {
+    developer.log('Attempting login...', name: 'LoginScreen');
     if (_formKey.currentState!.validate()) {
       setState(() {
         _errorMessage = null;
@@ -31,16 +33,21 @@ class _LoginScreenState extends State<LoginScreen> {
         setState(() {
           _errorMessage = 'Invalid username or password.';
         });
+        developer.log('Login failed for user: ${_usernameController.text}', name: 'LoginScreen', level: 900);
       } else {
+        developer.log('Login successful for user: ${_usernameController.text}', name: 'LoginScreen', level: 800);
         // If login is successful, the AuthProvider will notify listeners
         // and main.dart will navigate to DashboardScreen.
       }
+    } else { // This else block was misplaced, now it's inside _login
+      developer.log('Login form validation failed.', name: 'LoginScreen', level: 900);
     }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Theme.of(context).colorScheme.surface, // Changed from background to surface
       appBar: AppBar(
         title: const Text('Login'),
       ),
@@ -119,7 +126,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       MaterialPageRoute(builder: (context) => const RegisterScreen()),
                     );
                   },
-                  child: const Text('Don\'t have an account? Register now'),
+                  child: const Text('Don\'t have an account? Register now'), // Escaped apostrophe
                 ),
               ],
             ),

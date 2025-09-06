@@ -16,11 +16,12 @@ import 'screens/grades_screen.dart'; // Import GradesScreen
 import 'screens/attendance_screen.dart'; // Import AttendanceScreen
 import 'services/local_auth_service.dart'; // Import LocalAuthService
 import 'screens/login_screen.dart'; // Import LoginScreen
+import 'dart:developer' as developer; // Import for logging
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  // Initialize DatabaseHelper explicitly before runApp to ensure it's ready
-  await DatabaseHelper().database; 
+  // Temporarily commented out to debug database initialization
+  // await DatabaseHelper().database; 
   runApp(const MyApp());
 }
 
@@ -86,15 +87,18 @@ class _AppInitializerState extends State<AppInitializer> {
   @override
   void initState() {
     super.initState();
+    developer.log('AppInitializer: initState called.', name: 'AppInitializer');
     _initializeProviders();
   }
 
   Future<void> _initializeProviders() async {
+    developer.log('AppInitializer: Initializing providers...', name: 'AppInitializer');
     // Access providers after the widget tree is built and providers are available
     final authService = Provider.of<LocalAuthService>(context, listen: false);
 
     // Only fetch data if a user is authenticated. Otherwise, we'll show the login screen.
     if (authService.isAuthenticated) {
+      developer.log('AppInitializer: User is authenticated. Fetching data...', name: 'AppInitializer');
       final studentProvider = Provider.of<StudentProvider>(context, listen: false);
       final teacherProvider = Provider.of<TeacherProvider>(context, listen: false);
       final classProvider = Provider.of<ClassProvider>(context, listen: false);
@@ -112,6 +116,9 @@ class _AppInitializerState extends State<AppInitializer> {
         attendanceProvider.fetchAttendances(),
         timetableProvider.fetchTimetableEntries(),
       ]);
+      developer.log('AppInitializer: Data fetching complete.', name: 'AppInitializer');
+    } else {
+      developer.log('AppInitializer: User not authenticated. Skipping data fetch.', name: 'AppInitializer');
     }
 
     // After all initial data is fetched (or if no user is authenticated), set initialized state
@@ -119,12 +126,17 @@ class _AppInitializerState extends State<AppInitializer> {
       setState(() {
         _isInitialized = true;
       });
+      developer.log('AppInitializer: Initialization complete. Setting _isInitialized to true.', name: 'AppInitializer');
+    } else {
+      developer.log('AppInitializer: Widget not mounted when trying to set _isInitialized.', name: 'AppInitializer', level: 900);
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    developer.log('AppInitializer: build called. _isInitialized: $_isInitialized', name: 'AppInitializer');
     if (!_isInitialized) {
+      developer.log('AppInitializer: Showing CircularProgressIndicator.', name: 'AppInitializer');
       return const Scaffold(
         body: Center(
           child: CircularProgressIndicator(),
@@ -134,10 +146,13 @@ class _AppInitializerState extends State<AppInitializer> {
     // Based on authentication status, show either LoginScreen or the appropriate home screen
     return Consumer<LocalAuthService>(
       builder: (context, authService, child) {
+        developer.log('AppInitializer: Consumer rebuilding. isAuthenticated: ${authService.isAuthenticated}', name: 'AppInitializer');
         if (authService.isAuthenticated) {
+          developer.log('AppInitializer: User is authenticated. Navigating to role-based home screen.', name: 'AppInitializer');
           // This is where we will introduce role-based navigation
           return _getHomeScreenForRole(authService.currentUser!.role);
         } else {
+          developer.log('AppInitializer: User not authenticated. Navigating to LoginScreen.', name: 'AppInitializer');
           return const LoginScreen();
         }
       },
@@ -146,6 +161,7 @@ class _AppInitializerState extends State<AppInitializer> {
 
   // New method to return the appropriate home screen based on the user's role
   Widget _getHomeScreenForRole(String role) {
+    developer.log('AppInitializer: Getting home screen for role: $role', name: 'AppInitializer');
     switch (role) {
       case 'admin':
         return const DashboardScreen(); // Admin sees the full dashboard
@@ -156,6 +172,7 @@ class _AppInitializerState extends State<AppInitializer> {
       // case 'parent': // We will add parent role later
       //   return const ParentDashboardScreen();
       default:
+        developer.log('AppInitializer: Unknown role: $role. Falling back to LoginScreen.', name: 'AppInitializer', level: 900);
         return const LoginScreen(); // Fallback to login if role is unknown
     }
   }
@@ -206,9 +223,9 @@ class AppTheme {
       style: ElevatedButton.styleFrom(
         backgroundColor: primarySeedColor,
         foregroundColor: Colors.white,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-        textStyle: _appTextTheme.labelLarge,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(8),
+        ),
       ),
     ),
     cardTheme: CardThemeData(
@@ -248,9 +265,9 @@ class AppTheme {
       style: ElevatedButton.styleFrom(
         backgroundColor: primarySeedColor.shade200,
         foregroundColor: Colors.black,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-        textStyle: _appTextTheme.labelLarge,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(8),
+        ),
       ),
     ),
     cardTheme: CardThemeData(

@@ -4,6 +4,7 @@ import 'package:sqflite/sqflite.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:crypto/crypto.dart'; // Import for password hashing
 import 'dart:convert'; // For utf8 encoding
+import 'dart:developer' as developer; // Import for logging
 
 import 'student_model.dart';
 import 'teacher_model.dart';
@@ -28,18 +29,33 @@ class DatabaseHelper {
   }
 
   Future<Database> _initDB() async {
-    final dbPath = await getApplicationDocumentsDirectory();
-    final path = join(dbPath.path, 'school_management.db');
-    return await openDatabase(
-      path,
-      version: 14, // Increased version for parentUserId in students table
-      onCreate: _onCreate,
-      onUpgrade: _onUpgrade,
-    );
+    try {
+      final dbPath = await getApplicationDocumentsDirectory();
+      final path = join(dbPath.path, 'school_management.db');
+      developer.log('DatabaseHelper: Attempting to open database at $path', name: 'DatabaseHelper');
+      return await openDatabase(
+        path,
+        version: 14, // Increased version for parentUserId in students table
+        onCreate: _onCreate,
+        onUpgrade: _onUpgrade,
+      );
+    } catch (e, s) {
+      developer.log(
+        'DatabaseHelper: Error initializing database',
+        name: 'DatabaseHelper',
+        level: 1000, // SEVERE
+        error: e,
+        stackTrace: s,
+      );
+      // Re-throw to ensure the app crashes loudly if the DB can't be opened
+      rethrow; 
+    }
   }
 
   Future<void> _onCreate(Database db, int version) async {
-    await db.execute('''
+    developer.log('DatabaseHelper: _onCreate called, creating tables...', name: 'DatabaseHelper');
+    try {
+      await db.execute('''
       CREATE TABLE users(
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         username TEXT NOT NULL UNIQUE,
@@ -47,7 +63,7 @@ class DatabaseHelper {
         role TEXT NOT NULL
       )
     ''');
-    await db.execute('''
+      await db.execute('''
       CREATE TABLE students(
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         name TEXT NOT NULL,
@@ -66,7 +82,7 @@ class DatabaseHelper {
         parentUserId INTEGER -- New field to link to the parent's User ID
       )
     ''');
-    await db.execute('''
+      await db.execute('''
       CREATE TABLE teachers(
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         name TEXT NOT NULL,
@@ -78,7 +94,7 @@ class DatabaseHelper {
         responsibleClassId INTEGER
       )
     ''');
-    await db.execute('''
+      await db.execute('''
       CREATE TABLE classes(
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         name TEXT NOT NULL,
@@ -89,7 +105,7 @@ class DatabaseHelper {
         subjectIds TEXT -- Stored as comma-separated string or JSON string
       )
     ''');
-    await db.execute('''
+      await db.execute('''
       CREATE TABLE subjects(
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         name TEXT NOT NULL UNIQUE,
@@ -98,7 +114,7 @@ class DatabaseHelper {
         teacherId INTEGER
       )
     ''');
-    await db.execute('''
+      await db.execute('''
       CREATE TABLE grades(
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         studentId INTEGER NOT NULL,
@@ -112,7 +128,7 @@ class DatabaseHelper {
         FOREIGN KEY (classId) REFERENCES classes (id) ON DELETE CASCADE
       )
     ''');
-    await db.execute('''
+      await db.execute('''
       CREATE TABLE attendance(
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         studentId INTEGER NOT NULL,
@@ -128,7 +144,7 @@ class DatabaseHelper {
         FOREIGN KEY (teacherId) REFERENCES teachers (id) ON DELETE CASCADE
       )
     ''');
-    await db.execute('''
+      await db.execute('''
       CREATE TABLE timetable(
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         classId INTEGER NOT NULL,
@@ -144,23 +160,48 @@ class DatabaseHelper {
       )
     ''');
 
-    // Insert an initial admin user if the table is empty
-    await _insertInitialAdmin(db);
+      // Insert an initial admin user if the table is empty
+      await _insertInitialAdmin(db);
+      developer.log('DatabaseHelper: All tables created and initial admin inserted.', name: 'DatabaseHelper');
+    } catch (e, s) {
+      developer.log(
+        'DatabaseHelper: Error during _onCreate table creation',
+        name: 'DatabaseHelper',
+        level: 1000, // SEVERE
+        error: e,
+        stackTrace: s,
+      );
+      rethrow;
+    }
   }
 
   Future<void> _onUpgrade(Database db, int oldVersion, int newVersion) async {
-    // For development, dropping and recreating tables is acceptable.
-    // For production, consider more robust migration strategies.
-    if (oldVersion < newVersion) {
-      await db.execute('DROP TABLE IF EXISTS users'); 
-      await db.execute('DROP TABLE IF EXISTS students');
-      await db.execute('DROP TABLE IF EXISTS teachers');
-      await db.execute('DROP TABLE IF EXISTS classes');
-      await db.execute('DROP TABLE IF EXISTS subjects');
-      await db.execute('DROP TABLE IF EXISTS grades');
-      await db.execute('DROP TABLE IF EXISTS attendance');
-      await db.execute('DROP TABLE IF EXISTS timetable');
-      await _onCreate(db, newVersion);
+    developer.log('DatabaseHelper: _onUpgrade called from version $oldVersion to $newVersion', name: 'DatabaseHelper');
+    try {
+      // For development, dropping and recreating tables is acceptable.
+      // For production, consider more robust migration strategies.
+      if (oldVersion < newVersion) {
+        developer.log('DatabaseHelper: Dropping existing tables for upgrade...', name: 'DatabaseHelper');
+        await db.execute('DROP TABLE IF EXISTS users'); 
+        await db.execute('DROP TABLE IF EXISTS students');
+        await db.execute('DROP TABLE IF EXISTS teachers');
+        await db.execute('DROP TABLE IF EXISTS classes');
+        await db.execute('DROP TABLE IF EXISTS subjects');
+        await db.execute('DROP TABLE IF EXISTS grades');
+        await db.execute('DROP TABLE IF EXISTS attendance');
+        await db.execute('DROP TABLE IF EXISTS timetable');
+        await _onCreate(db, newVersion);
+        developer.log('DatabaseHelper: Tables dropped and recreated.', name: 'DatabaseHelper');
+      }
+    } catch (e, s) {
+      developer.log(
+        'DatabaseHelper: Error during _onUpgrade table migration',
+        name: 'DatabaseHelper',
+        level: 1000, // SEVERE
+        error: e,
+        stackTrace: s,
+      );
+      rethrow;
     }
   }
 
@@ -173,14 +214,19 @@ class DatabaseHelper {
 
   // Insert initial admin user if no users exist
   Future<void> _insertInitialAdmin(Database db) async {
+    developer.log('DatabaseHelper: Checking for initial admin user...', name: 'DatabaseHelper');
     final count = Sqflite.firstIntValue(await db.rawQuery("SELECT COUNT(*) FROM users"));
     if (count == 0) {
+      developer.log('DatabaseHelper: No users found, inserting default admin.', name: 'DatabaseHelper');
       final adminUser = User(
         username: 'admin',
         passwordHash: _hashPassword('admin123'), // Default admin password
         role: 'admin',
       );
       await db.insert('users', adminUser.toMap());
+      developer.log('DatabaseHelper: Default admin user inserted.', name: 'DatabaseHelper');
+    } else {
+      developer.log('DatabaseHelper: Admin user already exists.', name: 'DatabaseHelper');
     }
   }
 
