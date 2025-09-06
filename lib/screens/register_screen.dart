@@ -38,6 +38,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
         _selectedRole,
       );
 
+      if (!mounted) return; // Add this line
+
       if (success) {
         Navigator.pop(context); // Go back to login screen
         ScaffoldMessenger.of(context).showSnackBar(

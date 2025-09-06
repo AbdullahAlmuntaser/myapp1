@@ -32,7 +32,7 @@ class DatabaseHelper {
     final path = join(dbPath.path, 'school_management.db');
     return await openDatabase(
       path,
-      version: 13, // Increased version for users table and password hashing
+      version: 14, // Increased version for parentUserId in students table
       onCreate: _onCreate,
       onUpgrade: _onUpgrade,
     );
@@ -62,7 +62,8 @@ class DatabaseHelper {
         parentName TEXT,
         parentPhone TEXT,
         address TEXT,
-        status INTEGER NOT NULL DEFAULT 1
+        status INTEGER NOT NULL DEFAULT 1,
+        parentUserId INTEGER -- New field to link to the parent's User ID
       )
     ''');
     await db.execute('''
@@ -151,20 +152,7 @@ class DatabaseHelper {
     // For development, dropping and recreating tables is acceptable.
     // For production, consider more robust migration strategies.
     if (oldVersion < newVersion) {
-      await db.execute('DROP TABLE IF EXISTS users'); // Drop users table on upgrade
-      await db.execute('DROP TABLE IF EXISTS students');
-      await db.execute('DROP TABLE IF EXISTS teachers');
-      await db.execute('DROP TABLE IF EXISTS classes');
-      await db.execute('DROP TABLE IF EXISTS subjects');
-      await db.execute('DROP TABLE IF EXISTS grades');
-      await db.execute('DROP TABLE IF EXISTS attendance');
-      await db.execute('DROP TABLE IF EXISTS timetable');
-      await _onCreate(db, newVersion);
-    } else if (newVersion > oldVersion) {
-      // This handles cases where oldVersion is greater than newVersion
-      // which might happen during development if the version is manually decremented.
-      // In such cases, we might want to simply recreate the tables or handle specific migrations.
-      await db.execute('DROP TABLE IF EXISTS users');
+      await db.execute('DROP TABLE IF EXISTS users'); 
       await db.execute('DROP TABLE IF EXISTS students');
       await db.execute('DROP TABLE IF EXISTS teachers');
       await db.execute('DROP TABLE IF EXISTS classes');
@@ -221,6 +209,21 @@ class DatabaseHelper {
     }
   }
 
+  // New method to get a user by ID
+  Future<User?> getUserById(int id) async {
+    final db = await database;
+    final List<Map<String, dynamic>> maps = await db.query(
+      'users',
+      where: 'id = ?',
+      whereArgs: [id],
+    );
+    if (maps.isNotEmpty) {
+      return User.fromMap(maps.first);
+    } else {
+      return null;
+    }
+  }
+
   Future<int> updateUser(User user) async {
     final db = await database;
     return await db.update(
@@ -250,6 +253,18 @@ class DatabaseHelper {
   Future<List<Student>> getStudents() async {
     final db = await database;
     final List<Map<String, dynamic>> maps = await db.query('students');
+    return List.generate(maps.length, (i) {
+      return Student.fromMap(maps[i]);
+    });
+  }
+
+  Future<List<Student>> getStudentsByParentUserId(int parentUserId) async {
+    final db = await database;
+    final List<Map<String, dynamic>> maps = await db.query(
+      'students',
+      where: 'parentUserId = ?',
+      whereArgs: [parentUserId],
+    );
     return List.generate(maps.length, (i) {
       return Student.fromMap(maps[i]);
     });
@@ -395,6 +410,34 @@ class DatabaseHelper {
     });
   }
 
+  Future<SchoolClass?> getClassById(int id) async {
+    final db = await database;
+    final List<Map<String, dynamic>> maps = await db.query(
+      'classes',
+      where: 'id = ?',
+      whereArgs: [id],
+    );
+    if (maps.isNotEmpty) {
+      return SchoolClass.fromMap(maps.first);
+    } else {
+      return null;
+    }
+  }
+
+  Future<SchoolClass?> getClassByClassIdString(String classId) async {
+    final db = await database;
+    final List<Map<String, dynamic>> maps = await db.query(
+      'classes',
+      where: 'classId = ?',
+      whereArgs: [classId],
+    );
+    if (maps.isNotEmpty) {
+      return SchoolClass.fromMap(maps.first);
+    } else {
+      return null;
+    }
+  }
+
   Future<int> updateClass(SchoolClass schoolClass) async {
     final db = await database;
     return await db.update(
@@ -439,6 +482,20 @@ class DatabaseHelper {
     return List.generate(maps.length, (i) {
       return Subject.fromMap(maps[i]);
     });
+  }
+
+  Future<Subject?> getSubjectById(int id) async {
+    final db = await database;
+    final List<Map<String, dynamic>> maps = await db.query(
+      'subjects',
+      where: 'id = ?',
+      whereArgs: [id],
+    );
+    if (maps.isNotEmpty) {
+      return Subject.fromMap(maps.first);
+    } else {
+      return null;
+    }
   }
 
   Future<int> updateSubject(Subject subject) async {
@@ -750,7 +807,7 @@ class DatabaseHelper {
 
   Future<void> clearAllData() async {
     final db = await database;
-    await db.delete('users'); // Clear users table
+    await db.delete('users'); 
     await db.delete('students');
     await db.delete('teachers');
     await db.delete('classes');

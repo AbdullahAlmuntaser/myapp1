@@ -61,4 +61,9 @@ class SubjectProvider with ChangeNotifier {
     await _dbHelper.deleteSubject(id);
     await fetchSubjects();
   }
+
+  // New method to get a subject by ID
+  Future<Subject?> getSubjectById(int id) async {
+    return await _dbHelper.getSubjectById(id);
+  }
 }

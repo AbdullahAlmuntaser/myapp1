@@ -3,8 +3,10 @@ import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import '../../providers/student_provider.dart';
 import '../../student_model.dart';
-import '../../providers/class_provider.dart'; // Added import for ClassProvider
-import '../../class_model.dart'; // Added import for SchoolClass
+import '../../providers/class_provider.dart';
+import '../../class_model.dart';
+import '../../database_helper.dart'; // Import DatabaseHelper
+import '../../user_model.dart'; // Import User model
 
 class AddEditStudentScreen extends StatefulWidget {
   final Student? student;
@@ -29,8 +31,10 @@ class AddEditStudentScreenState extends State<AddEditStudentScreen> {
   late TextEditingController _parentPhoneController;
   late TextEditingController _addressController;
 
-  String? _selectedClassId; // For DropdownButton
-  bool _status = true; // Default student status to active
+  String? _selectedClassId;
+  bool _status = true;
+  List<User> _parents = []; // List to hold parent users
+  int? _selectedParentUserId; // To store the selected parent's user ID
 
   @override
   void initState() {
@@ -43,7 +47,6 @@ class AddEditStudentScreenState extends State<AddEditStudentScreen> {
     _passwordController = TextEditingController(
       text: widget.student?.password ?? '',
     );
-    // New controllers initialization
     _academicNumberController = TextEditingController(
       text: widget.student?.academicNumber ?? '',
     );
@@ -60,13 +63,37 @@ class AddEditStudentScreenState extends State<AddEditStudentScreen> {
       text: widget.student?.address ?? '',
     );
 
-    _selectedClassId = widget.student?.classId; // Initialize selected class ID
-    _status = widget.student?.status ?? true; // Initialize status
+    _selectedClassId = widget.student?.classId;
+    _status = widget.student?.status ?? true;
+    _selectedParentUserId = widget.student?.parentUserId; // Initialize selected parent
 
-    // Fetch classes when the screen initializes
     WidgetsBinding.instance.addPostFrameCallback((_) {
       Provider.of<ClassProvider>(context, listen: false).fetchClasses();
+      _fetchParents(); // Fetch parents when the screen initializes
     });
+  }
+
+  Future<void> _fetchParents() async {
+    final dbHelper = DatabaseHelper();
+    // Assuming you have a method to get users by role in DatabaseHelper
+    // For now, let's fetch all users and filter by role 'parent'
+    final allUsers = await dbHelper.database.then((db) async {
+      final List<Map<String, dynamic>> maps = await db.query('users');
+      return List.generate(maps.length, (i) {
+        return User.fromMap(maps[i]);
+      });
+    });
+
+    if (mounted) {
+      setState(() {
+        _parents = allUsers.where((user) => user.role == 'parent').toList();
+        // If no parent is selected for an existing student, and there are parents, try to default.
+        if (widget.student?.parentUserId == null && _parents.isNotEmpty && _selectedParentUserId == null) {
+          // Optionally default to the first parent or keep null
+          // _selectedParentUserId = _parents.first.id;
+        }
+      });
+    }
   }
 
   @override
@@ -124,7 +151,7 @@ class AddEditStudentScreenState extends State<AddEditStudentScreen> {
         password: _passwordController.text.isNotEmpty
             ? _passwordController.text
             : null,
-        classId: _selectedClassId, // Use selected class ID
+        classId: _selectedClassId,
         academicNumber: _academicNumberController.text.isNotEmpty
             ? _academicNumberController.text
             : null,
@@ -141,6 +168,7 @@ class AddEditStudentScreenState extends State<AddEditStudentScreen> {
             ? _addressController.text
             : null,
         status: _status,
+        parentUserId: _selectedParentUserId, // Save the selected parent's user ID
       );
 
       final provider = Provider.of<StudentProvider>(context, listen: false);
@@ -265,15 +293,14 @@ class AddEditStudentScreenState extends State<AddEditStudentScreen> {
                   },
                 ),
                 const SizedBox(height: 16),
+                // Consider removing password field for student if authentication is separate
                 TextFormField(
                   controller: _passwordController,
                   decoration: const InputDecoration(
-                    labelText: 'كلمة المرور',
+                    labelText: 'كلمة المرور (يمكن تركها فارغة لتغيير لاحقًا)',
                     border: OutlineInputBorder(),
                   ),
                   obscureText: true,
-                  validator: (value) =>
-                      value!.isEmpty ? 'الرجاء إدخال كلمة المرور' : null,
                 ),
                 const SizedBox(height: 16),
                 // Dropdown for Class ID
@@ -312,21 +339,44 @@ class AddEditStudentScreenState extends State<AddEditStudentScreen> {
                   ),
                 ),
                 const SizedBox(height: 16),
+                // Dropdown for Parent User
+                DropdownButtonFormField<int>(
+                  decoration: const InputDecoration(
+                    labelText: 'ربط بولي أمر (اختياري)',
+                    border: OutlineInputBorder(),
+                  ),
+                  value: _selectedParentUserId,
+                  hint: const Text('اختر ولي أمر'),
+                  items: _parents.map((User parentUser) {
+                    return DropdownMenuItem<int>(
+                      value: parentUser.id,
+                      child: Text('${parentUser.username} (${parentUser.role})'), // Fixed interpolation
+                    );
+                  }).toList(),
+                  onChanged: (int? newValue) {
+                    setState(() {
+                      _selectedParentUserId = newValue;
+                    });
+                  },
+                ),
+                const SizedBox(height: 16),
                 TextFormField(
                   controller: _parentNameController,
                   decoration: const InputDecoration(
-                    labelText: 'اسم ولي الأمر (اختياري)',
+                    labelText: 'اسم ولي الأمر (يملأ تلقائياً عند اختيار ولي أمر)',
                     border: OutlineInputBorder(),
                   ),
+                  readOnly: true, // Make it read-only as it will be filled by selected parent
                 ),
                 const SizedBox(height: 16),
                 TextFormField(
                   controller: _parentPhoneController,
                   decoration: const InputDecoration(
-                    labelText: 'هاتف ولي الأمر (اختياري)',
+                    labelText: 'هاتف ولي الأمر (يملأ تلقائياً عند اختيار ولي أمر)',
                     border: OutlineInputBorder(),
                   ),
                   keyboardType: TextInputType.phone,
+                  readOnly: true, // Make it read-only
                 ),
                 const SizedBox(height: 16),
                 TextFormField(

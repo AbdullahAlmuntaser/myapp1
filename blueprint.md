@@ -40,6 +40,25 @@
 ### 5. الاختبارات
 *   ملفات اختبارات موجودة لمزودي (providers) وشاشات معينة، مما يدل على بداية جيدة لجودة الكود.
 
+## التغييرات الحالية (Current Changes)
+
+تم معالجة المشكلات التالية لتحسين استقرار الكود وتقليل الأخطاء:
+
+*   **`lib/screens/student_detail_for_parent_screen.dart`**:
+    *   تم إصلاح مشكلة تكرار `trailing` widget في `ListView.builder` لقسم الحضور.
+    *   تم تصحيح أخطاء في تهيئة `Text` widgets وسلسلة من الأخطاء النحوية الناتجة عن أخطاء النسخ واللصق في قسم الجدول الزمني.
+    *   تم إزالة استيراد غير مستخدم لـ `teacher_provider.dart`.
+    *   تم إضافة وتنفيذ طرق `getClassByClassIdString` في `ClassProvider` و`getSubjectById` في `SubjectProvider` و`DatabaseHelper` لدعم جلب البيانات اللازمة بشكل صحيح.
+*   **`lib/screens/dashboard_screen.dart`**:
+    *   تم إزالة الاستيرادات غير المستخدمة لـ `student_provider.dart`، `teacher_provider.dart`، `class_provider.dart`، و `subject_provider.dart`.
+    *   تم إزالة الكلمة المفتاحية `await` من استدعاء `authService.signOut()` حيث أن الوظيفة ترجع `void`، مما أدى إلى حل خطأ `await_only_futures`.
+*   **`lib/screens/add_edit_student_screen.dart`**:
+    *   تم تصحيح مشكلات `prefer_interpolation_to_compose_strings` باستخدام الاستيفاء الصحيح للسلاسل.
+*   **`lib/screens/register_screen.dart`**:
+    *   تم حل تحذيرات `use_build_context_synchronously` عن طريق إضافة فحص `if (!mounted) return;` قبل استخدام `BuildContext` بعد عمليات `await` غير متزامنة.
+
+هذه الإصلاحات تضمن أن التطبيق أصبح أكثر استقرارًا وخالياً من الأخطاء التي تم تحليلها مؤخرًا.
+
 ## خطة التحسينات والتطوير
 
 تهدف هذه الخطة إلى تحسين تجربة المستخدم وتوسيع وظائف نظام إدارة المدرسة ليصبح حلاً شاملاً.

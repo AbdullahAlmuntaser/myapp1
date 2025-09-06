@@ -5,14 +5,15 @@ class Student {
   final String phone;
   final String grade;
   final String? email;
-  final String? password;
+  final String? password; // Consider removing if authentication is only through User model
   final String? classId;
   final String? academicNumber;
   final String? section;
-  final String? parentName;
-  final String? parentPhone;
+  final String? parentName; // Can be derived or kept for display purposes
+  final String? parentPhone; // Can be derived or kept for display purposes
   final String? address;
   final bool status; // true for active, false for inactive
+  final int? parentUserId; // New field to link to the parent's User ID
 
   Student({
     this.id,
@@ -28,7 +29,8 @@ class Student {
     this.parentName,
     this.parentPhone,
     this.address,
-    this.status = true, // Default to active
+    this.status = true,
+    this.parentUserId, // Add to constructor
   });
 
   Map<String, dynamic> toMap() {
@@ -46,7 +48,8 @@ class Student {
       'parentName': parentName,
       'parentPhone': parentPhone,
       'address': address,
-      'status': status ? 1 : 0, // SQLite stores bool as int
+      'status': status ? 1 : 0,
+      'parentUserId': parentUserId, // Add to toMap
     };
   }
 
@@ -66,12 +69,13 @@ class Student {
       parentPhone: map['parentPhone'] as String?,
       address: map['address'] as String?,
       status: (map['status'] as int?) == 1 ? true : false,
+      parentUserId: map['parentUserId'] as int?, // Add to fromMap
     );
   }
 
   @override
   String toString() {
-    return 'Student{id: $id, name: $name, dob: $dob, phone: $phone, grade: $grade, email: $email, password: $password, classId: $classId, academicNumber: $academicNumber, section: $section, parentName: $parentName, parentPhone: $parentPhone, address: $address, status: $status}';
+    return 'Student{id: $id, name: $name, dob: $dob, phone: $phone, grade: $grade, email: $email, password: $password, classId: $classId, academicNumber: $academicNumber, section: $section, parentName: $parentName, parentPhone: $parentPhone, address: $address, status: $status, parentUserId: $parentUserId}';
   }
 
   Student copyWith({
@@ -89,6 +93,7 @@ class Student {
     String? parentPhone,
     String? address,
     bool? status,
+    int? parentUserId, // Add to copyWith
   }) {
     return Student(
       id: id ?? this.id,
@@ -105,6 +110,7 @@ class Student {
       parentPhone: parentPhone ?? this.parentPhone,
       address: address ?? this.address,
       status: status ?? this.status,
+      parentUserId: parentUserId ?? this.parentUserId, // Assign new field
     );
   }
 }

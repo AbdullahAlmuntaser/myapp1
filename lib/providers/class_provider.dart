@@ -39,4 +39,9 @@ class ClassProvider with ChangeNotifier {
     await _dbHelper.deleteClass(id);
     await fetchClasses();
   }
+
+  Future<SchoolClass?> getClassByClassIdString(String classId) async {
+    // Assuming DatabaseHelper has a method to get a class by its string classId
+    return await _dbHelper.getClassByClassIdString(classId);
+  }
 }
