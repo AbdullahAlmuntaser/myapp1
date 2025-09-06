@@ -2,6 +2,8 @@ import 'dart:async';
 import 'package:path/path.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:crypto/crypto.dart'; // Import for password hashing
+import 'dart:convert'; // For utf8 encoding
 
 import 'student_model.dart';
 import 'teacher_model.dart';
@@ -10,6 +12,7 @@ import 'subject_model.dart';
 import 'grade_model.dart';
 import 'attendance_model.dart';
 import 'timetable_model.dart';
+import 'user_model.dart'; // Import the new User model
 
 class DatabaseHelper {
   static final DatabaseHelper _instance = DatabaseHelper._internal();
@@ -29,13 +32,21 @@ class DatabaseHelper {
     final path = join(dbPath.path, 'school_management.db');
     return await openDatabase(
       path,
-      version: 12, // Increased version for timetable table
+      version: 13, // Increased version for users table and password hashing
       onCreate: _onCreate,
       onUpgrade: _onUpgrade,
     );
   }
 
   Future<void> _onCreate(Database db, int version) async {
+    await db.execute('''
+      CREATE TABLE users(
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        username TEXT NOT NULL UNIQUE,
+        passwordHash TEXT NOT NULL,
+        role TEXT NOT NULL
+      )
+    ''');
     await db.execute('''
       CREATE TABLE students(
         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -131,12 +142,29 @@ class DatabaseHelper {
         FOREIGN KEY (teacherId) REFERENCES teachers (id) ON DELETE CASCADE
       )
     ''');
+
+    // Insert an initial admin user if the table is empty
+    await _insertInitialAdmin(db);
   }
 
   Future<void> _onUpgrade(Database db, int oldVersion, int newVersion) async {
     // For development, dropping and recreating tables is acceptable.
     // For production, consider more robust migration strategies.
     if (oldVersion < newVersion) {
+      await db.execute('DROP TABLE IF EXISTS users'); // Drop users table on upgrade
+      await db.execute('DROP TABLE IF EXISTS students');
+      await db.execute('DROP TABLE IF EXISTS teachers');
+      await db.execute('DROP TABLE IF EXISTS classes');
+      await db.execute('DROP TABLE IF EXISTS subjects');
+      await db.execute('DROP TABLE IF EXISTS grades');
+      await db.execute('DROP TABLE IF EXISTS attendance');
+      await db.execute('DROP TABLE IF EXISTS timetable');
+      await _onCreate(db, newVersion);
+    } else if (newVersion > oldVersion) {
+      // This handles cases where oldVersion is greater than newVersion
+      // which might happen during development if the version is manually decremented.
+      // In such cases, we might want to simply recreate the tables or handle specific migrations.
+      await db.execute('DROP TABLE IF EXISTS users');
       await db.execute('DROP TABLE IF EXISTS students');
       await db.execute('DROP TABLE IF EXISTS teachers');
       await db.execute('DROP TABLE IF EXISTS classes');
@@ -146,6 +174,66 @@ class DatabaseHelper {
       await db.execute('DROP TABLE IF EXISTS timetable');
       await _onCreate(db, newVersion);
     }
+  }
+
+  // Helper to hash passwords
+  String _hashPassword(String password) {
+    final bytes = utf8.encode(password);
+    final digest = sha256.convert(bytes);
+    return digest.toString();
+  }
+
+  // Insert initial admin user if no users exist
+  Future<void> _insertInitialAdmin(Database db) async {
+    final count = Sqflite.firstIntValue(await db.rawQuery("SELECT COUNT(*) FROM users"));
+    if (count == 0) {
+      final adminUser = User(
+        username: 'admin',
+        passwordHash: _hashPassword('admin123'), // Default admin password
+        role: 'admin',
+      );
+      await db.insert('users', adminUser.toMap());
+    }
+  }
+
+  // --- User Methods ---
+
+  Future<int> createUser(User user) async {
+    final db = await database;
+    return await db.insert(
+      'users',
+      user.toMap(),
+      conflictAlgorithm: ConflictAlgorithm.replace,
+    );
+  }
+
+  Future<User?> getUserByUsername(String username) async {
+    final db = await database;
+    final List<Map<String, dynamic>> maps = await db.query(
+      'users',
+      where: 'username = ?',
+      whereArgs: [username],
+    );
+    if (maps.isNotEmpty) {
+      return User.fromMap(maps.first);
+    } else {
+      return null;
+    }
+  }
+
+  Future<int> updateUser(User user) async {
+    final db = await database;
+    return await db.update(
+      'users',
+      user.toMap(),
+      where: 'id = ?',
+      whereArgs: [user.id],
+    );
+  }
+
+  Future<int> deleteUser(int id) async {
+    final db = await database;
+    return await db.delete('users', where: 'id = ?', whereArgs: [id]);
   }
 
   // --- Student Methods ---
@@ -662,6 +750,7 @@ class DatabaseHelper {
 
   Future<void> clearAllData() async {
     final db = await database;
+    await db.delete('users'); // Clear users table
     await db.delete('students');
     await db.delete('teachers');
     await db.delete('classes');

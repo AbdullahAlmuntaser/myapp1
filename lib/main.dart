@@ -14,17 +14,13 @@ import 'providers/timetable_provider.dart';
 import 'database_helper.dart'; // Import DatabaseHelper
 import 'screens/grades_screen.dart'; // Import GradesScreen
 import 'screens/attendance_screen.dart'; // Import AttendanceScreen
-
-// Define an interface for initializable providers
-abstract class InitializableProvider {
-  Future<void> initialize();
-}
+import 'services/local_auth_service.dart'; // Import LocalAuthService
+import 'screens/login_screen.dart'; // Import LoginScreen
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  // Ensure the database is initialized once and globally accessible
-  // No need to await here, it will be awaited by providers when they access `database`
-  DatabaseHelper(); 
+  // Initialize DatabaseHelper explicitly before runApp to ensure it's ready
+  await DatabaseHelper().database; 
   runApp(const MyApp());
 }
 
@@ -36,6 +32,7 @@ class MyApp extends StatelessWidget {
     return MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (_) => ThemeProvider()),
+        ChangeNotifierProvider(create: (_) => LocalAuthService()), // Add LocalAuthService
         ChangeNotifierProvider(create: (_) => StudentProvider()),
         ChangeNotifierProvider(create: (_) => TeacherProvider()),
         ChangeNotifierProvider(create: (_) => ClassProvider()),
@@ -53,9 +50,10 @@ class MyApp extends StatelessWidget {
             themeMode: themeProvider.themeMode,
             home: const AppInitializer(), // Use AppInitializer as the home screen
             routes: {
-              // Moved route definitions here.
               GradesScreen.routeName: (context) => const GradesScreen(),
               AttendanceScreen.routeName: (context) => const AttendanceScreen(),
+              // Add routes for authentication screens if needed for direct navigation
+              '/login': (context) => const LoginScreen(),
             },
             debugShowCheckedModeBanner: false,
             localizationsDelegates: const [
@@ -93,26 +91,30 @@ class _AppInitializerState extends State<AppInitializer> {
 
   Future<void> _initializeProviders() async {
     // Access providers after the widget tree is built and providers are available
-    final studentProvider = Provider.of<StudentProvider>(context, listen: false);
-    final teacherProvider = Provider.of<TeacherProvider>(context, listen: false);
-    final classProvider = Provider.of<ClassProvider>(context, listen: false);
-    final subjectProvider = Provider.of<SubjectProvider>(context, listen: false);
-    final gradeProvider = Provider.of<GradeProvider>(context, listen: false);
-    final attendanceProvider = Provider.of<AttendanceProvider>(context, listen: false);
-    final timetableProvider = Provider.of<TimetableProvider>(context, listen: false);
+    final authService = Provider.of<LocalAuthService>(context, listen: false);
 
-    // Call fetch methods on each provider that needs to fetch initial data
-    await Future.wait([
-      studentProvider.fetchStudents(),
-      teacherProvider.fetchTeachers(),
-      classProvider.fetchClasses(),
-      subjectProvider.fetchSubjects(),
-      gradeProvider.initialize(), 
-      attendanceProvider.initialize(), 
-      timetableProvider.fetchTimetableEntries(),
-    ]);
+    // Only fetch data if a user is authenticated. Otherwise, we'll show the login screen.
+    if (authService.isAuthenticated) {
+      final studentProvider = Provider.of<StudentProvider>(context, listen: false);
+      final teacherProvider = Provider.of<TeacherProvider>(context, listen: false);
+      final classProvider = Provider.of<ClassProvider>(context, listen: false);
+      final subjectProvider = Provider.of<SubjectProvider>(context, listen: false);
+      final gradeProvider = Provider.of<GradeProvider>(context, listen: false);
+      final attendanceProvider = Provider.of<AttendanceProvider>(context, listen: false);
+      final timetableProvider = Provider.of<TimetableProvider>(context, listen: false);
 
-    // After all initial data is fetched, set initialized state
+      await Future.wait([
+        studentProvider.fetchStudents(),
+        teacherProvider.fetchTeachers(),
+        classProvider.fetchClasses(),
+        subjectProvider.fetchSubjects(),
+        gradeProvider.fetchGrades(),
+        attendanceProvider.fetchAttendances(),
+        timetableProvider.fetchTimetableEntries(),
+      ]);
+    }
+
+    // After all initial data is fetched (or if no user is authenticated), set initialized state
     if (mounted) {
       setState(() {
         _isInitialized = true;
@@ -129,7 +131,33 @@ class _AppInitializerState extends State<AppInitializer> {
         ),
       );
     }
-    return const DashboardScreen();
+    // Based on authentication status, show either LoginScreen or the appropriate home screen
+    return Consumer<LocalAuthService>(
+      builder: (context, authService, child) {
+        if (authService.isAuthenticated) {
+          // This is where we will introduce role-based navigation
+          return _getHomeScreenForRole(authService.currentUser!.role);
+        } else {
+          return const LoginScreen();
+        }
+      },
+    );
+  }
+
+  // New method to return the appropriate home screen based on the user's role
+  Widget _getHomeScreenForRole(String role) {
+    switch (role) {
+      case 'admin':
+        return const DashboardScreen(); // Admin sees the full dashboard
+      case 'teacher':
+        return const DashboardScreen(); // Teachers might see a modified dashboard or a specific teacher screen
+      case 'student':
+        return const DashboardScreen(); // Students might see a specific student screen
+      // case 'parent': // We will add parent role later
+      //   return const ParentDashboardScreen();
+      default:
+        return const LoginScreen(); // Fallback to login if role is unknown
+    }
   }
 }
 

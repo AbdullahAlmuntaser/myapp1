@@ -1,83 +1,110 @@
-# Blueprint: School Management App
+# مخطط التطبيق (Blueprint)
 
-## Overview
+## نظرة عامة على المشروع
+هذا المشروع عبارة عن نظام لإدارة الطلاب يهدف إلى تبسيط العمليات المدرسية الأساسية المتعلقة بالطلاب والمعلمين والمواد الدراسية والصفوف والجداول والدرجات والحضور. يستخدم التطبيق إطار عمل Flutter لإتاحة الوصول على منصات متعددة، ويعتمد على مزودي (Providers) لإدارة الحالة ونماذج (Models) واضحة لتمثيل البيانات.
 
-This document outlines the plan and progress for creating a comprehensive School Management application using Flutter. The application will provide a user-friendly interface for managing students, teachers, classes, and subjects. The UI will be responsive, adapting to both mobile and desktop layouts.
+## الميزات الحالية
 
-## Implemented Style, Design, and Features
+بناءً على تحليل ملفات المشروع، يتضمن التطبيق الميزات الأساسية التالية:
 
-### Core Architecture
-- **State Management:** Using the `provider` package for managing application state.
-- **Database:** Local SQLite database managed via the `sqflite` package.
-- **Navigation:** Tab-based navigation for the main sections of the app.
-- **Theming:** A consistent theme with support for light and dark modes, managed by `ThemeProvider`.
+### 1. إدارة الكيانات الأساسية
+*   **الطلاب (`Student`):** إضافة، تعديل، عرض الطلاب.
+*   **المعلمون (`Teacher`):** إضافة، تعديل، عرض المعلمين.
+*   **الصفوف (`Class`):** إضافة، تعديل، عرض الصفوف الدراسية.
+*   **المواد الدراسية (`Subject`):** إضافة، تعديل، عرض المواد.
+*   **الجداول الدراسية (`Timetable`):** إضافة، تعديل، عرض الجداول.
+*   **الدرجات (`Grade`):** إضافة، تعديل، عرض درجات الطلاب (بما في ذلك شاشة إدخال الدرجات بالجملة ونظرة عامة).
+*   **الحضور (`Attendance`):** تتبع وعرض حضور وغياب الطلاب.
 
-### Implemented Features
-- **Dashboard:** A central dashboard that hosts tabs for Students, Teachers, Classes, Subjects, Grades, Settings, and Reports.
-- **Student Management:**
-    - View a list of all students.
-    - Add new students with details like name, class, parent info, etc.
-    - Edit existing student information.
-    - Delete students from the system.
-    - Search and filter students.
-- **Teacher Management:**
-    - View a list of all teachers.
-    - Add new teachers.
-    - Edit existing teacher information.
-    - Delete teachers.
-    - Search and filter teachers.
-- **Subject Management:**
-    - View a list of all subjects.
-    - Add new subjects.
-    - Edit existing subjects.
-    - Delete subjects.
-    - Search and filter subjects.
-- **Class Management:**
-    - View a list of all classes.
-    - Add new classes.
-    - Edit existing class details.
-    - Delete classes.
-    - Search and filter classes.
-- **Attendance Management:**
-    - Record and view student attendance by date, class, subject, teacher, and lesson number.
-    - Set attendance status (present, absent, late, excused).
-- **Grade Management:**
-    - View and manage grades for students. (Implemented as `GradesScreen` in `DashboardScreen`).
+### 2. إدارة الحالة
+*   يتم استخدام حزمة `provider` لإدارة الحالة عبر التطبيق لمختلف الكيانات (الطلاب، المعلمون، الصفوف، إلخ).
+*   يتضمن `ThemeProvider` لإدارة سمات التطبيق (الوضع الفاتح والداكن).
 
-## Current Plans and Next Steps
+### 3. واجهة المستخدم والشاشات
+*   **لوحة القيادة (`DashboardScreen`):** نقطة دخول مركزية.
+*   **شاشات الإضافة والتعديل:** شاشات مخصصة لإضافة وتعديل بيانات كل من الصفوف، الدرجات (كحوار)، الطلاب، المواد، المعلمين، والجداول.
+*   **شاشات العرض:** شاشات لعرض الحضور، الدرجات، والجداول الدراسية.
+*   **الجدوال (Tabs) الرئيسية:**
+    *   `StudentsTab`: إدارة الطلاب.
+    *   `TeachersTab`: إدارة المعلمين.
+    *   `ClassesTab`: إدارة الصفوف.
+    *   `SubjectsTab`: إدارة المواد الدراسية.
+    *   `GradesBulkEntryTab`: إدخال الدرجات بكميات كبيرة.
+    *   `GradesOverviewTab`: نظرة عامة على الدرجات.
+    *   `ReportsTab`: قسم للتقارير (يحتاج إلى توسيع).
+    *   `SettingsTab`: إعدادات التطبيق (مثل معلومات "حول التطبيق").
 
-This section details the next set of improvements and new features to be implemented.
+### 4. قاعدة البيانات
+*   يوجد `DatabaseHelper` مما يشير إلى استخدام قاعدة بيانات محلية (ربما SQLite) لإدارة البيانات.
 
-### 1. Codebase Refinements
+### 5. الاختبارات
+*   ملفات اختبارات موجودة لمزودي (providers) وشاشات معينة، مما يدل على بداية جيدة لجودة الكود.
 
-This section addresses recent code quality improvements and bug fixes.
+## خطة التحسينات والتطوير
 
-- **Removed Unused Imports:** Eliminated unnecessary `dart:developer` imports from `lib/screens/tabs/classes_tab.dart`, `lib/screens/tabs/students_tab.dart`, and `lib/screens/tabs/teachers_tab.dart`.
-- **Improved Asynchronous Context Handling:** Added `mounted` checks before using `BuildContext` across asynchronous operations in `lib/screens/tabs/classes_tab.dart`, `lib/screens/tabs/students_tab.dart`, and `lib/screens/tabs/teachers_tab.dart` to prevent `use_build_context_synchronously` warnings.
-- **Widget Property Ordering:** Corrected the order of `child` arguments in `PopupMenuItem` widgets within `lib/screens/tabs/students_tab.dart` and `lib/screens/tabs/teachers_tab.dart` to adhere to `sort_child_properties_last` linting rules.
+تهدف هذه الخطة إلى تحسين تجربة المستخدم وتوسيع وظائف نظام إدارة المدرسة ليصبح حلاً شاملاً.
 
-### 2. Attendance Screen Improvements (`lib/screens/attendance_screen.dart`)
+### 1. تحسينات الواجهة وتجربة المستخدم (UI/UX)
 
-This plan focuses on enhancing the user experience, usability, and robustness of the existing attendance screen.
+*   **تطبيق Material Design 3 المتكامل:**
+    *   **الألوان:** استخدام `ColorScheme.fromSeed` لإنشاء لوحة ألوان متناسقة، وتطبيقها بشكل منهجي على جميع المكونات.
+    *   **الخطوط (Typography):** دمج `google_fonts` لتحديد خطوط مخصصة وواضحة، مع تطبيق `TextTheme` لضمان اتساق أنماط النصوص (مثل `displayLarge`, `titleMedium`, `bodySmall`).
+    *   **تخصيص المكونات:** استخدام `ThemeData` لتخصيص مظهر الأزرار (`ElevatedButtonThemeData`)، أشرطة التطبيق (`AppBarTheme`)، وغيرها من مكونات Material لإنشاء هوية بصرية فريدة.
+    *   **الأيقونات والصور:** استخدام أيقونات معبرة وصور ذات صلة (مع توفير صور مؤقتة إذا لزم الأمر).
+*   **الاستجابة والتكيف (Responsiveness):**
+    *   تكييف تخطيطات الشاشات المختلفة (خاصة لوحات القيادة والجداول) لتبدو جيدة على أحجام الشاشات المختلفة (الهواتف المحمولة، الأجهزة اللوحية، الويب).
+    *   استخدام `MediaQuery` و `LayoutBuilder` لتصميم واجهات مرنة.
+*   **الحركات الانتقالية والجاذبية:**
+    *   إضافة حركات انتقالية مخصصة بين الشاشات لتحسين التجربة البصرية.
+    *   إضافة تأثيرات بصرية دقيقة (مثل الظلال، التوهج عند التفاعل) على الأزرار والعناصر التفاعلية.
+*   **التعامل مع حالات خاصة:**
+    *   توفير مؤشرات تحميل واضحة (`CircularProgressIndicator`) عند جلب البيانات.
+    *   عرض رسائل واجهات جذابة عند عدم وجود بيانات (empty states).
+*   **تحسين النماذج والمدخلات:**
+    *   توفير تحقق فوري وواضح من صحة المدخلات في جميع النماذج.
+    *   تقديم رسائل خطأ ودية ومفيدة للمستخدم.
+*   **الوصولية (Accessibility):**
+    *   ضمان أن التطبيق قابل للاستخدام من قبل مجموعة واسعة من المستخدمين ذوي الاحتياجات المختلفة (مثل دعم قارئات الشاشة، أحجام الخطوط القابلة للتعديل، تباين الألوان الجيد).
 
--   **Loading Indicators:** Implement a `_isLoading` state to display a `CircularProgressIndicator` during asynchronous data fetching operations (`_fetchInitialData`, `_loadAttendanceData`) to provide visual feedback to the user.
--   **Enhanced Initial Load and Empty State Handling:**
-    -   Ensure that default selections for `_selectedClass`, `_selectedSubject`, and `_selectedTeacher` are only made if their respective data lists (`classProvider.classes`, `subjectProvider.subjects`, `teacherProvider.teachers`) are not empty.
-    -   Provide clear and informative messages to the user when no classes, subjects, or teachers are available, rather than displaying empty dropdowns.
-    -   Display a specific guidance message in the student list area if the primary filters (class, subject, teacher, and lesson number) have not yet been fully selected, prompting the user to make their selections.
--   **Improved User Guidance for Filter Selection:** Disable the student attendance status dropdowns for individual students until all necessary primary filters (date, class, subject, teacher, and lesson number) have been selected. This prevents users from attempting to set attendance without complete context.
--   **Refine Date Picker Label:** Simplify the display of the selected date in the `ElevatedButton.icon` to directly show the formatted `_selectedDate`, making it more concise and readable.
+### 2. توسيع ميزات نظام إدارة المدرسة
 
-### 3. Timetable Screen Implementation
+#### المرحلة الأولى: إضافات أساسية (ذات أولوية عالية)
 
-This plan outlines the creation of a new, dedicated screen for viewing and managing school timetables.
+1.  **المصادقة وإدارة المستخدمين (Authentication & User Management):**
+    *   **شاشات تسجيل الدخول والخروج:** تنفيذ نظام تسجيل دخول آمن (يمكن استخدام Firebase Authentication لاحقاً).
+    *   **الأدوار والصلاحيات:** تحديد أدوار المستخدمين (إداري، معلم، طالب) وتطبيق نظام صلاحيات صارم للتحكم في الوصول إلى الميزات والبيانات.
+    *   **شاشة إنشاء حساب إداري:** لإعداد المستخدم الإداري الأولي.
+2.  **بوابة أولياء الأمور (Parent Portal):**
+    *   واجهة بسيطة تسمح لأولياء الأمور بتسجيل الدخول وعرض معلومات أبنائهم (الحضور، الدرجات، الجدول الدراسي، الإعلانات).
+3.  **نظام الإعلانات والإشعارات (Announcements & Notifications):**
+    *   نظام يسمح للمسؤولين والمعلمين بنشر إعلانات عامة أو خاصة بصفوف محددة.
+    *   عرض الإعلانات على لوحة القيادة أو في قسم خاص.
 
--   **File Creation:** Create a new Dart file, `lib/screens/timetable_screen.dart`, to encapsulate the UI and logic for the timetable functionality.
--   **Integration:** Integrate the `TimetableScreen` as a new, accessible tab within the `DashboardScreen`'s `BottomNavigationBar`, providing easy navigation for users.
--   **Data Management:**
-    -   **Model:** Utilize the existing `lib/timetable_model.dart` to define the data structure for timetable entries.
-    -   **Provider:** Create a new `lib/providers/timetable_provider.dart` to manage the state and business logic related to fetching, adding, editing, and deleting timetable entries. This provider will interact with the database.
--   **User Interface (UI) Design:**
-    -   **Grid-based Layout:** Design a visually clear, grid-based layout for the timetable, with columns representing days of the week and rows representing lesson numbers or time slots.
-    -   **Filtering:** Implement interactive dropdown filters for `class` and `teacher` at the top of the screen, allowing users to view timetables specific to a chosen class or teacher.
-    -   **Slot Details:** Within each timetable slot in the grid, display essential details such as the subject name and either the teacher's name (when viewing a class timetable) or the class name (when viewing a teacher's timetable).
+#### المرحلة الثانية: ميزات متقدمة (ذات أولوية متوسطة)
+
+1.  **إدارة الرسوم الدراسية (Fee Management):**
+    *   **هياكل الرسوم:** تحديد أنواع الرسوم المختلفة (رسوم دراسية، مواصلات، أنشطة).
+    *   **تتبع الدفعات:** تسجيل دفعات الرسوم وتتبع الرسوم المستحقة والمتأخرة لكل طالب.
+    *   **تقارير الرسوم:** إنشاء تقارير عن حالة الرسوم.
+2.  **إدارة الامتحانات والنتائج (Exam & Result Management):**
+    *   **جدولة الامتحانات:** القدرة على تحديد مواعيد الامتحانات وإنشائها.
+    *   **إدخال الدرجات:** واجهة مبسطة للمعلمين لإدخال درجات الامتحانات.
+    *   **إصدار الشهادات/بطاقات النتائج:** إنشاء تقارير نتائج للطلاب.
+3.  **الموارد التعليمية والمكتبة الرقمية (Educational Resources):**
+    *   **رفع الملفات:** السماح للمعلمين برفع مواد دراسية (مستندات، عروض تقديمية، فيديوهات) وربطها بالمواد أو الصفوف.
+    *   **الوصول للطلاب:** تمكين الطلاب من الوصول إلى هذه الموارد وعرضها.
+
+#### المرحلة الثالثة: ميزات شاملة (على المدى الطويل)
+
+1.  **تقارير وتحليلات متقدمة (Advanced Reporting & Analytics):**
+    *   تقارير مفصلة عن أداء الطلاب، اتجاهات الحضور والغياب، تحليل أداء المواد.
+    *   إمكانية تخصيص التقارير بناءً على معايير مختلفة.
+2.  **إدارة القبول والتسجيل (Admission Management):**
+    *   نماذج طلبات الالتحاق عبر الإنترنت.
+    *   تتبع حالة طلبات الالتحاق وعملية التسجيل.
+3.  **نظام المراسلة الداخلية (In-app Messaging):**
+    *   سماح بالاتصال المباشر بين المعلمين والطلاب، والمعلمين وأولياء الأمور داخل التطبيق.
+
+---
+**الخطوات التالية:**
+سأنتظر توجيهاتك بخصوص أي من هذه التحسينات تود البدء بها، أو إذا كان لديك أي أفكار إضافية.
