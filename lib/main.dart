@@ -11,7 +11,7 @@ import 'providers/grade_provider.dart';
 import 'providers/theme_provider.dart';
 import 'providers/attendance_provider.dart';
 import 'providers/timetable_provider.dart';
-import 'database_helper.dart'; // Import DatabaseHelper
+// Removed unused import: import 'database_helper.dart'; 
 import 'screens/grades_screen.dart'; // Import GradesScreen
 import 'screens/attendance_screen.dart'; // Import AttendanceScreen
 import 'services/local_auth_service.dart'; // Import LocalAuthService
@@ -228,7 +228,7 @@ class AppTheme {
         ),
       ),
     ),
-    cardTheme: CardThemeData(
+    cardTheme: const CardThemeData(
       elevation: 4,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
     ),
@@ -270,7 +270,7 @@ class AppTheme {
         ),
       ),
     ),
-    cardTheme: CardThemeData(
+    cardTheme: const CardThemeData(
       elevation: 4,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       color: Colors.grey[800],
