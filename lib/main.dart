@@ -11,7 +11,7 @@ import 'providers/grade_provider.dart';
 import 'providers/theme_provider.dart';
 import 'providers/attendance_provider.dart';
 import 'providers/timetable_provider.dart';
-// Removed unused import: import 'database_helper.dart'; 
+import 'database_helper.dart'; // Keep this import
 import 'screens/grades_screen.dart'; // Import GradesScreen
 import 'screens/attendance_screen.dart'; // Import AttendanceScreen
 import 'services/local_auth_service.dart'; // Import LocalAuthService
@@ -20,8 +20,7 @@ import 'dart:developer' as developer; // Import for logging
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  // Temporarily commented out to debug database initialization
-  // await DatabaseHelper().database; 
+  await DatabaseHelper().database; // UNCOMMENTED THIS LINE
   runApp(const MyApp());
 }
 
@@ -70,7 +69,7 @@ class MyApp extends StatelessWidget {
             ],
             locale: const Locale('ar', ''),
           );
-        },
+        }, // Corrected closing for builder
       ),
     );
   }
