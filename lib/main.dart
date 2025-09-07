@@ -16,6 +16,7 @@ import 'screens/grades_screen.dart'; // Import GradesScreen
 import 'screens/attendance_screen.dart'; // Import AttendanceScreen
 import 'services/local_auth_service.dart'; // Import LocalAuthService
 import 'screens/login_screen.dart'; // Import LoginScreen
+import 'screens/register_screen.dart'; // Import RegisterScreen
 import 'dart:developer' as developer; // Import for logging
 
 void main() async {
@@ -56,6 +57,7 @@ class MyApp extends StatelessWidget {
               AttendanceScreen.routeName: (context) => const AttendanceScreen(),
               // Add routes for authentication screens if needed for direct navigation
               '/login': (context) => const LoginScreen(),
+              '/register': (context) => const RegisterScreen(),
             },
             debugShowCheckedModeBanner: false,
             localizationsDelegates: const [
@@ -172,8 +174,8 @@ class _AppInitializerState extends State<AppInitializer> {
           developer.log('AppInitializer: Authenticated user role: $userRole', name: 'AppInitializer');
           return _getHomeScreenForRole(userRole);
         } else {
-          developer.log('AppInitializer: User not authenticated or currentUser is null. Navigating to LoginScreen.', name: 'AppInitializer');
-          return const LoginScreen();
+          developer.log('AppInitializer: User not authenticated or currentUser is null. Navigating to RegisterScreen.', name: 'AppInitializer');
+          return const RegisterScreen(); // Changed to RegisterScreen
         }
       },
     );
@@ -192,11 +194,11 @@ class _AppInitializerState extends State<AppInitializer> {
       // case 'parent': // We will add parent role later
       //   return const ParentDashboardScreen();
       case 'guest': // Handle the default 'guest' role if currentUser is null
-        developer.log('AppInitializer: User role is guest. Falling back to LoginScreen.', name: 'AppInitializer', level: 800);
-        return const LoginScreen();
+        developer.log('AppInitializer: User role is guest. Falling back to RegisterScreen.', name: 'AppInitializer', level: 800);
+        return const RegisterScreen(); // Fallback to RegisterScreen
       default:
-        developer.log('AppInitializer: Unknown role: $role. Falling back to LoginScreen.', name: 'AppInitializer', level: 900);
-        return const LoginScreen(); // Fallback to login if role is unknown
+        developer.log('AppInitializer: Unknown role: $role. Falling back to RegisterScreen.', name: 'AppInitializer', level: 900);
+        return const RegisterScreen(); // Fallback to RegisterScreen if role is unknown
     }
   }
 }

@@ -15,6 +15,10 @@ import 'attendance_model.dart';
 import 'timetable_model.dart';
 import 'user_model.dart'; // Import the new User model
 
+// Conditional import for Flutter Web
+import 'dart:io' show Platform;
+import 'package:sqflite_common_ffi_web/sqflite_ffi_web.dart';
+
 class DatabaseHelper {
   static final DatabaseHelper _instance = DatabaseHelper._internal();
   factory DatabaseHelper() => _instance;
@@ -30,8 +34,24 @@ class DatabaseHelper {
 
   Future<Database> _initDB() async {
     try {
-      final dbPath = await getApplicationDocumentsDirectory();
-      final path = join(dbPath.path, 'school_management.db');
+      String path;
+      if (Platform.isWindows || Platform.isLinux || Platform.isMacOS) {
+        // For desktop platforms (including web build on desktop)
+        // This might still be an issue for a pure web browser environment,
+        // but for web-server, path_provider should still give a usable path.
+        final dbPath = await getApplicationDocumentsDirectory();
+        path = join(dbPath.path, 'school_management.db');
+      } else if (Platform.isAndroid || Platform.isIOS) {
+        // For mobile platforms
+        final dbPath = await getApplicationDocumentsDirectory();
+        path = join(dbPath.path, 'school_management.db');
+      } else {
+        // For web (browser) environment
+        // Use sqflite_ffi_web for web compatibility
+        databaseFactory = databaseFactoryFfiWeb;
+        path = 'school_management.db'; // Simple name for web database
+      }
+
       developer.log('DatabaseHelper: Attempting to open database at $path', name: 'DatabaseHelper');
       return await openDatabase(
         path,

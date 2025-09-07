@@ -49,6 +49,7 @@ dependencies:
   flutter_chat_ui: ^2.9.0
   bubble: ^1.2.1
   crypto: ^3.0.3 # Added for password hashing
+  sqflite_common_ffi_web: ^1.0.1+1
 
 dev_dependencies:
   flutter_test:
