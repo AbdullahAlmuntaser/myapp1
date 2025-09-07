@@ -30,6 +30,7 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    developer.log('MyApp: build called.', name: 'MyApp');
     return MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (_) => ThemeProvider()),
@@ -44,8 +45,9 @@ class MyApp extends StatelessWidget {
       ],
       child: Consumer<ThemeProvider>(
         builder: (context, themeProvider, child) {
+          developer.log('MyApp: Building MaterialApp with themeMode: ${themeProvider.themeMode}', name: 'MyApp');
           return MaterialApp(
-            title: 'نظام إدارة الطلاب',
+            title: 'Student Management System',
             theme: AppTheme.lightTheme,
             darkTheme: AppTheme.darkTheme,
             themeMode: themeProvider.themeMode,
@@ -93,12 +95,12 @@ class _AppInitializerState extends State<AppInitializer> {
 
   Future<void> _initializeProviders() async {
     developer.log('AppInitializer: Initializing providers...', name: 'AppInitializer');
-    // Access providers after the widget tree is built and providers are available
     final authService = Provider.of<LocalAuthService>(context, listen: false);
+    developer.log('AppInitializer: LocalAuthService isAuthenticated: ${authService.isAuthenticated}', name: 'AppInitializer');
 
-    // Only fetch data if a user is authenticated. Otherwise, we'll show the login screen.
-    if (authService.isAuthenticated) {
-      developer.log('AppInitializer: User is authenticated. Fetching data...', name: 'AppInitializer');
+    // Only fetch data if a user is authenticated AND currentUser is not null.
+    if (authService.isAuthenticated && authService.currentUser != null) {
+      developer.log('AppInitializer: User is authenticated and currentUser is not null. Fetching data...', name: 'AppInitializer');
       final studentProvider = Provider.of<StudentProvider>(context, listen: false);
       final teacherProvider = Provider.of<TeacherProvider>(context, listen: false);
       final classProvider = Provider.of<ClassProvider>(context, listen: false);
@@ -107,18 +109,22 @@ class _AppInitializerState extends State<AppInitializer> {
       final attendanceProvider = Provider.of<AttendanceProvider>(context, listen: false);
       final timetableProvider = Provider.of<TimetableProvider>(context, listen: false);
 
-      await Future.wait([
-        studentProvider.fetchStudents(),
-        teacherProvider.fetchTeachers(),
-        classProvider.fetchClasses(),
-        subjectProvider.fetchSubjects(),
-        gradeProvider.fetchGrades(),
-        attendanceProvider.fetchAttendances(),
-        timetableProvider.fetchTimetableEntries(),
-      ]);
-      developer.log('AppInitializer: Data fetching complete.', name: 'AppInitializer');
+      try {
+        await Future.wait([
+          studentProvider.fetchStudents(),
+          teacherProvider.fetchTeachers(),
+          classProvider.fetchClasses(),
+          subjectProvider.fetchSubjects(),
+          gradeProvider.fetchGrades(),
+          attendanceProvider.fetchAttendances(),
+          timetableProvider.fetchTimetableEntries(),
+        ]);
+        developer.log('AppInitializer: Data fetching complete.', name: 'AppInitializer');
+      } catch (e, s) {
+        developer.log('AppInitializer: Error fetching initial data: $e', name: 'AppInitializer', level: 1000, error: e, stackTrace: s);
+      }
     } else {
-      developer.log('AppInitializer: User not authenticated. Skipping data fetch.', name: 'AppInitializer');
+      developer.log('AppInitializer: User not authenticated or currentUser is null. Skipping data fetch.', name: 'AppInitializer');
     }
 
     // After all initial data is fetched (or if no user is authenticated), set initialized state
@@ -136,10 +142,24 @@ class _AppInitializerState extends State<AppInitializer> {
   Widget build(BuildContext context) {
     developer.log('AppInitializer: build called. _isInitialized: $_isInitialized', name: 'AppInitializer');
     if (!_isInitialized) {
-      developer.log('AppInitializer: Showing CircularProgressIndicator.', name: 'AppInitializer');
-      return const Scaffold(
+      developer.log('AppInitializer: Showing a simple loading screen.', name: 'AppInitializer');
+      // Temporarily show a simple message with logs to break potential redirect loops
+      return Scaffold(
+        appBar: AppBar(title: const Text('Initializing App...')),
         body: Center(
-          child: CircularProgressIndicator(),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const CircularProgressIndicator(),
+              const SizedBox(height: 20),
+              Text('Initializing: ${_isInitialized ? "Complete" : "In Progress"}'),
+              Consumer<LocalAuthService>(
+                builder: (context, authService, child) {
+                  return Text('Authenticated: ${authService.isAuthenticated}, User: ${authService.currentUser?.role ?? "N/A"}');
+                },
+              ),
+            ],
+          ),
         ),
       );
     }
@@ -147,12 +167,13 @@ class _AppInitializerState extends State<AppInitializer> {
     return Consumer<LocalAuthService>(
       builder: (context, authService, child) {
         developer.log('AppInitializer: Consumer rebuilding. isAuthenticated: ${authService.isAuthenticated}', name: 'AppInitializer');
-        if (authService.isAuthenticated) {
+        if (authService.isAuthenticated && authService.currentUser != null) {
           developer.log('AppInitializer: User is authenticated. Navigating to role-based home screen.', name: 'AppInitializer');
-          // This is where we will introduce role-based navigation
-          return _getHomeScreenForRole(authService.currentUser!.role);
+          final String userRole = authService.currentUser!.role; // currentUser is guaranteed not null here
+          developer.log('AppInitializer: Authenticated user role: $userRole', name: 'AppInitializer');
+          return _getHomeScreenForRole(userRole);
         } else {
-          developer.log('AppInitializer: User not authenticated. Navigating to LoginScreen.', name: 'AppInitializer');
+          developer.log('AppInitializer: User not authenticated or currentUser is null. Navigating to LoginScreen.', name: 'AppInitializer');
           return const LoginScreen();
         }
       },
@@ -171,6 +192,9 @@ class _AppInitializerState extends State<AppInitializer> {
         return const DashboardScreen(); // Students might see a specific student screen
       // case 'parent': // We will add parent role later
       //   return const ParentDashboardScreen();
+      case 'guest': // Handle the default 'guest' role if currentUser is null
+        developer.log('AppInitializer: User role is guest. Falling back to LoginScreen.', name: 'AppInitializer', level: 800);
+        return const LoginScreen();
       default:
         developer.log('AppInitializer: Unknown role: $role. Falling back to LoginScreen.', name: 'AppInitializer', level: 900);
         return const LoginScreen(); // Fallback to login if role is unknown
@@ -228,7 +252,7 @@ class AppTheme {
         ),
       ),
     ),
-    cardTheme: const CardThemeData(
+    cardTheme: CardThemeData(
       elevation: 4,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
     ),
@@ -270,7 +294,7 @@ class AppTheme {
         ),
       ),
     ),
-    cardTheme: const CardThemeData(
+    cardTheme: CardThemeData(
       elevation: 4,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       color: Colors.grey[800],
