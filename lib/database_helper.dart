@@ -5,6 +5,7 @@ import 'package:path_provider/path_provider.dart';
 import 'package:crypto/crypto.dart'; // Import for password hashing
 import 'dart:convert'; // For utf8 encoding
 import 'dart:developer' as developer; // Import for logging
+import 'package:flutter/foundation.dart'; // Import for kIsWeb
 
 import 'student_model.dart';
 import 'teacher_model.dart';
@@ -16,7 +17,7 @@ import 'timetable_model.dart';
 import 'user_model.dart'; // Import the new User model
 
 // Conditional import for Flutter Web
-import 'dart:io' show Platform;
+// Removed: import 'dart:io' show Platform;
 import 'package:sqflite_common_ffi_web/sqflite_ffi_web.dart';
 
 class DatabaseHelper {
@@ -35,21 +36,15 @@ class DatabaseHelper {
   Future<Database> _initDB() async {
     try {
       String path;
-      if (Platform.isWindows || Platform.isLinux || Platform.isMacOS) {
-        // For desktop platforms (including web build on desktop)
-        // This might still be an issue for a pure web browser environment,
-        // but for web-server, path_provider should still give a usable path.
-        final dbPath = await getApplicationDocumentsDirectory();
-        path = join(dbPath.path, 'school_management.db');
-      } else if (Platform.isAndroid || Platform.isIOS) {
-        // For mobile platforms
-        final dbPath = await getApplicationDocumentsDirectory();
-        path = join(dbPath.path, 'school_management.db');
-      } else {
+      if (kIsWeb) {
         // For web (browser) environment
         // Use sqflite_ffi_web for web compatibility
         databaseFactory = databaseFactoryFfiWeb;
         path = 'school_management.db'; // Simple name for web database
+      } else {
+        // For mobile and desktop platforms
+        final dbPath = await getApplicationDocumentsDirectory();
+        path = join(dbPath.path, 'school_management.db');
       }
 
       developer.log('DatabaseHelper: Attempting to open database at $path', name: 'DatabaseHelper');

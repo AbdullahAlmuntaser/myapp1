@@ -1,91 +1,66 @@
-# مخطط المشروع (Blueprint)
+# Student Management System Blueprint
 
-## نظرة عامة على المشروع
+## Overview
 
-هذا المشروع عبارة عن نظام لإدارة الطلاب تم تطويره باستخدام Flutter ويهدف إلى توفير واجهة سهلة الاستخدام لإدارة معلومات الطلاب، الفصول الدراسية، الدرجات، الحضور، والجداول الزمنية. يتضمن التطبيق ميزات لتسجيل الدخول، لوحة تحكم شاملة، ونظام تبويب لتنظيم البيانات.
+This blueprint outlines the development and features of a Student Management System built with Flutter. The system aims to provide a comprehensive platform for managing students, classes, grades, attendance, timetables, teachers, and users, with a focus on Material Design 3 principles, robust state management, and an intuitive user interface.
 
-## التصميم والميزات المنفذة
+## Style, Design, and Features Implemented
 
-*   **تطبيق Material Design 3 المتكامل:**
-    *   **الألوان:** استخدام `ColorScheme.fromSeed` لإنشاء لوحة ألوان متناسقة، وتطبيقها بشكل منهجي على جميع المكونات.
-    *   **الخطوط (Typography):** دمج `google_fonts` لتحديد خطوط مخصصة وواضحة، مع تطبيق `TextTheme` لضمان اتساق أنماط النصوص (مثل `displayLarge`, `titleMedium`, `bodySmall`).
-    *   **تخصيص المكونات:** استخدام `ThemeData` لتخصيص مظهر الأزرار (`ElevatedButtonThemeData`)، أشرطة التطبيق (`AppBarTheme`)، وغيرها من مكونات Material لإنشاء هوية بصرية فريدة.
-    *   **الاستجابة والتكيف (Responsiveness):**
-    *   تكييف تخطيطات الشاشات المختلفة (خاصة لوحات القيادة والجداول) لتبدو جيدة على أحجام الشاشات المختلفة (الهواتف المحمولة، الأجهزة اللوحية، الويب).
-    *   استخدام `MediaQuery` و `LayoutBuilder` لتصميم واجهات مرنة.
-*   **الحركات الانتقالية والجاذبية:**
-    *   إضافة حركات انتقالية مخصصة بين الشاشات لتحسين التجربة البصرية.
-*   **إدارة الحالة (State Management):**
-    *   استخدام `provider` لإدارة الحالة على مستوى التطبيق.
-    *   فئات `ChangeNotifier` مخصصة (مثل `StudentProvider`, `ClassProvider`, `SubjectProvider`, `TeacherProvider`, `AttendanceProvider`, `GradeProvider`, `TimetableProvider`, `ThemeProvider`) لإدارة البيانات والمنطق الخاص بكل جزء).
-*   **شاشات رئيسية:**
-    *   `LoginScreen`: شاشة تسجيل الدخول للمستخدمين.
-    *   `RegisterScreen`: شاشة تسجيل مستخدمين جدد (تم تعيينها كالشاشة الافتراضية عند عدم تسجيل الدخول).
-    *   `DashboardScreen`: لوحة تحكم رئيسية مع نظام تبويبات (`BottomNavigationBar`) للتنقل بين الأقسام.
-    *   `ParentPortalScreen`: شاشة خاصة بأولياء الأمور لعرض معلومات الطلاب.
-    *   `StudentDetailForParentScreen`: تفاصيل الطالب لولي الأمر.
-*   **علامات التبويب في لوحة التحكم (Dashboard Tabs):**
-    *   `StudentsTab`: عرض وإدارة الطلاب.
-    *   `ClassesTab`: عرض وإدارة الفصول الدراسية.
-    *   `SubjectsTab`: عرض وإدارة المواد.
-    *   `TeachersTab`: عرض وإدارة المعلمين.
-    *   `GradesOverviewTab`: نظرة عامة على الدرجات.
-    *   `GradesBulkEntryTab`: إدخال الدرجات بشكل مجمع.
-    *   `ReportsTab`: عرض التقارير.
-    *   `SettingsTab`: إعدادات التطبيق (يتضمن معلومات حول التطبيق).
-*   **شاشات الإضافة والتعديل:**
-    *   `AddEditStudentScreen`
-    *   `AddEditClassScreen`
-    *   `AddEditSubjectScreen`
-    *   `AddEditTeacherScreen`
-    *   `AddEditTimetableScreen`
-    *   `AddEditGradeDialog` (كحوار ضمن شاشة الدرجات).
-*   **ميزات أخرى:**
-    *   `AttendanceScreen`: شاشة لتسجيل الحضور.
-    *   `GradesScreen`: شاشة تفاصيل الدرجات.
-    *   `TimetableScreen`: شاشة عرض الجدول الزمني.
-    *   `LocalAuthService`: لخدمات المصادقة المحلية (مثل بصمة الإصبع/الوجه).
-    *   تكامل قاعدة البيانات المحلية (SQLite) باستخدام `database_helper.dart`.
-    *   نماذج بيانات (Models) منفصلة لكل كيان (`StudentModel`, `ClassModel`, `SubjectModel`, `TeacherModel`, `AttendanceModel`, `GradeModel`, `TimetableModel`, `UserModel`).
-    *   اختبارات الوحدة (Unit Tests) لبعض المزودين والشاشات.
+### Theming
+- **Material Design 3:** The application adheres to Material Design 3 guidelines for a modern and consistent look and feel.
+- **Color Scheme:** Uses `ColorScheme.fromSeed` with `Colors.deepPurple` as the primary seed color for both light and dark themes, ensuring harmonious and accessible color palettes.
+- **Typography:** Custom `TextTheme` defined using `google_fonts` (specifically 'Amiri') for various text styles (display, headline, title, body, label), ensuring readability and aesthetic appeal.
+- **Component Theming:** `AppBarTheme`, `ElevatedButtonThemeData`, `FloatingActionButtonThemeData`, `CardThemeData`, and `InputDecorationTheme` are customized to maintain a consistent UI across the application.
+- **Dark/Light Mode:** Supports both light and dark themes, with `ThemeProvider` (using `ChangeNotifierProvider`) managing the theme mode (`ThemeMode.system`, `ThemeMode.light`, `ThemeMode.dark`).
+- **Responsiveness:** Designed to be mobile-responsive and adapt to different screen sizes.
 
-## الحالة الحالية: المشكلات المحلولة
+### State Management
+- **Provider Package:** Utilizes the `provider` package for efficient and scalable state management.
+- **ChangeNotifier Providers:**
+    - `ThemeProvider`: Manages the application's theme.
+    - `LocalAuthService`: Handles user authentication and user session.
+    - `StudentProvider`: Manages student-related data and logic.
+    - `TeacherProvider`: Manages teacher-related data and logic.
+    - `ClassProvider`: Manages class-related data and logic.
+    - `SubjectProvider`: Manages subject-related data and logic.
+    - `GradeProvider`: Manages grade-related data and logic.
+    - `AttendanceProvider`: Manages attendance records.
+    - `TimetableProvider`: Manages timetable entries.
+- **Database Integration:** `DatabaseHelper` manages interactions with the local SQLite database (`sqflite`), abstracting data access for providers.
 
-تم حل المشكلات المتعلقة بـ "معاينة الويب الفارغة وعدم التعرف على جهاز الويب" و "التطبيق ليس مثبت" على أندرويد. يبدو أن البيئة جاهزة الآن لمزيد من التطوير.
+### Navigation and Routing
+- **Initial Route:** The `AppInitializer` widget determines the initial screen based on user authentication status. If a user is not authenticated, it navigates to the `RegisterScreen`. If authenticated, it directs to the `DashboardScreen` or a role-specific home screen.
+- **Named Routes:** Uses named routes for `GradesScreen` and `AttendanceScreen`, and for authentication (`/login`, `/register`).
+- **Bottom Navigation Bar:** `DashboardScreen` uses a `BottomNavigationBar` for easy navigation between main sections (tabs).
 
-## الخطة الحالية: عرض واجهة التسجيل عند تشغيل التطبيق
+### Core Features (Screens and Tabs)
+- **Login/Registration:**
+    - `LoginScreen`: Allows existing users to log in.
+    - `RegisterScreen`: Allows new users to create an account.
+- **Dashboard (`DashboardScreen`):** The central hub of the application for authenticated users, featuring a `BottomNavigationBar` with the following tabs:
+    - `StudentsTab`: To view, add, edit, and delete student information.
+    - `ClassesTab`: To manage academic classes.
+    - `SubjectsTab`: To manage subjects.
+    - `TeachersTab`: To manage teacher profiles.
+    - `GradesOverviewTab`: Provides an overview of student grades.
+    - `GradesBulkEntryTab`: For efficient bulk entry of grades.
+    - `ReportsTab`: For generating various reports.
+    - `SettingsTab`: For application settings, including theme toggles.
+- **Student Details:** `StudentDetailForParentScreen` (for parents).
+- **Other Screens:** `AddEditClassScreen`, `AddEditGradeDialog`, `AddEditStudentScreen`, `AddEditSubjectScreen`, `AddEditTeacherScreen`, `AddEditTimetableScreen`, `AttendanceScreen`, `GradesScreen`, `ParentPortalScreen`, `TimetableScreen`.
 
-**الهدف:** جعل `RegisterScreen` هي الشاشة الافتراضية التي تظهر عند بدء تشغيل التطبيق إذا لم يكن هناك مستخدم مسجل الدخول، وذلك لتمكين المستخدمين الجدد من التسجيل مباشرة.
+### Internationalization (I18n)
+- **Multi-language Support:** Configured for both English and Arabic, with Arabic as the default locale (`locale: const Locale('ar', '')`).
 
-**التغييرات المنفذة:**
+### Logging
+- **dart:developer:** Utilizes `dart:developer` for structured logging throughout the application to aid in debugging and monitoring.
 
-*   تم تعديل `lib/main.dart` لإضافة استيراد `RegisterScreen`.
-*   تم تعديل `AppInitializer` في `lib/main.dart` ليعرض `RegisterScreen` بدلاً من `LoginScreen` عندما يكون `authService.isAuthenticated` خاطئًا.
+## Current Plan
 
-## مشكلة جديدة: معاينة الويب الفارغة بسبب MissingPluginException
+**Objective:** Run the Flutter application and view its interfaces.
 
-**الهدف:** حل مشكلة `MissingPluginException` التي تمنع التطبيق من التهيئة والعمل على الويب، والتي تحدث لأن مكون `sqflite` الإضافي لا يحتوي على تطبيق ويب.
+**Steps:**
+1.  **Initial Attempt (Web - Failed):** Attempted to run the application on the web using `flutter run -d web`, but encountered issues with device recognition and web renderer options in the Firebase Studio environment.
+2.  **Revised Plan (Android Emulator):** Due to issues with web preview, the current plan is to run the application on an available Android emulator.
+3.  **Execution:** Run the command `flutter run -d emulator-5554` to launch the application on the Android emulator.
 
-**الخطوات التي تم اتخاذها:**
-
-*   تم تشغيل `flutter doctor -v` لتشخيص بيئة Flutter.
-*   تم قبول جميع تراخيص Android المطلوبة باستخدام `flutter doctor --android-licenses`.
-*   تم إضافة حزمة دعم الويب `sqflite_common_ffi_web`.
-*   تم تعديل `lib/database_helper.dart` لتهيئة قاعدة البيانات بشكل صحيح على الويب.
-*   تم حل مشكلة `No space left on device` عن طريق تشغيل `flutter clean`.
-
-## إنجازات حديثة:
-
-*   **بناء ملف APK بنجاح!** تم إنشاء ملف التثبيت: `build/app/outputs/flutter-apk/app-release.apk`.
-*   **تم حل مشكلة تضارب إصدار Android NDK!** تم تحديث `ndkVersion` في `android/app/build.gradle.kts` إلى `27.0.12077973`.
-
-**الخطة الحالية:**
-
-1.  **تنظيف المشروع:**
-    *   الأمر: `flutter clean`
-    *   الهدف: إزالة ملفات البناء المؤقتة بعد تعديل إعدادات NDK.
-2.  **بناء ملف APK:**
-    *   الأمر: `flutter build apk`
-    *   الهدف: إنشاء ملف APK جديد بعد تطبيق إصلاح NDK والتأكد من عدم وجود تحذيرات.
-
-سأقوم الآن بتنفيذ الأمر `flutter clean`.

@@ -3,19 +3,20 @@ import 'package:crypto/crypto.dart';
 import 'dart:convert';
 import '../database_helper.dart';
 import '../user_model.dart';
+import 'dart:developer' as developer; // Import for logging
+import 'package:shared_preferences/shared_preferences.dart'; // Import shared_preferences
 
 class LocalAuthService with ChangeNotifier {
   User? _currentUser; // Holds the currently logged-in user
   final DatabaseHelper _databaseHelper = DatabaseHelper();
+  bool _isSessionLoading = true; // New state to indicate if session is being loaded
 
   User? get currentUser => _currentUser;
   bool get isAuthenticated => _currentUser != null;
+  bool get isSessionLoading => _isSessionLoading; // Getter for session loading state
 
-  // Constructor - could try to load a persisted user session here if implemented
   LocalAuthService() {
-    // In a real app, you might try to load a user session from SharedPreferences
-    // or secure storage here to keep the user logged in across app restarts.
-    // For now, we start with no user logged in.
+    _loadUserSession(); // Load session when service is instantiated
   }
 
   String _hashPassword(String password) {
@@ -24,24 +25,73 @@ class LocalAuthService with ChangeNotifier {
     return digest.toString();
   }
 
+  // New method to load user session from shared_preferences
+  Future<void> _loadUserSession() async {
+    developer.log('LocalAuthService: Attempting to load user session...', name: 'LocalAuthService');
+    _isSessionLoading = true;
+    notifyListeners();
+
+    final prefs = await SharedPreferences.getInstance();
+    final userId = prefs.getInt('userId');
+    final userRole = prefs.getString('userRole');
+
+    if (userId != null && userRole != null) {
+      // Fetch full user details from DB to reconstruct User object
+      final userFromDb = await _databaseHelper.getUserById(userId);
+      if (userFromDb != null && userFromDb.role == userRole) {
+        _currentUser = userFromDb; // Use user from DB to ensure all fields are correct
+        developer.log('LocalAuthService: User session loaded for user: ${_currentUser!.username}', name: 'LocalAuthService');
+      } else {
+        // Inconsistent or outdated session, clear it
+        await _clearUserSession();
+        developer.log('LocalAuthService: Inconsistent user session, cleared.', name: 'LocalAuthService', level: 900);
+      }
+    } else {
+      developer.log('LocalAuthService: No user session found.', name: 'LocalAuthService');
+    }
+    _isSessionLoading = false;
+    notifyListeners(); // Notify UI that session loading is complete
+  }
+
+  // New method to save user session to shared_preferences
+  Future<void> _saveUserSession(User user) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setInt('userId', user.id!); // user.id is guaranteed not null here after successful sign-up/in
+    await prefs.setString('userRole', user.role);
+    developer.log('LocalAuthService: User session saved for user: ${user.username}', name: 'LocalAuthService');
+  }
+
+  // New method to clear user session from shared_preferences
+  Future<void> _clearUserSession() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove('userId');
+    await prefs.remove('userRole');
+    developer.log('LocalAuthService: User session cleared.', name: 'LocalAuthService');
+  }
+
   Future<bool> signIn(String username, String password) async {
+    developer.log('LocalAuthService: Attempting sign-in for user: $username', name: 'LocalAuthService');
     final user = await _databaseHelper.getUserByUsername(username);
     if (user != null) {
       final hashedPassword = _hashPassword(password);
       if (user.passwordHash == hashedPassword) {
         _currentUser = user;
-        notifyListeners(); // Notify UI that user state has changed
+        await _saveUserSession(user); // Save session on successful sign-in
+        notifyListeners();
+        developer.log('LocalAuthService: Sign-in successful for user: $username', name: 'LocalAuthService');
         return true;
       }
     }
+    developer.log('LocalAuthService: Sign-in failed for user: $username', name: 'LocalAuthService', level: 900);
     return false; // Authentication failed
   }
 
   Future<bool> signUp(String username, String password, String role) async {
-    // Check if user already exists
+    developer.log('LocalAuthService: Attempting sign-up for user: $username with role: $role', name: 'LocalAuthService');
     final existingUser = await _databaseHelper.getUserByUsername(username);
     if (existingUser != null) {
-      return false; // User with this username already exists
+      developer.log('LocalAuthService: Sign-up failed. Username already exists: $username', name: 'LocalAuthService', level: 900);
+      return false;
     }
 
     final hashedPassword = _hashPassword(password);
@@ -51,24 +101,35 @@ class LocalAuthService with ChangeNotifier {
       role: role,
     );
 
-    final id = await _databaseHelper.createUser(newUser);
-    if (id > 0) {
-      // Optionally, automatically log in the new user
-      _currentUser = newUser.copyWith(id: id); // Assuming copyWith exists, or just create new user object with ID
-      notifyListeners();
-      return true;
+    try {
+      final id = await _databaseHelper.createUser(newUser);
+      if (id > 0) {
+        // Create a new User object with the generated ID from the database
+        _currentUser = newUser.copyWith(id: id);
+        await _saveUserSession(_currentUser!); // Save session on successful sign-up
+        notifyListeners();
+        developer.log('LocalAuthService: Sign-up successful for user: $username (ID: $id)', name: 'LocalAuthService', level: 800);
+        return true;
+      } else {
+        developer.log('LocalAuthService: Sign-up failed. Could not create user in database. ID returned: $id', name: 'LocalAuthService', level: 1000);
+        return false;
+      }
+    } catch (e, s) {
+      developer.log('LocalAuthService: Error during user creation for user: $username', name: 'LocalAuthService', level: 1000, error: e, stackTrace: s);
+      return false;
     }
-    return false;
   }
 
-  void signOut() {
+  void signOut() async { // Made async to await _clearUserSession
+    developer.log('LocalAuthService: Attempting to sign out user: ${_currentUser?.username}', name: 'LocalAuthService');
     _currentUser = null;
-    notifyListeners(); // Notify UI that user state has changed
+    await _clearUserSession(); // Clear session on sign out
+    notifyListeners();
+    developer.log('LocalAuthService: User signed out.', name: 'LocalAuthService');
   }
 }
 
 extension on User {
-  // Helper to create a new User object with updated fields (e.g., after insertion gives an ID)
   User copyWith({int? id, String? username, String? passwordHash, String? role}) {
     return User(
       id: id ?? this.id,

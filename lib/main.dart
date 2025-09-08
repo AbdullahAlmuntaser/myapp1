@@ -34,7 +34,8 @@ class MyApp extends StatelessWidget {
     return MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (_) => ThemeProvider()),
-        ChangeNotifierProvider(create: (_) => LocalAuthService()), // Add LocalAuthService
+        // Ensure LocalAuthService is created and initialized before other providers
+        ChangeNotifierProvider(create: (_) => LocalAuthService()), 
         ChangeNotifierProvider(create: (_) => StudentProvider()),
         ChangeNotifierProvider(create: (_) => TeacherProvider()),
         ChangeNotifierProvider(create: (_) => ClassProvider()),
@@ -55,7 +56,6 @@ class MyApp extends StatelessWidget {
             routes: {
               GradesScreen.routeName: (context) => const GradesScreen(),
               AttendanceScreen.routeName: (context) => const AttendanceScreen(),
-              // Add routes for authentication screens if needed for direct navigation
               '/login': (context) => const LoginScreen(),
               '/register': (context) => const RegisterScreen(),
             },
@@ -86,20 +86,40 @@ class AppInitializer extends StatefulWidget {
 
 class _AppInitializerState extends State<AppInitializer> {
   bool _isInitialized = false;
+  late Future<void> _initializationFuture; // To hold the future for initialization
 
   @override
   void initState() {
     super.initState();
     developer.log('AppInitializer: initState called.', name: 'AppInitializer');
-    _initializeProviders();
+    _initializationFuture = _initializeProvidersAndAuth();
   }
 
-  Future<void> _initializeProviders() async {
-    developer.log('AppInitializer: Initializing providers...', name: 'AppInitializer');
+  Future<void> _initializeProvidersAndAuth() async {
+    developer.log('AppInitializer: Initializing providers and authenticating...', name: 'AppInitializer');
     final authService = Provider.of<LocalAuthService>(context, listen: false);
+
+    // Wait for the session to load first
+    // The constructor of LocalAuthService now calls _loadUserSession(),
+    // so we need to ensure it's complete, possibly by checking a flag or waiting for a Future
+    // For simplicity, we'll assume _loadUserSession has completed by the time this is called
+    // or we'll add a specific method to await.
+    // A better approach is to await a Future from LocalAuthService that completes when session is loaded.
+    // Let's add a future to LocalAuthService for this.
+
+    // For now, let's ensure _loadUserSession is called and awaited indirectly if needed.
+    // Since LocalAuthService constructor is async, we might need a flag or a Future it exposes.
+    // Given _loadUserSession is async and called in constructor, let's assume it has started.
+    // We'll rely on the isSessionLoading flag.
+
+    // If session is still loading, wait for it.
+    while (authService.isSessionLoading) {
+      developer.log('AppInitializer: Waiting for authService.isSessionLoading to be false...', name: 'AppInitializer');
+      await Future.delayed(const Duration(milliseconds: 100)); // Wait a bit
+    }
+
     developer.log('AppInitializer: LocalAuthService isAuthenticated: ${authService.isAuthenticated}', name: 'AppInitializer');
 
-    // Only fetch data if a user is authenticated AND currentUser is not null.
     if (authService.isAuthenticated && authService.currentUser != null) {
       developer.log('AppInitializer: User is authenticated and currentUser is not null. Fetching data...', name: 'AppInitializer');
       final studentProvider = Provider.of<StudentProvider>(context, listen: false);
@@ -128,7 +148,6 @@ class _AppInitializerState extends State<AppInitializer> {
       developer.log('AppInitializer: User not authenticated or currentUser is null. Skipping data fetch.', name: 'AppInitializer');
     }
 
-    // After all initial data is fetched (or if no user is authenticated), set initialized state
     if (mounted) {
       setState(() {
         _isInitialized = true;
@@ -142,63 +161,72 @@ class _AppInitializerState extends State<AppInitializer> {
   @override
   Widget build(BuildContext context) {
     developer.log('AppInitializer: build called. _isInitialized: $_isInitialized', name: 'AppInitializer');
-    if (!_isInitialized) {
-      developer.log('AppInitializer: Showing a simple loading screen.', name: 'AppInitializer');
-      // Temporarily show a simple message with logs to break potential redirect loops
-      return Scaffold(
-        appBar: AppBar(title: const Text('Initializing App...')),
-        body: Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              const CircularProgressIndicator(),
-              const SizedBox(height: 20),
-              Text('Initializing: ${_isInitialized ? "Complete" : "In Progress"}'),
-              Consumer<LocalAuthService>(
-                builder: (context, authService, child) {
-                  return Text('Authenticated: ${authService.isAuthenticated}, User: ${authService.currentUser?.role ?? "N/A"}');
-                },
-              ),
-            ],
-          ),
-        ),
-      );
-    }
-    // Based on authentication status, show either LoginScreen or the appropriate home screen
-    return Consumer<LocalAuthService>(
-      builder: (context, authService, child) {
-        developer.log('AppInitializer: Consumer rebuilding. isAuthenticated: ${authService.isAuthenticated}', name: 'AppInitializer');
-        if (authService.isAuthenticated && authService.currentUser != null) {
-          developer.log('AppInitializer: User is authenticated. Navigating to role-based home screen.', name: 'AppInitializer');
-          final String userRole = authService.currentUser!.role; // currentUser is guaranteed not null here
-          developer.log('AppInitializer: Authenticated user role: $userRole', name: 'AppInitializer');
-          return _getHomeScreenForRole(userRole);
+    return FutureBuilder(
+      future: _initializationFuture,
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.done) {
+          developer.log('AppInitializer: FutureBuilder connectionState is done.', name: 'AppInitializer');
+          // Based on authentication status, show either LoginScreen or the appropriate home screen
+          return Consumer<LocalAuthService>(
+            builder: (context, authService, child) {
+              developer.log('AppInitializer: Consumer rebuilding. isAuthenticated: ${authService.isAuthenticated}', name: 'AppInitializer');
+              if (authService.isAuthenticated && authService.currentUser != null) {
+                developer.log('AppInitializer: User is authenticated. Navigating to role-based home screen.', name: 'AppInitializer');
+                final String userRole = authService.currentUser!.role;
+                developer.log('AppInitializer: Authenticated user role: $userRole', name: 'AppInitializer');
+                return _getHomeScreenForRole(userRole);
+              } else {
+                developer.log('AppInitializer: User not authenticated or currentUser is null. Navigating to LoginScreen.', name: 'AppInitializer');
+                return const LoginScreen(); // Changed to LoginScreen
+              }
+            },
+          );
+        } else if (snapshot.hasError) {
+          developer.log('AppInitializer: FutureBuilder has error: ${snapshot.error}', name: 'AppInitializer', level: 1000, error: snapshot.error, stackTrace: snapshot.stackTrace);
+          return Scaffold(
+            appBar: AppBar(title: const Text('Error')),
+            body: Center(child: Text('Error initializing app: ${snapshot.error}')),
+          );
         } else {
-          developer.log('AppInitializer: User not authenticated or currentUser is null. Navigating to RegisterScreen.', name: 'AppInitializer');
-          return const RegisterScreen(); // Changed to RegisterScreen
+          developer.log('AppInitializer: FutureBuilder connectionState is waiting.', name: 'AppInitializer');
+          return Scaffold(
+            appBar: AppBar(title: const Text('Initializing App...')),
+            body: Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const CircularProgressIndicator(),
+                  const SizedBox(height: 20),
+                  const Text('Loading application...'),
+                  Consumer<LocalAuthService>(
+                    builder: (context, authService, child) {
+                      return Text('Authenticated: ${authService.isAuthenticated}, User: ${authService.currentUser?.role ?? "N/A"}, Loading Session: ${authService.isSessionLoading}');
+                    },
+                  ),
+                ],
+              ),
+            ),
+          );
         }
       },
     );
   }
 
-  // New method to return the appropriate home screen based on the user's role
   Widget _getHomeScreenForRole(String role) {
     developer.log('AppInitializer: Getting home screen for role: $role', name: 'AppInitializer');
     switch (role) {
       case 'admin':
-        return const DashboardScreen(); // Admin sees the full dashboard
+        return const DashboardScreen();
       case 'teacher':
-        return const DashboardScreen(); // Teachers might see a modified dashboard or a specific teacher screen
+        return const DashboardScreen();
       case 'student':
-        return const DashboardScreen(); // Students might see a specific student screen
-      // case 'parent': // We will add parent role later
-      //   return const ParentDashboardScreen();
-      case 'guest': // Handle the default 'guest' role if currentUser is null
-        developer.log('AppInitializer: User role is guest. Falling back to RegisterScreen.', name: 'AppInitializer', level: 800);
-        return const RegisterScreen(); // Fallback to RegisterScreen
+        return const DashboardScreen();
+      case 'guest':
+        developer.log('AppInitializer: User role is guest. Falling back to LoginScreen.', name: 'AppInitializer', level: 800);
+        return const LoginScreen();
       default:
-        developer.log('AppInitializer: Unknown role: $role. Falling back to RegisterScreen.', name: 'AppInitializer', level: 900);
-        return const RegisterScreen(); // Fallback to RegisterScreen if role is unknown
+        developer.log('AppInitializer: Unknown role: $role. Falling back to LoginScreen.', name: 'AppInitializer', level: 900);
+        return const LoginScreen();
     }
   }
 }

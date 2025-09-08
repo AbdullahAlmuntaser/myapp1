@@ -7,11 +7,13 @@
   packages = [
     pkgs.jdk21
     pkgs.unzip
-    pkgs.google-chrome
+    pkgs.chromium # Changed from pkgs.google-chrome
+    pkgs.flutter # Added Flutter
+    pkgs.dart # Added Dart
   ];
   # Sets environment variables in the workspace
   env = {
-    CHROME_EXECUTABLE = "${pkgs.google-chrome}/bin/google-chrome";
+    CHROME_EXECUTABLE = "${pkgs.chromium}/bin/chromium"; # Changed path to chromium
   };
   idx = {
     # Search for the extensions you want on https://open-vsx.org/ and use "publisher.id"

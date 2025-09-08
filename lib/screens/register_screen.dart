@@ -38,10 +38,11 @@ class _RegisterScreenState extends State<RegisterScreen> {
         _selectedRole,
       );
 
-      if (!mounted) return; // Add this line
+      if (!mounted) return;
 
       if (success) {
-        Navigator.pop(context); // Go back to login screen
+        // Changed from Navigator.pop(context) to pushReplacementNamed
+        Navigator.pushReplacementNamed(context, '/login'); 
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Registration successful! Please log in.')),
         );
