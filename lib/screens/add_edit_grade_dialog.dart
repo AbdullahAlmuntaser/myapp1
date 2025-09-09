@@ -128,7 +128,7 @@ class _AddEditGradeDialogState extends State<AddEditGradeDialog> {
                 builder: (context, studentProvider, child) {
                   return DropdownButtonFormField<Student>(
                     decoration: const InputDecoration(labelText: 'الطالب'),
-                    value: _selectedStudent,
+                    initialValue: _selectedStudent, // Changed 'value' to 'initialValue'
                     items: studentProvider.students.map((student) {
                       return DropdownMenuItem(
                         value: student,
@@ -149,7 +149,7 @@ class _AddEditGradeDialogState extends State<AddEditGradeDialog> {
                 builder: (context, subjectProvider, child) {
                   return DropdownButtonFormField<Subject>(
                     decoration: const InputDecoration(labelText: 'المادة'),
-                    value: _selectedSubject,
+                    initialValue: _selectedSubject, // Changed 'value' to 'initialValue'
                     items: subjectProvider.subjects.map((subject) {
                       return DropdownMenuItem(
                         value: subject,
@@ -170,7 +170,7 @@ class _AddEditGradeDialogState extends State<AddEditGradeDialog> {
                 builder: (context, classProvider, child) {
                   return DropdownButtonFormField<SchoolClass>(
                     decoration: const InputDecoration(labelText: 'الفصل'),
-                    value: _selectedClass,
+                    initialValue: _selectedClass, // Changed 'value' to 'initialValue'
                     items: classProvider.classes.map((schoolClass) {
                       return DropdownMenuItem(
                         value: schoolClass,
@@ -189,7 +189,7 @@ class _AddEditGradeDialogState extends State<AddEditGradeDialog> {
               const SizedBox(height: 16),
               DropdownButtonFormField<String>(
                 decoration: const InputDecoration(labelText: 'نوع التقييم'),
-                value: _selectedAssessmentType,
+                initialValue: _selectedAssessmentType, // Changed 'value' to 'initialValue'
                 items: _assessmentTypes.map((type) {
                   return DropdownMenuItem(
                     value: type,

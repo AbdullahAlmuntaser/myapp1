@@ -151,7 +151,7 @@ class AddEditClassScreenState extends State<AddEditClassScreen> {
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 DropdownButtonFormField<String>(
-                  value: _selectedClassName,
+                  initialValue: _selectedClassName, // Changed 'value' to 'initialValue'
                   decoration: const InputDecoration(
                     labelText: 'اسم الصف',
                     border: OutlineInputBorder(),

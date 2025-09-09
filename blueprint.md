@@ -30,7 +30,7 @@ This blueprint outlines the development and features of a Student Management Sys
 
 ### Navigation and Routing
 - **Initial Route:** The `AppInitializer` widget determines the initial screen based on user authentication status. If a user is not authenticated, it navigates to the `RegisterScreen`. If authenticated, it directs to the `DashboardScreen` or a role-specific home screen.
-- **Named Routes:** Uses named routes for `GradesScreen` and `AttendanceScreen`, and for authentication (`/login`, `/register`).
+- **Named Routes:** Uses named routes for `GradesScreen` and `AttendanceScreen`, and for authentication (`/login`, `/router`).
 - **Bottom Navigation Bar:** `DashboardScreen` uses a `BottomNavigationBar` for easy navigation between main sections (tabs).
 
 ### Core Features (Screens and Tabs)
@@ -57,30 +57,32 @@ This blueprint outlines the development and features of a Student Management Sys
 
 ## Current Plan
 
-**Objective:** Finally resolve the Dart SDK version mismatch and successfully run the Flutter application as a web server to display its interfaces within the IDE's preview.
+**Objective:** Resolve remaining warnings from `flutter analyze` and ensure a clean project state.
 
 **Steps:**
-1.  **Update `.idx/dev.nix`:** Modified the `.idx/dev.nix` file to explicitly include `pkgs.flutter` and `pkgs.dart` in the `packages` list, ensuring Flutter and Dart are available in the workspace environment.
-2.  **User Action Required (Reload Workspace):** Instructed the user to reload their workspace for the changes to the `.idx/dev.nix` file to take effect.
-3.  **Initial `flutter doctor` Run:** Executed `flutter doctor` which revealed:
-    *   Android toolchain: Some Android licenses not accepted.
-    *   Linux toolchain: Missing `clang++`, `CMake`, `ninja`, `pkg-config`.
-    *   Android Studio: Not installed.
-4.  **Attempt to Accept Android Licenses:** Ran `flutter doctor --android-licenses` to accept pending Android SDK licenses.
-5.  **Re-run `flutter doctor`:** Executed `flutter doctor` again to verify the resolution of Android license issues. This run still reported that Android licenses were not accepted, which was unexpected.
-6.  **Fix `use_build_context_synchronously` issues:** Modified `lib/main.dart` to add `if (!mounted) return;` checks before `Provider.of(context)` calls after `await` operations to resolve `use_build_context_synchronously` lint warnings.
-7.  **Run `flutter analyze`:** Executed `flutter analyze` which reported "No issues found!" indicating that all code quality issues have been addressed.
-8.  **Attempt to Run Application on Android Emulator (Failed):** Executed `flutter run -d android` which failed due to an incorrect device ID. An available emulator `emulator-5554` was identified.
-9.  **Attempt to Run Application on Chrome (Failed):** Executed `flutter run -d chrome` which failed because the IDE environment does not have a graphical X server to launch Chrome as a desktop application.
-10. **Initial Run Application as Web Server (Failed to Display):** Executed `flutter run -d web-server --web-hostname 0.0.0.0 --web-port $PORT`. The command indicated it was long-running, but the application did not appear in the IDE's preview.
-11. **Workspace Reload (User Action):** Instructed the user to reload the workspace after the previous web server attempt to ensure a clean state.
-12. **Attempt to Rerun Web Server with `$PORT` (Failed):** Executed `flutter run -d web-server --web-hostname 0.0.0.0 --web-port $PORT` again after workspace reload. This failed because `$PORT` was not resolved to an actual port number.
-13. **Attempt to Read `$PORT` Environment Variable:** Executed `echo $PORT` to check if the `$PORT` environment variable was accessible, which returned an empty string.
-14. **Diagnose Web Preview Connection Failure:** Received user feedback that the web preview shows "Connection Failed".
-15. **Check `.idx/mcp.json`:** Inspected the `.idx/mcp.json` file and found it to be empty, indicating missing Firebase MCP configurations.
-16. **Add Firebase MCP Configuration:** Added the standard Firebase MCP configuration to `.idx/mcp.json` to ensure the core Firebase Studio environment is set up correctly.
-17. **Workspace Reload (User Action):** Instructed the user to reload the workspace again to apply the `.idx/mcp.json` changes.
-18. **Diagnose Dart SDK Version Mismatch (New Error):** After the last workspace reload, the Debug Console showed the error: "Error: The current Dart SDK version is 3.4.0. Because myapp requires SDK version ^3.8.1, version solving failed."
-19. **Modify `.idx/dev.nix` to use Flutter's bundled Dart SDK (Initial Attempt):** Removed `pkgs.dart` from the `packages` list in `.idx/dev.nix`, relying instead on the Dart SDK version bundled with `pkgs.flutter`. This attempt did not resolve the Dart SDK version mismatch.
-20. **Modify `.idx/dev.nix` to use `unstable` Nix channel for updated SDKs:** Changed the `channel` in `dev.nix` from `"stable-24.05"` to `"unstable"` to access more recent versions of Flutter and Dart, which should include the required SDK version. This change has been confirmed in the `dev.nix` file.
-21. **Critical Next Action: Final Workspace Reload (User Action) and Patient Waiting:** After confirming the `dev.nix` channel change, a *final and critical* workspace reload is required. This time, it's essential to allow ample time for Nix to pull and configure the updated Flutter/Dart SDK from the `unstable` channel. This process is intensive and will likely take a long time. Upon completion, the IDE should attempt to start the web preview automatically. The user *must* wait patiently without any interaction during this reload and subsequent automated preview startup.
+1.  **Update `.idx/dev.nix` (Initial Attempt):** Modified the `.idx/dev.nix` file to include `pkgs.flutter` and `pkgs.dart`.
+2.  **User Reload Workspace:** User reloaded the workspace.
+3.  **Initial `flutter doctor` Run:** Revealed Android toolchain issues, Linux toolchain issues, and missing Android Studio.
+4.  **Attempt to Accept Android Licenses:** Ran `flutter doctor --android-licenses`.
+5.  **Re-run `flutter doctor`:** Still reported unaccepted Android licenses.
+6.  **Fix `use_build_context_synchronously`:** Modified `lib/main.dart` to add `if (!mounted) return;` checks.
+7.  **Run `flutter analyze` (Post-fix):** Reported "No issues found!"
+8.  **Attempt Android Emulator Run (Failed):** Incorrect device ID used.
+9.  **Attempt Chrome Run (Failed):** IDE environment lacked graphical X server.
+10. **Initial Web Server Run (Failed to Display):** `flutter run -d web-server --web-hostname 0.0.0.0 --web-port $PORT` command ran long, but no display.
+11. **User Reload Workspace:** User reloaded the workspace.
+12. **Rerun Web Server with `$PORT` (Failed):** `$PORT` not resolved.
+13. **Read `$PORT` Environment Variable:** Returned empty string.
+14. **Diagnose Web Preview Connection Failure:** User reported "Connection Failed".
+15. **Check `.idx/mcp.json`:** Found to be empty.
+16. **Add Firebase MCP Configuration:** Added standard Firebase MCP configuration to `.idx/mcp.json`.
+17. **User Reload Workspace:** User reloaded the workspace.
+18. **Diagnose Dart SDK Version Mismatch (Error):** Debug Console showed "Error: The current Dart SDK version is 3.4.0. Because myapp requires SDK version ^3.8.1, version solving failed."
+19. **Modify `.idx/dev.nix` to use Flutter's bundled Dart SDK (Second Attempt):** Removed `pkgs.dart`.
+20. **Modify `.idx/dev.nix` to use `unstable` Nix channel:** Changed `channel = "unstable";`.
+21. **User Reload Workspace (Critical & Patient Wait):** User reloaded the workspace, which involved a significant wait for Nix to update the SDKs.
+22. **Web Preview Successfully Launched:** The application successfully launched and is running in the web preview, allowing user interaction and navigation to the dashboard.
+23. **Current Problem Diagnosis:**
+    *   "Flutter: Attaching..." notification is present in the status bar, indicating a pending debug connection.
+    *   `flutter analyze` (after `unstable` channel update) reported 20 `info` level issues related to deprecated API usage (`value` and `activeColor`).
+24. **Next Action: Fix Deprecated API Usage and Rerun `flutter analyze`:** The next step is to address the 20 `info` warnings by replacing deprecated properties (`value` with `initialValue`, `activeColor` with `activeThumbColor`) in the relevant files. After these fixes, `flutter analyze` will be run again to confirm a clean analysis.
