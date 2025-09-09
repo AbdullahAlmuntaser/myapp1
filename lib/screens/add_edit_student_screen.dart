@@ -311,7 +311,7 @@ class AddEditStudentScreenState extends State<AddEditStudentScreen> {
                         labelText: 'الفصل',
                         border: OutlineInputBorder(),
                       ),
-                      initialValue: _selectedClassId, // Changed 'value' to 'initialValue'
+                      initialValue: _selectedClassId,
                       hint: const Text('اختر فصلاً'),
                       items: classProvider.classes.map((SchoolClass classItem) {
                         return DropdownMenuItem<String>(
@@ -328,7 +328,8 @@ class AddEditStudentScreenState extends State<AddEditStudentScreen> {
                           ? 'الرجاء اختيار فصل'
                           : null,
                     );
-                  },\n                ),
+                  },
+                ),
                 const SizedBox(height: 16),
                 TextFormField(
                   controller: _sectionController,
@@ -344,12 +345,12 @@ class AddEditStudentScreenState extends State<AddEditStudentScreen> {
                     labelText: 'ربط بولي أمر (اختياري)',
                     border: OutlineInputBorder(),
                   ),
-                  initialValue: _selectedParentUserId, // Changed 'value' to 'initialValue'
+                  initialValue: _selectedParentUserId,
                   hint: const Text('اختر ولي أمر'),
                   items: _parents.map((User parentUser) {
                     return DropdownMenuItem<int>(
                       value: parentUser.id,
-                      child: Text('${parentUser.username} (${parentUser.role})'), // Fixed interpolation
+                      child: Text('${parentUser.username} (${parentUser.role})'),
                     );
                   }).toList(),
                   onChanged: (int? newValue) {

@@ -182,7 +182,7 @@ class _AddEditTimetableScreenState extends State<AddEditTimetableScreen> {
                   children: [
                     // Class Dropdown
                     DropdownButtonFormField<SchoolClass>(
-                      value: _selectedClass,
+                      initialValue: _selectedClass,
                       hint: const Text('اختر الفصل'),
                       onChanged: classProvider.classes.isEmpty ? null : (newValue) {
                         setState(() {
@@ -197,7 +197,7 @@ class _AddEditTimetableScreenState extends State<AddEditTimetableScreen> {
                     const SizedBox(height: 16),
                     // Subject Dropdown
                     DropdownButtonFormField<Subject>(
-                      value: _selectedSubject,
+                      initialValue: _selectedSubject,
                       hint: const Text('اختر المادة'),
                       onChanged: subjectProvider.subjects.isEmpty ? null : (newValue) {
                         setState(() {
@@ -212,7 +212,7 @@ class _AddEditTimetableScreenState extends State<AddEditTimetableScreen> {
                     const SizedBox(height: 16),
                     // Teacher Dropdown
                     DropdownButtonFormField<Teacher>(
-                      value: _selectedTeacher,
+                      initialValue: _selectedTeacher,
                       hint: const Text('اختر المعلم'),
                       onChanged: teacherProvider.teachers.isEmpty ? null : (newValue) {
                         setState(() {
@@ -227,7 +227,7 @@ class _AddEditTimetableScreenState extends State<AddEditTimetableScreen> {
                     const SizedBox(height: 16),
                     // Day of Week Dropdown
                     DropdownButtonFormField<String>(
-                      value: _selectedDayOfWeek,
+                      initialValue: _selectedDayOfWeek,
                       hint: const Text('اختر اليوم'),
                       onChanged: (newValue) {
                         setState(() {
@@ -242,14 +242,14 @@ class _AddEditTimetableScreenState extends State<AddEditTimetableScreen> {
                     const SizedBox(height: 16),
                     // Lesson Number Dropdown
                     DropdownButtonFormField<int>(
-                      value: _selectedLessonNumber,
+                      initialValue: _selectedLessonNumber,
                       hint: const Text('اختر رقم الحصة'),
                       onChanged: (newValue) {
                         setState(() {
                           _selectedLessonNumber = newValue;
                         });
                       },
-                      items: _lessonNumbers.map((lessonNum) { // Changed 'num' to 'lessonNum'
+                      items: _lessonNumbers.map((lessonNum) {
                         return DropdownMenuItem(value: lessonNum, child: Text('الحصة $lessonNum'));
                       }).toList(),
                       validator: (value) => value == null ? 'الرجاء اختيار رقم الحصة' : null,

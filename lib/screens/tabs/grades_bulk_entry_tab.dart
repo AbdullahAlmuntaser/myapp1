@@ -123,7 +123,7 @@ class _GradesBulkEntryTabState extends State<GradesBulkEntryTab> {
             children: [
               DropdownButtonFormField<SchoolClass>(
                 decoration: const InputDecoration(labelText: 'الفصل'),
-                value: _selectedClass,
+                initialValue: _selectedClass,
                 items: classProvider.classes.map((schoolClass) {
                   return DropdownMenuItem(
                     value: schoolClass,
@@ -140,7 +140,7 @@ class _GradesBulkEntryTabState extends State<GradesBulkEntryTab> {
               const SizedBox(height: 16),
               DropdownButtonFormField<Subject>(
                 decoration: const InputDecoration(labelText: 'المادة'),
-                value: _selectedSubject,
+                initialValue: _selectedSubject,
                 items: subjectProvider.subjects.map((subject) {
                   return DropdownMenuItem(
                     value: subject,
@@ -156,7 +156,7 @@ class _GradesBulkEntryTabState extends State<GradesBulkEntryTab> {
               const SizedBox(height: 16),
               DropdownButtonFormField<String>(
                 decoration: const InputDecoration(labelText: 'نوع التقييم'),
-                value: _selectedAssessmentType,
+                initialValue: _selectedAssessmentType,
                 items: _assessmentTypes.map((type) {
                   return DropdownMenuItem(
                     value: type,

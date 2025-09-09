@@ -33,7 +33,7 @@ class SettingsTab extends StatelessWidget {
                     onChanged: (value) {
                       themeProvider.toggleTheme(value);
                     },
-                    activeColor: Theme.of(context).primaryColor,
+                    activeTrackColor: Theme.of(context).primaryColor,
                   ),
                 ],
               ),

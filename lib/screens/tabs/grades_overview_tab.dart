@@ -140,7 +140,7 @@ class _GradesOverviewTabState extends State<GradesOverviewTab> {
                   Expanded(
                     child: DropdownButtonFormField<String>(
                       decoration: const InputDecoration(labelText: 'فلتر الطالب'),
-                      value: _selectedStudentFilter,
+                      initialValue: _selectedStudentFilter,
                       items: studentProvider.students.map((s) => s.name).map((name) {
                         return DropdownMenuItem(value: name, child: Text(name));
                       }).toList(),
@@ -155,7 +155,7 @@ class _GradesOverviewTabState extends State<GradesOverviewTab> {
                   Expanded(
                     child: DropdownButtonFormField<String>(
                       decoration: const InputDecoration(labelText: 'فلتر الفصل'),
-                      value: _selectedClassFilter,
+                      initialValue: _selectedClassFilter,
                       items: classProvider.classes.map((c) => c.name).map((name) {
                         return DropdownMenuItem(value: name, child: Text(name));
                       }).toList(),
@@ -170,7 +170,7 @@ class _GradesOverviewTabState extends State<GradesOverviewTab> {
                   Expanded(
                     child: DropdownButtonFormField<String>(
                       decoration: const InputDecoration(labelText: 'فلتر المادة'),
-                      value: _selectedSubjectFilter,
+                      initialValue: _selectedSubjectFilter,
                       items: subjectProvider.subjects.map((s) => s.name).map((name) {
                         return DropdownMenuItem(value: name, child: Text(name));
                       }).toList(),
