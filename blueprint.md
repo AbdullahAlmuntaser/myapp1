@@ -57,7 +57,7 @@ This blueprint outlines the development and features of a Student Management Sys
 
 ## Current Plan
 
-**Objective:** Successfully run the Flutter application as a web server to display its interfaces within the IDE's preview.
+**Objective:** Finally resolve the Dart SDK version mismatch and successfully run the Flutter application as a web server to display its interfaces within the IDE's preview.
 
 **Steps:**
 1.  **Update `.idx/dev.nix`:** Modified the `.idx/dev.nix` file to explicitly include `pkgs.flutter` and `pkgs.dart` in the `packages` list, ensuring Flutter and Dart are available in the workspace environment.
@@ -73,4 +73,14 @@ This blueprint outlines the development and features of a Student Management Sys
 8.  **Attempt to Run Application on Android Emulator (Failed):** Executed `flutter run -d android` which failed due to an incorrect device ID. An available emulator `emulator-5554` was identified.
 9.  **Attempt to Run Application on Chrome (Failed):** Executed `flutter run -d chrome` which failed because the IDE environment does not have a graphical X server to launch Chrome as a desktop application.
 10. **Initial Run Application as Web Server (Failed to Display):** Executed `flutter run -d web-server --web-hostname 0.0.0.0 --web-port $PORT`. The command indicated it was long-running, but the application did not appear in the IDE's preview.
-11. **Next Action: Workspace Reload and Re-run Web Server:** The current `flutter run` process needs to be terminated, and the workspace reloaded to ensure a fresh environment and proper connection to the IDE's preview. After the reload, the web server command will be re-executed.
+11. **Workspace Reload (User Action):** Instructed the user to reload the workspace after the previous web server attempt to ensure a clean state.
+12. **Attempt to Rerun Web Server with `$PORT` (Failed):** Executed `flutter run -d web-server --web-hostname 0.0.0.0 --web-port $PORT` again after workspace reload. This failed because `$PORT` was not resolved to an actual port number.
+13. **Attempt to Read `$PORT` Environment Variable:** Executed `echo $PORT` to check if the `$PORT` environment variable was accessible, which returned an empty string.
+14. **Diagnose Web Preview Connection Failure:** Received user feedback that the web preview shows "Connection Failed".
+15. **Check `.idx/mcp.json`:** Inspected the `.idx/mcp.json` file and found it to be empty, indicating missing Firebase MCP configurations.
+16. **Add Firebase MCP Configuration:** Added the standard Firebase MCP configuration to `.idx/mcp.json` to ensure the core Firebase Studio environment is set up correctly.
+17. **Workspace Reload (User Action):** Instructed the user to reload the workspace again to apply the `.idx/mcp.json` changes.
+18. **Diagnose Dart SDK Version Mismatch (New Error):** After the last workspace reload, the Debug Console showed the error: "Error: The current Dart SDK version is 3.4.0. Because myapp requires SDK version ^3.8.1, version solving failed."
+19. **Modify `.idx/dev.nix` to use Flutter's bundled Dart SDK (Initial Attempt):** Removed `pkgs.dart` from the `packages` list in `.idx/dev.nix`, relying instead on the Dart SDK version bundled with `pkgs.flutter`. This attempt did not resolve the Dart SDK version mismatch.
+20. **Modify `.idx/dev.nix` to use `unstable` Nix channel for updated SDKs:** Changed the `channel` in `dev.nix` from `"stable-24.05"` to `"unstable"` to access more recent versions of Flutter and Dart, which should include the required SDK version. This change has been confirmed in the `dev.nix` file.
+21. **Critical Next Action: Final Workspace Reload (User Action) and Patient Waiting:** After confirming the `dev.nix` channel change, a *final and critical* workspace reload is required. This time, it's essential to allow ample time for Nix to pull and configure the updated Flutter/Dart SDK from the `unstable` channel. This process is intensive and will likely take a long time. Upon completion, the IDE should attempt to start the web preview automatically. The user *must* wait patiently without any interaction during this reload and subsequent automated preview startup.
