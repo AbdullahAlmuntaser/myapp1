@@ -97,8 +97,7 @@ class _AppInitializerState extends State<AppInitializer> {
 
   Future<void> _initializeProvidersAndAuth() async {
     developer.log('AppInitializer: Initializing providers and authenticating...', name: 'AppInitializer');
-    final authService = Provider.of<LocalAuthService>(context, listen: false);
-
+    
     // Wait for the session to load first
     // The constructor of LocalAuthService now calls _loadUserSession(),
     // so we need to ensure it's complete, possibly by checking a flag or waiting for a Future
@@ -113,21 +112,32 @@ class _AppInitializerState extends State<AppInitializer> {
     // We'll rely on the isSessionLoading flag.
 
     // If session is still loading, wait for it.
-    while (authService.isSessionLoading) {
+    while (Provider.of<LocalAuthService>(context, listen: false).isSessionLoading) {
       developer.log('AppInitializer: Waiting for authService.isSessionLoading to be false...', name: 'AppInitializer');
       await Future.delayed(const Duration(milliseconds: 100)); // Wait a bit
+      if (!mounted) return; // Check if widget is still mounted after delay
     }
 
+    final authService = Provider.of<LocalAuthService>(context, listen: false);
     developer.log('AppInitializer: LocalAuthService isAuthenticated: ${authService.isAuthenticated}', name: 'AppInitializer');
 
     if (authService.isAuthenticated && authService.currentUser != null) {
       developer.log('AppInitializer: User is authenticated and currentUser is not null. Fetching data...', name: 'AppInitializer');
+      
+      // Add mounted checks before accessing context with Provider.of
+      if (!mounted) return;
       final studentProvider = Provider.of<StudentProvider>(context, listen: false);
+      if (!mounted) return;
       final teacherProvider = Provider.of<TeacherProvider>(context, listen: false);
+      if (!mounted) return;
       final classProvider = Provider.of<ClassProvider>(context, listen: false);
+      if (!mounted) return;
       final subjectProvider = Provider.of<SubjectProvider>(context, listen: false);
+      if (!mounted) return;
       final gradeProvider = Provider.of<GradeProvider>(context, listen: false);
+      if (!mounted) return;
       final attendanceProvider = Provider.of<AttendanceProvider>(context, listen: false);
+      if (!mounted) return;
       final timetableProvider = Provider.of<TimetableProvider>(context, listen: false);
 
       try {

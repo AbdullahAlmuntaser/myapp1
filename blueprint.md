@@ -57,10 +57,20 @@ This blueprint outlines the development and features of a Student Management Sys
 
 ## Current Plan
 
-**Objective:** Run the Flutter application and view its interfaces.
+**Objective:** Successfully run the Flutter application as a web server to display its interfaces within the IDE's preview.
 
 **Steps:**
-1.  **Initial Attempt (Web - Failed):** Attempted to run the application on the web using `flutter run -d web`, but encountered issues with device recognition and web renderer options in the Firebase Studio environment.
-2.  **Revised Plan (Android Emulator):** Due to issues with web preview, the current plan is to run the application on an available Android emulator.
-3.  **Execution:** Run the command `flutter run -d emulator-5554` to launch the application on the Android emulator.
-
+1.  **Update `.idx/dev.nix`:** Modified the `.idx/dev.nix` file to explicitly include `pkgs.flutter` and `pkgs.dart` in the `packages` list, ensuring Flutter and Dart are available in the workspace environment.
+2.  **User Action Required (Reload Workspace):** Instructed the user to reload their workspace for the changes to the `.idx/dev.nix` file to take effect.
+3.  **Initial `flutter doctor` Run:** Executed `flutter doctor` which revealed:
+    *   Android toolchain: Some Android licenses not accepted.
+    *   Linux toolchain: Missing `clang++`, `CMake`, `ninja`, `pkg-config`.
+    *   Android Studio: Not installed.
+4.  **Attempt to Accept Android Licenses:** Ran `flutter doctor --android-licenses` to accept pending Android SDK licenses.
+5.  **Re-run `flutter doctor`:** Executed `flutter doctor` again to verify the resolution of Android license issues. This run still reported that Android licenses were not accepted, which was unexpected.
+6.  **Fix `use_build_context_synchronously` issues:** Modified `lib/main.dart` to add `if (!mounted) return;` checks before `Provider.of(context)` calls after `await` operations to resolve `use_build_context_synchronously` lint warnings.
+7.  **Run `flutter analyze`:** Executed `flutter analyze` which reported "No issues found!" indicating that all code quality issues have been addressed.
+8.  **Attempt to Run Application on Android Emulator (Failed):** Executed `flutter run -d android` which failed due to an incorrect device ID. An available emulator `emulator-5554` was identified.
+9.  **Attempt to Run Application on Chrome (Failed):** Executed `flutter run -d chrome` which failed because the IDE environment does not have a graphical X server to launch Chrome as a desktop application.
+10. **Initial Run Application as Web Server (Failed to Display):** Executed `flutter run -d web-server --web-hostname 0.0.0.0 --web-port $PORT`. The command indicated it was long-running, but the application did not appear in the IDE's preview.
+11. **Next Action: Workspace Reload and Re-run Web Server:** The current `flutter run` process needs to be terminated, and the workspace reloaded to ensure a fresh environment and proper connection to the IDE's preview. After the reload, the web server command will be re-executed.
