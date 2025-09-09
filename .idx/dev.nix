@@ -17,21 +17,22 @@
   idx = {
     # Search for the extensions you want on https://open-vsx.org/ and use "publisher.id"
     extensions = [
-      "Dart-Co1e = { };
-      # To run something each time the workspace is (re)started, use the `onStart` hook
-    };
-    # Enable previews and customize configuration
+      "Dart-Code.dart-code"
+    ];
+    # To run something each time the workspace is (re)started, use the `onStart` hook
+    # onStart = "echo Hello from Nix";
+  };
+  # Enable previews and customize configuration
+  previews = {
+    enable = true;
     previews = {
-      enable = true;
-      previews = {
-        web = {
-          command = ["flutter" "run" "--machine" "-d" "web-server" "--web-hostname" "0.0.0.0" "--web-port" "$PORT"];
-          manager = "flutter";
-        };
-        android = {
-          command = ["flutter" "run" "--machine" "-d" "android" "-d" "localhost:5555"];
-          manager = "flutter";
-        };
+      web = {
+        command = ["flutter" "run" "--machine" "-d" "web-server" "--web-hostname" "0.0.0.0" "--web-port" "$PORT"];
+        manager = "flutter";
+      };
+      android = {
+        command = ["flutter" "run" "--machine" "-d" "android" "-d" "localhost:5555"];
+        manager = "flutter";
       };
     };
   };
