@@ -11,12 +11,12 @@ android {
     ndkVersion = "27.0.12077973" // Updated NDK Version to resolve plugin dependency issue
 
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_11
-        targetCompatibility = JavaVersion.VERSION_11
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
     }
 
     kotlinOptions {
-        jvmTarget = JavaVersion.VERSION_11.toString()
+        jvmTarget = JavaVersion.VERSION_17.toString()
     }
 
     defaultConfig {
@@ -42,3 +42,12 @@ android {
 flutter {
     source = "../../"
 }
+
+// Explicitly set JAVA_HOME for Gradle
+tasks.withType<org.gradle.api.tasks.compile.JavaCompile>().configureEach {
+    options.compilerArgs.add("-Xlint:unchecked")
+    options.compilerArgs.add("-Xlint:deprecation")
+}
+
+// Ensure JAVA_HOME is set for Gradle Daemon if not picked up from environment
+gradle.startParameter.systemProperties.put("org.gradle.java.home", "/nix/store/fnshd55b29s6z88mfl3ilmdqfb7l3dqi-openjdk-21.0.7+6/lib/openjdk")
