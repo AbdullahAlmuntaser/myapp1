@@ -2,10 +2,10 @@ import 'dart:async';
 import 'package:path/path.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:path_provider/path_provider.dart';
-import 'package:crypto/crypto.dart'; // Import for password hashing
-import 'dart:convert'; // For utf8 encoding
-import 'dart:developer' as developer; // Import for logging
-import 'package:flutter/foundation.dart'; // Import for kIsWeb
+import 'package:crypto/crypto.dart'; 
+import 'dart:convert'; 
+import 'dart:developer' as developer;
+import 'package:flutter/foundation.dart'; 
 
 import 'student_model.dart';
 import 'teacher_model.dart';
@@ -14,10 +14,9 @@ import 'subject_model.dart';
 import 'grade_model.dart';
 import 'attendance_model.dart';
 import 'timetable_model.dart';
-import 'user_model.dart'; // Import the new User model
+import 'user_model.dart'; 
 
-// Conditional import for Flutter Web
-// Removed: import 'dart:io' show Platform;
+
 import 'package:sqflite_common_ffi_web/sqflite_ffi_web.dart';
 
 class DatabaseHelper {
@@ -37,12 +36,11 @@ class DatabaseHelper {
     try {
       String path;
       if (kIsWeb) {
-        // For web (browser) environment
-        // Use sqflite_ffi_web for web compatibility
+        
         databaseFactory = databaseFactoryFfiWeb;
-        path = 'school_management.db'; // Simple name for web database
+        path = 'school_management.db';
       } else {
-        // For mobile and desktop platforms
+        
         final dbPath = await getApplicationDocumentsDirectory();
         path = join(dbPath.path, 'school_management.db');
       }
@@ -50,7 +48,7 @@ class DatabaseHelper {
       developer.log('DatabaseHelper: Attempting to open database at $path', name: 'DatabaseHelper');
       return await openDatabase(
         path,
-        version: 14, // Increased version for parentUserId in students table
+        version: 15, 
         onCreate: _onCreate,
         onUpgrade: _onUpgrade,
       );
@@ -58,11 +56,11 @@ class DatabaseHelper {
       developer.log(
         'DatabaseHelper: Error initializing database',
         name: 'DatabaseHelper',
-        level: 1000, // SEVERE
+        level: 1000, 
         error: e,
         stackTrace: s,
       );
-      // Re-throw to ensure the app crashes loudly if the DB can't be opened
+      
       rethrow; 
     }
   }
@@ -75,7 +73,8 @@ class DatabaseHelper {
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         username TEXT NOT NULL UNIQUE,
         passwordHash TEXT NOT NULL,
-        role TEXT NOT NULL
+        role TEXT NOT NULL,
+        phone TEXT
       )
     ''');
       await db.execute('''
@@ -94,7 +93,7 @@ class DatabaseHelper {
         parentPhone TEXT,
         address TEXT,
         status INTEGER NOT NULL DEFAULT 1,
-        parentUserId INTEGER -- New field to link to the parent's User ID
+        parentUserId INTEGER
       )
     ''');
       await db.execute('''
@@ -117,7 +116,7 @@ class DatabaseHelper {
         teacherId INTEGER,
         capacity INTEGER,
         yearTerm TEXT,
-        subjectIds TEXT -- Stored as comma-separated string or JSON string
+        subjectIds TEXT
       )
     ''');
       await db.execute('''
@@ -152,7 +151,7 @@ class DatabaseHelper {
         teacherId INTEGER NOT NULL,
         date TEXT NOT NULL,
         lessonNumber INTEGER NOT NULL,
-        status TEXT NOT NULL, -- 'present', 'absent', 'late', 'excused'
+        status TEXT NOT NULL, 
         FOREIGN KEY (studentId) REFERENCES students (id) ON DELETE CASCADE,
         FOREIGN KEY (classId) REFERENCES classes (id) ON DELETE CASCADE,
         FOREIGN KEY (subjectId) REFERENCES subjects (id) ON DELETE CASCADE,
@@ -165,24 +164,24 @@ class DatabaseHelper {
         classId INTEGER NOT NULL,
         subjectId INTEGER NOT NULL,
         teacherId INTEGER NOT NULL,
-        dayOfWeek TEXT NOT NULL, -- 'Sunday', 'Monday', etc.
+        dayOfWeek TEXT NOT NULL, 
         lessonNumber INTEGER NOT NULL,
-        startTime TEXT NOT NULL, -- 'HH:MM'
-        endTime TEXT NOT NULL, -- 'HH:MM'
+        startTime TEXT NOT NULL, 
+        endTime TEXT NOT NULL, 
         FOREIGN KEY (classId) REFERENCES classes (id) ON DELETE CASCADE,
         FOREIGN KEY (subjectId) REFERENCES subjects (id) ON DELETE CASCADE,
         FOREIGN KEY (teacherId) REFERENCES teachers (id) ON DELETE CASCADE
       )
     ''');
 
-      // Insert an initial admin user if the table is empty
+      
       await _insertInitialAdmin(db);
       developer.log('DatabaseHelper: All tables created and initial admin inserted.', name: 'DatabaseHelper');
     } catch (e, s) {
       developer.log(
         'DatabaseHelper: Error during _onCreate table creation',
         name: 'DatabaseHelper',
-        level: 1000, // SEVERE
+        level: 1000, 
         error: e,
         stackTrace: s,
       );
@@ -193,26 +192,16 @@ class DatabaseHelper {
   Future<void> _onUpgrade(Database db, int oldVersion, int newVersion) async {
     developer.log('DatabaseHelper: _onUpgrade called from version $oldVersion to $newVersion', name: 'DatabaseHelper');
     try {
-      // For development, dropping and recreating tables is acceptable.
-      // For production, consider more robust migration strategies.
-      if (oldVersion < newVersion) {
-        developer.log('DatabaseHelper: Dropping existing tables for upgrade...', name: 'DatabaseHelper');
-        await db.execute('DROP TABLE IF EXISTS users'); 
-        await db.execute('DROP TABLE IF EXISTS students');
-        await db.execute('DROP TABLE IF EXISTS teachers');
-        await db.execute('DROP TABLE IF EXISTS classes');
-        await db.execute('DROP TABLE IF EXISTS subjects');
-        await db.execute('DROP TABLE IF EXISTS grades');
-        await db.execute('DROP TABLE IF EXISTS attendance');
-        await db.execute('DROP TABLE IF EXISTS timetable');
-        await _onCreate(db, newVersion);
-        developer.log('DatabaseHelper: Tables dropped and recreated.', name: 'DatabaseHelper');
+      
+      
+      if (oldVersion < 15) {
+         await db.execute('ALTER TABLE users ADD COLUMN phone TEXT');
       }
     } catch (e, s) {
       developer.log(
         'DatabaseHelper: Error during _onUpgrade table migration',
         name: 'DatabaseHelper',
-        level: 1000, // SEVERE
+        level: 1000, 
         error: e,
         stackTrace: s,
       );
@@ -220,14 +209,14 @@ class DatabaseHelper {
     }
   }
 
-  // Helper to hash passwords
+  
   String _hashPassword(String password) {
     final bytes = utf8.encode(password);
     final digest = sha256.convert(bytes);
     return digest.toString();
   }
 
-  // Insert initial admin user if no users exist
+  
   Future<void> _insertInitialAdmin(Database db) async {
     developer.log('DatabaseHelper: Checking for initial admin user...', name: 'DatabaseHelper');
     final count = Sqflite.firstIntValue(await db.rawQuery("SELECT COUNT(*) FROM users"));
@@ -235,7 +224,7 @@ class DatabaseHelper {
       developer.log('DatabaseHelper: No users found, inserting default admin.', name: 'DatabaseHelper');
       final adminUser = User(
         username: 'admin',
-        passwordHash: _hashPassword('admin123'), // Default admin password
+        passwordHash: _hashPassword('admin123'), 
         role: 'admin',
       );
       await db.insert('users', adminUser.toMap());
@@ -245,7 +234,7 @@ class DatabaseHelper {
     }
   }
 
-  // --- User Methods ---
+  
 
   Future<int> createUser(User user) async {
     final db = await database;
@@ -270,7 +259,15 @@ class DatabaseHelper {
     }
   }
 
-  // New method to get a user by ID
+  Future<List<User>> getUsers() async {
+    final db = await database;
+    final List<Map<String, dynamic>> maps = await db.query('users');
+    return List.generate(maps.length, (i) {
+      return User.fromMap(maps[i]);
+    });
+  }
+
+  
   Future<User?> getUserById(int id) async {
     final db = await database;
     final List<Map<String, dynamic>> maps = await db.query(
@@ -300,7 +297,7 @@ class DatabaseHelper {
     return await db.delete('users', where: 'id = ?', whereArgs: [id]);
   }
 
-  // --- Student Methods ---
+  
 
   Future<int> createStudent(Student student) async {
     final db = await database;
@@ -395,7 +392,7 @@ class DatabaseHelper {
     }
   }
 
-  // --- Teacher Methods ---
+  
 
   Future<int> createTeacher(Teacher teacher) async {
     final db = await database;
@@ -452,7 +449,7 @@ class DatabaseHelper {
     });
   }
 
-  // --- Class Methods ---
+  
 
   Future<int> createClass(SchoolClass schoolClass) async {
     final db = await database;
@@ -526,7 +523,7 @@ class DatabaseHelper {
     });
   }
 
-  // --- Subject Methods ---
+  
 
   Future<int> createSubject(Subject subject) async {
     final db = await database;
@@ -614,7 +611,7 @@ class DatabaseHelper {
     }
   }
 
-  // --- Grade Methods ---
+  
 
   Future<int> createGrade(Grade grade) async {
     final db = await database;
@@ -697,7 +694,7 @@ class DatabaseHelper {
     return result;
   }
 
-  // --- Attendance Methods ---
+  
 
   Future<int> createAttendance(Attendance attendance) async {
     final db = await database;
@@ -780,7 +777,7 @@ class DatabaseHelper {
     });
   }
 
-  // --- Timetable Methods ---
+  
 
   Future<int> insertTimetableEntry(Map<String, dynamic> entry) async {
     final db = await database;
@@ -859,7 +856,7 @@ class DatabaseHelper {
       'timetable',
       where: whereString.isEmpty ? null : whereString,
       whereArgs: whereArgs.isEmpty ? null : whereArgs,
-      orderBy: 'lessonNumber ASC', // Order by lesson number for correct display
+      orderBy: 'lessonNumber ASC',
     );
     return List.generate(maps.length, (i) {
       return TimetableEntry.fromMap(maps[i]);

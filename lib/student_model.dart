@@ -5,15 +5,15 @@ class Student {
   final String phone;
   final String grade;
   final String? email;
-  final String? password; // Consider removing if authentication is only through User model
+  final String? password;
   final String? classId;
   final String? academicNumber;
   final String? section;
-  final String? parentName; // Can be derived or kept for display purposes
-  final String? parentPhone; // Can be derived or kept for display purposes
+  final String? parentName;
+  final String? parentPhone;
   final String? address;
-  final bool status; // true for active, false for inactive
-  final int? parentUserId; // New field to link to the parent's User ID
+  final bool status;
+  final int? parentUserId;
 
   Student({
     this.id,
@@ -30,7 +30,7 @@ class Student {
     this.parentPhone,
     this.address,
     this.status = true,
-    this.parentUserId, // Add to constructor
+    this.parentUserId,
   });
 
   Map<String, dynamic> toMap() {
@@ -49,7 +49,7 @@ class Student {
       'parentPhone': parentPhone,
       'address': address,
       'status': status ? 1 : 0,
-      'parentUserId': parentUserId, // Add to toMap
+      'parentUserId': parentUserId,
     };
   }
 
@@ -62,20 +62,20 @@ class Student {
       grade: map['grade'] as String,
       email: map['email'] as String?,
       password: map['password'] as String?,
-      classId: map['classId'] as String?,
-      academicNumber: map['academicNumber'] as String?,
-      section: map['section'] as String?,
+      classId: map['classId']?.toString(), // Ensure classId is a string
+      academicNumber: map['academicNumber']?.toString(), // Ensure academicNumber is a string
+      section: map['section']?.toString(), // Ensure section is a string
       parentName: map['parentName'] as String?,
       parentPhone: map['parentPhone'] as String?,
       address: map['address'] as String?,
-      status: (map['status'] as int?) == 1 ? true : false,
-      parentUserId: map['parentUserId'] as int?, // Add to fromMap
+      status: (map['status'] as int?) == 1,
+      parentUserId: map['parentUserId'] as int?,
     );
   }
 
   @override
   String toString() {
-    return 'Student{id: $id, name: $name, dob: $dob, phone: $phone, grade: $grade, email: $email, password: $password, classId: $classId, academicNumber: $academicNumber, section: $section, parentName: $parentName, parentPhone: $parentPhone, address: $address, status: $status, parentUserId: $parentUserId}';
+    return 'Student{id: $id, name: $name, dob: $dob, phone: $phone, grade: $grade, email: $email, classId: $classId, academicNumber: $academicNumber, section: $section, parentName: $parentName, parentPhone: $parentPhone, address: $address, status: $status, parentUserId: $parentUserId}';
   }
 
   Student copyWith({
@@ -93,7 +93,7 @@ class Student {
     String? parentPhone,
     String? address,
     bool? status,
-    int? parentUserId, // Add to copyWith
+    int? parentUserId,
   }) {
     return Student(
       id: id ?? this.id,
@@ -110,7 +110,7 @@ class Student {
       parentPhone: parentPhone ?? this.parentPhone,
       address: address ?? this.address,
       status: status ?? this.status,
-      parentUserId: parentUserId ?? this.parentUserId, // Assign new field
+      parentUserId: parentUserId ?? this.parentUserId,
     );
   }
 }
