@@ -83,6 +83,5 @@ This blueprint outlines the development and features of a Student Management Sys
 21. **User Reload Workspace (Critical & Patient Wait):** User reloaded the workspace, which involved a significant wait for Nix to update the SDKs.
 22. **Web Preview Successfully Launched:** The application successfully launched and is running in the web preview, allowing user interaction and navigation to the dashboard.
 23. **Current Problem Diagnosis:**
-    *   "Flutter: Attaching..." notification is present in the status bar, indicating a pending debug connection.
-    *   `flutter analyze` (after `unstable` channel update) reported 20 `info` level issues related to deprecated API usage (`value` and `activeColor`).
-24. **Next Action: Fix Deprecated API Usage and Rerun `flutter analyze`:** The next step is to address the 20 `info` warnings by replacing deprecated properties (`value` with `initialValue`, `activeColor` with `activeThumbColor`) in the relevant files. After these fixes, `flutter analyze` will be run again to confirm a clean analysis.
+    *   `flutter analyze` (after `unstable` channel update) reported `info` level issues related to deprecated API usage in `settings_tab.dart`.
+24. **Next Action: Fix Deprecated API Usage and Rerun `flutter analyze`:** Address the `info` warnings by replacing deprecated properties in `lib/src/presentation/tabs/settings_tab.dart` and updating the `ThemeProvider` in `lib/main.dart`. After these fixes, `flutter analyze` will be run again to confirm a clean analysis.

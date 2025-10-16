@@ -98,20 +98,20 @@ class _GradesOverviewTabState extends State<GradesOverviewTab> {
                             );
                           }).toList(),
                           titlesData: FlTitlesData(
-                            leftTitles: AxisTitles(
+                            leftTitles: const AxisTitles(
                               sideTitles: SideTitles(showTitles: true, interval: 20),
                             ),
                             bottomTitles: AxisTitles(
                               sideTitles: SideTitles(
                                 showTitles: true,
-                                getTitlesWidget: (value, meta) {
+                                getTitlesWidget: (double value, TitleMeta meta) {
                                   final index = value.toInt();
                                   if (index >= 0 && index < data.length) {
                                     return SideTitleWidget(
-                                      axisSide: meta.axisSide, // Re-added axisSide parameter
+                                      axisSide: meta.axisSide,
                                       space: 8.0,
                                       child: Text(data[index]['subjectName']!),
-                                    ); 
+                                    );
                                   }
                                   return const Text('');
                                 },

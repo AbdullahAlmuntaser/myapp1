@@ -3,7 +3,9 @@ import 'package:provider/provider.dart';
 import '../services/local_auth_service.dart';
 import '../database_helper.dart';
 import '../student_model.dart';
-import 'student_detail_for_parent_screen.dart'; // Import the student detail screen
+import 'student_detail_for_parent_screen.dart';
+import 'chat_screen.dart';
+import '../services/notification_service.dart';
 
 class ParentPortalScreen extends StatefulWidget {
   const ParentPortalScreen({super.key});
@@ -38,18 +40,21 @@ class _ParentPortalScreenState extends State<ParentPortalScreen> {
           setState(() {
             _children = students;
           });
+          // Show a notification
+          final notificationService = Provider.of<NotificationService>(context, listen: false);
+          await notificationService.showNotification(0, 'Parent Portal Updated', 'Your children\'s data has been updated.', 'payload');
         }
       } else {
         if (mounted) {
           setState(() {
-            _errorMessage = 'ليس لديك صلاحية لعرض هذه الصفحة أو لم يتم تسجيل الدخول كولي أمر.';
+            _errorMessage = 'You do not have permission to view this page or are not logged in as a parent.';
           });
         }
       }
     } catch (e) {
       if (mounted) {
         setState(() {
-          _errorMessage = 'حدث خطأ أثناء جلب بيانات أبنائك: $e';
+          _errorMessage = 'An error occurred while fetching your children\'s data: $e';
         });
       }
     }
@@ -64,12 +69,12 @@ class _ParentPortalScreenState extends State<ParentPortalScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('بوابة ولي الأمر'),
+        title: const Text('Parent Portal'),
         actions: [
           IconButton(
             icon: const Icon(Icons.refresh),
             onPressed: _fetchChildren,
-            tooltip: 'تحديث',
+            tooltip: 'Refresh',
           ),
         ],
       ),
@@ -94,13 +99,13 @@ class _ParentPortalScreenState extends State<ParentPortalScreen> {
                           Icon(Icons.sentiment_dissatisfied, size: 80, color: Colors.grey),
                           SizedBox(height: 20),
                           Text(
-                            'لا يوجد أبناء مرتبطون بهذا الحساب.',
+                            'No children associated with this account.',
                             style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
                             textAlign: TextAlign.center,
                           ),
                           SizedBox(height: 10),
                           Text(
-                            'يرجى التواصل مع إدارة المدرسة لربط أبنائك بحسابك.',
+                            'Please contact the school administration to link your children to your account.',
                             style: TextStyle(fontSize: 16, color: Colors.grey),
                             textAlign: TextAlign.center,
                           ),
@@ -136,9 +141,8 @@ class _ParentPortalScreenState extends State<ParentPortalScreen> {
                                     style: Theme.of(context).textTheme.titleLarge,
                                   ),
                                   const SizedBox(height: 5),
-                                  Text('الصف: ${student.grade} - الرقم الأكاديمي: ${student.academicNumber ?? 'N/A'}',
+                                  Text('Grade: ${student.grade} - Academic Number: ${student.academicNumber ?? 'N/A'}',
                                       style: Theme.of(context).textTheme.bodyMedium),
-                                  // You can add more summary details here if needed
                                 ],
                               ),
                             ),
@@ -146,6 +150,16 @@ class _ParentPortalScreenState extends State<ParentPortalScreen> {
                         );
                       },
                     ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => const ChatScreen()),
+          );
+        },
+        tooltip: 'Chat with School',
+        child: const Icon(Icons.chat),
+      ),
     );
   }
 }

@@ -224,7 +224,7 @@ class AddEditStudentScreenState extends State<AddEditStudentScreen> {
                   builder: (context, classProvider, child) {
                     return DropdownButtonFormField<String>(
                       decoration: const InputDecoration(labelText: 'Class'),
-                      value: _selectedClassId,
+                      initialValue: _selectedClassId,
                       hint: const Text('Select a class'),
                       items: classProvider.classes.map((SchoolClass classItem) {
                         return DropdownMenuItem<String>(
@@ -249,7 +249,7 @@ class AddEditStudentScreenState extends State<AddEditStudentScreen> {
                 const SizedBox(height: 16),
                 DropdownButtonFormField<int>(
                   decoration: const InputDecoration(labelText: 'Link Parent (Optional)'),
-                  value: _selectedParentUserId,
+                  initialValue: _selectedParentUserId,
                   hint: const Text('Select a parent'),
                   items: _parents.map((User parentUser) {
                     return DropdownMenuItem<int>(

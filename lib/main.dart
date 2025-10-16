@@ -11,17 +11,21 @@ import 'providers/grade_provider.dart';
 import 'providers/theme_provider.dart';
 import 'providers/attendance_provider.dart';
 import 'providers/timetable_provider.dart';
-import 'database_helper.dart'; // Keep this import
-import 'screens/grades_screen.dart'; // Import GradesScreen
-import 'screens/attendance_screen.dart'; // Import AttendanceScreen
-import 'services/local_auth_service.dart'; // Import LocalAuthService
-import 'screens/login_screen.dart'; // Import LoginScreen
-import 'screens/register_screen.dart'; // Import RegisterScreen
-import 'dart:developer' as developer; // Import for logging
+import 'database_helper.dart';
+import 'screens/grades_screen.dart';
+import 'screens/attendance_screen.dart';
+import 'services/local_auth_service.dart';
+import 'services/notification_service.dart'; // Import NotificationService
+import 'screens/login_screen.dart';
+import 'screens/register_screen.dart';
+import 'dart:developer' as developer;
+
+final notificationService = NotificationService(); // Create an instance of NotificationService
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await DatabaseHelper().database; // UNCOMMENTED THIS LINE
+  await DatabaseHelper().database;
+  await notificationService.init(); // Initialize NotificationService
   runApp(const MyApp());
 }
 
@@ -34,7 +38,6 @@ class MyApp extends StatelessWidget {
     return MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (_) => ThemeProvider()),
-        // Ensure LocalAuthService is created and initialized before other providers
         ChangeNotifierProvider(create: (_) => LocalAuthService()), 
         ChangeNotifierProvider(create: (_) => StudentProvider()),
         ChangeNotifierProvider(create: (_) => TeacherProvider()),
@@ -43,6 +46,7 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => GradeProvider()),
         ChangeNotifierProvider(create: (_) => AttendanceProvider()),
         ChangeNotifierProvider(create: (_) => TimetableProvider()),
+        Provider<NotificationService>.value(value: notificationService), // Provide NotificationService
       ],
       child: Consumer<ThemeProvider>(
         builder: (context, themeProvider, child) {
@@ -52,7 +56,7 @@ class MyApp extends StatelessWidget {
             theme: AppTheme.lightTheme,
             darkTheme: AppTheme.darkTheme,
             themeMode: themeProvider.themeMode,
-            home: const AppInitializer(), // Use AppInitializer as the home screen
+            home: const AppInitializer(),
             routes: {
               GradesScreen.routeName: (context) => const GradesScreen(),
               AttendanceScreen.routeName: (context) => const AttendanceScreen(),
@@ -71,7 +75,7 @@ class MyApp extends StatelessWidget {
             ],
             locale: const Locale('ar', ''),
           );
-        }, // Corrected closing for builder
+        },
       ),
     );
   }
@@ -86,7 +90,7 @@ class AppInitializer extends StatefulWidget {
 
 class _AppInitializerState extends State<AppInitializer> {
   bool _isInitialized = false;
-  late Future<void> _initializationFuture; // To hold the future for initialization
+  late Future<void> _initializationFuture;
 
   @override
   void initState() {
@@ -98,24 +102,10 @@ class _AppInitializerState extends State<AppInitializer> {
   Future<void> _initializeProvidersAndAuth() async {
     developer.log('AppInitializer: Initializing providers and authenticating...', name: 'AppInitializer');
     
-    // Wait for the session to load first
-    // The constructor of LocalAuthService now calls _loadUserSession(),
-    // so we need to ensure it's complete, possibly by checking a flag or waiting for a Future
-    // For simplicity, we'll assume _loadUserSession has completed by the time this is called
-    // or we'll add a specific method to await.
-    // A better approach is to await a Future from LocalAuthService that completes when session is loaded.
-    // Let's add a future to LocalAuthService for this.
-
-    // For now, let's ensure _loadUserSession is called and awaited indirectly if needed.
-    // Since LocalAuthService constructor is async, we might need a flag or a Future it exposes.
-    // Given _loadUserSession is async and called in constructor, let's assume it has started.
-    // We'll rely on the isSessionLoading flag.
-
-    // If session is still loading, wait for it.
     while (Provider.of<LocalAuthService>(context, listen: false).isSessionLoading) {
       developer.log('AppInitializer: Waiting for authService.isSessionLoading to be false...', name: 'AppInitializer');
-      await Future.delayed(const Duration(milliseconds: 100)); // Wait a bit
-      if (!mounted) return; // Check if widget is still mounted after delay
+      await Future.delayed(const Duration(milliseconds: 100));
+      if (!mounted) return;
     }
 
     final authService = Provider.of<LocalAuthService>(context, listen: false);
@@ -124,7 +114,6 @@ class _AppInitializerState extends State<AppInitializer> {
     if (authService.isAuthenticated && authService.currentUser != null) {
       developer.log('AppInitializer: User is authenticated and currentUser is not null. Fetching data...', name: 'AppInitializer');
       
-      // Add mounted checks before accessing context with Provider.of
       if (!mounted) return;
       final studentProvider = Provider.of<StudentProvider>(context, listen: false);
       if (!mounted) return;
@@ -176,7 +165,6 @@ class _AppInitializerState extends State<AppInitializer> {
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.done) {
           developer.log('AppInitializer: FutureBuilder connectionState is done.', name: 'AppInitializer');
-          // Based on authentication status, show either LoginScreen or the appropriate home screen
           return Consumer<LocalAuthService>(
             builder: (context, authService, child) {
               developer.log('AppInitializer: Consumer rebuilding. isAuthenticated: ${authService.isAuthenticated}', name: 'AppInitializer');
@@ -187,7 +175,7 @@ class _AppInitializerState extends State<AppInitializer> {
                 return _getHomeScreenForRole(userRole);
               } else {
                 developer.log('AppInitializer: User not authenticated or currentUser is null. Navigating to LoginScreen.', name: 'AppInitializer');
-                return const LoginScreen(); // Changed to LoginScreen
+                return const LoginScreen();
               }
             },
           );

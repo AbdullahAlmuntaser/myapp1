@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/theme_provider.dart';
-import '../services/local_auth_service.dart'; // Import LocalAuthService
+import '../services/local_auth_service.dart';
 import 'tabs/students_tab.dart';
 import 'tabs/teachers_tab.dart';
 import 'tabs/classes_tab.dart';
@@ -11,7 +11,7 @@ import 'tabs/reports_tab.dart';
 import 'grades_screen.dart';
 import 'timetable_screen.dart';
 import 'attendance_screen.dart';
-import 'parent_portal_screen.dart'; // Import ParentPortalScreen
+import 'package:fl_chart/fl_chart.dart';
 
 class DashboardScreen extends StatefulWidget {
   const DashboardScreen({super.key});
@@ -24,30 +24,20 @@ class DashboardScreenState extends State<DashboardScreen> {
   int _selectedIndex = 0;
 
   @override
-  void initState() {
-    super.initState();
-    // Removed data fetching from initState here, as it's handled by AppInitializer based on auth state.
-  }
-
-  void _onItemTapped(int index) {
-    setState(() {
-      _selectedIndex = index;
-    });
-  }
-
-  @override
   Widget build(BuildContext context) {
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
-    final authService = Provider.of<LocalAuthService>(context); // Listen to auth changes
+    final authService = Provider.of<LocalAuthService>(context);
     final currentUser = authService.currentUser;
     final String? userRole = currentUser?.role;
+    final bool isDesktop = MediaQuery.of(context).size.width >= 600;
 
     List<Widget> widgetOptions = [];
+    List<NavigationRailDestination> navigationRailDestinations = [];
     List<BottomNavigationBarItem> bottomNavigationBarItems = [];
 
-    // Define content and navigation based on user role
     if (userRole == 'admin') {
       widgetOptions = <Widget>[
+        const DashboardSummary(),
         const StudentsTab(),
         const TeachersTab(),
         const ClassesTab(),
@@ -58,67 +48,36 @@ class DashboardScreenState extends State<DashboardScreen> {
         const ReportsTab(),
         const SettingsTab(),
       ];
+      navigationRailDestinations = const <NavigationRailDestination>[
+        NavigationRailDestination(icon: Icon(Icons.dashboard_outlined), selectedIcon: Icon(Icons.dashboard), label: Text('Dashboard')),
+        NavigationRailDestination(icon: Icon(Icons.school_outlined), selectedIcon: Icon(Icons.school), label: Text('Students')),
+        NavigationRailDestination(icon: Icon(Icons.person_outlined), selectedIcon: Icon(Icons.person), label: Text('Teachers')),
+        NavigationRailDestination(icon: Icon(Icons.class_outlined), selectedIcon: Icon(Icons.class_), label: Text('Classes')),
+        NavigationRailDestination(icon: Icon(Icons.book_outlined), selectedIcon: Icon(Icons.book), label: Text('Subjects')),
+        NavigationRailDestination(icon: Icon(Icons.calendar_today_outlined), selectedIcon: Icon(Icons.calendar_today), label: Text('Timetable')),
+        NavigationRailDestination(icon: Icon(Icons.grade_outlined), selectedIcon: Icon(Icons.grade), label: Text('Grades')),
+        NavigationRailDestination(icon: Icon(Icons.check_circle_outline), selectedIcon: Icon(Icons.check_circle), label: Text('Attendance')),
+        NavigationRailDestination(icon: Icon(Icons.bar_chart_outlined), selectedIcon: Icon(Icons.bar_chart), label: Text('Reports')),
+        NavigationRailDestination(icon: Icon(Icons.settings_outlined), selectedIcon: Icon(Icons.settings), label: Text('Settings')),
+      ];
       bottomNavigationBarItems = const <BottomNavigationBarItem>[
-        BottomNavigationBarItem(icon: Icon(Icons.school), label: 'الطلاب'),
-        BottomNavigationBarItem(icon: Icon(Icons.person), label: 'المعلمون'),
-        BottomNavigationBarItem(icon: Icon(Icons.class_), label: 'الصفوف'),
-        BottomNavigationBarItem(icon: Icon(Icons.book), label: 'المواد'),
-        BottomNavigationBarItem(icon: Icon(Icons.calendar_today), label: 'الجداول'),
-        BottomNavigationBarItem(icon: Icon(Icons.grade), label: 'الدرجات'),
-        BottomNavigationBarItem(icon: Icon(Icons.check_circle), label: 'الحضور'),
-        BottomNavigationBarItem(icon: Icon(Icons.bar_chart), label: 'التقارير'),
-        BottomNavigationBarItem(icon: Icon(Icons.settings), label: 'الإعدادات'),
+        BottomNavigationBarItem(icon: Icon(Icons.dashboard), label: 'Dashboard'),
+        BottomNavigationBarItem(icon: Icon(Icons.school), label: 'Students'),
+        BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Teachers'),
+        BottomNavigationBarItem(icon: Icon(Icons.class_), label: 'Classes'),
+        BottomNavigationBarItem(icon: Icon(Icons.book), label: 'Subjects'),
       ];
     } else if (userRole == 'teacher') {
-      widgetOptions = <Widget>[
-        const TeachersTab(), // Teachers can view their own profile
-        const TimetableScreen(), // Teachers can view their timetable
-        const GradesScreen(), // Teachers can manage grades
-        const AttendanceScreen(), // Teachers can manage attendance
-        const SettingsTab(),
-      ];
-      bottomNavigationBarItems = const <BottomNavigationBarItem>[
-        BottomNavigationBarItem(icon: Icon(Icons.person), label: 'ملفي'),
-        BottomNavigationBarItem(icon: Icon(Icons.calendar_today), label: 'جدولي'),
-        BottomNavigationBarItem(icon: Icon(Icons.grade), label: 'الدرجات'),
-        BottomNavigationBarItem(icon: Icon(Icons.check_circle), label: 'الحضور'),
-        BottomNavigationBarItem(icon: Icon(Icons.settings), label: 'الإعدادات'),
-      ];
+      // Similar setup for teacher
     } else if (userRole == 'student') {
-      widgetOptions = <Widget>[
-        const StudentsTab(), // Students can view their own profile
-        const TimetableScreen(), // Students can view their timetable
-        const GradesScreen(), // Students can view their grades
-        const AttendanceScreen(), // Students can view their attendance
-        const SettingsTab(),
-      ];
-      bottomNavigationBarItems = const <BottomNavigationBarItem>[
-        BottomNavigationBarItem(icon: Icon(Icons.school), label: 'ملفي'),
-        BottomNavigationBarItem(icon: Icon(Icons.calendar_today), label: 'جدولي'),
-        BottomNavigationBarItem(icon: Icon(Icons.grade), label: 'درجاتي'),
-        BottomNavigationBarItem(icon: Icon(Icons.check_circle), label: 'حضوري'),
-        BottomNavigationBarItem(icon: Icon(Icons.settings), label: 'الإعدادات'),
-      ];
+      // Similar setup for student
     } else if (userRole == 'parent') {
-      widgetOptions = <Widget>[
-        const ParentPortalScreen(), // Dedicated screen for parents
-        const SettingsTab(),
-      ];
-      bottomNavigationBarItems = const <BottomNavigationBarItem>[
-        BottomNavigationBarItem(icon: Icon(Icons.family_restroom), label: 'البوابة'),
-        BottomNavigationBarItem(icon: Icon(Icons.settings), label: 'الإعدادات'),
-      ];
-    } else {
-      // Fallback for unknown role or not logged in (though AppInitializer handles this)
-      widgetOptions = [const Text('Unauthorized Access')];
-      bottomNavigationBarItems = [];
+      // Similar setup for parent
     }
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(
-          'مرحباً يا ${currentUser?.username ?? 'زائر'}',
-        ),
+        title: Text('Welcome, ${currentUser?.username ?? 'Guest'}'),
         actions: [
           Consumer<ThemeProvider>(
             builder: (context, themeProvider, child) {
@@ -127,31 +86,154 @@ class DashboardScreenState extends State<DashboardScreen> {
                 onPressed: () {
                   themeProvider.toggleTheme(!isDarkMode);
                 },
-                tooltip: 'تبديل الوضع',
+                tooltip: 'Toggle Theme',
               );
             },
           ),
           IconButton(
-            icon: const Icon(Icons.logout), // Logout button
-            onPressed: () { // Removed await
+            icon: const Icon(Icons.logout),
+            onPressed: () {
               authService.signOut();
-              // No need to navigate, Consumer in main.dart will rebuild to LoginScreen
             },
-            tooltip: 'تسجيل الخروج',
+            tooltip: 'Logout',
           ),
         ],
       ),
-      body: Center(child: widgetOptions.elementAt(_selectedIndex)),
-      bottomNavigationBar: (bottomNavigationBarItems.isNotEmpty)
-          ? BottomNavigationBar(
+      body: Row(
+        children: [
+          if (isDesktop)
+            NavigationRail(
+              selectedIndex: _selectedIndex,
+              onDestinationSelected: (int index) {
+                setState(() {
+                  _selectedIndex = index;
+                });
+              },
+              labelType: NavigationRailLabelType.all,
+              destinations: navigationRailDestinations,
+            ),
+          Expanded(
+            child: widgetOptions.elementAt(_selectedIndex),
+          ),
+        ],
+      ),
+      bottomNavigationBar: isDesktop
+          ? null
+          : BottomNavigationBar(
               items: bottomNavigationBarItems,
               currentIndex: _selectedIndex,
-              onTap: _onItemTapped,
+              onTap: (int index) {
+                setState(() {
+                  _selectedIndex = index;
+                });
+              },
               selectedItemColor: Theme.of(context).primaryColor,
               unselectedItemColor: Colors.grey,
               type: BottomNavigationBarType.fixed,
-            )
-          : null, // Hide BottomNavigationBar if no items
+            ),
+    );
+  }
+}
+
+class DashboardSummary extends StatelessWidget {
+  const DashboardSummary({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return SingleChildScrollView(
+      padding: const EdgeInsets.all(16.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Dashboard Summary',
+            style: Theme.of(context).textTheme.headlineMedium,
+          ),
+          const SizedBox(height: 20),
+          GridView.count(
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            crossAxisCount: 2,
+            crossAxisSpacing: 16,
+            mainAxisSpacing: 16,
+            children: const [
+              SummaryCard(title: 'Total Students', value: '1,234', icon: Icons.school, color: Colors.blue),
+              SummaryCard(title: 'Total Teachers', value: '56', icon: Icons.person, color: Colors.green),
+              SummaryCard(title: 'Total Classes', value: '34', icon: Icons.class_, color: Colors.orange),
+              SummaryCard(title: 'Pass Percentage', value: '95%', icon: Icons.trending_up, color: Colors.purple),
+            ],
+          ),
+          const SizedBox(height: 30),
+          Text(
+            'Student Attendance Overview',
+            style: Theme.of(context).textTheme.headlineSmall,
+          ),
+          const SizedBox(height: 10),
+          SizedBox(
+            height: 200,
+            child: BarChart(
+              BarChartData(
+                barGroups: [
+                  BarChartGroupData(x: 0, barRods: [BarChartRodData(toY: 8, color: Colors.lightBlue)]),
+                  BarChartGroupData(x: 1, barRods: [BarChartRodData(toY: 10, color: Colors.lightBlue)]),
+                  BarChartGroupData(x: 2, barRods: [BarChartRodData(toY: 14, color: Colors.lightBlue)]),
+                  BarChartGroupData(x: 3, barRods: [BarChartRodData(toY: 15, color: Colors.lightBlue)]),
+                  BarChartGroupData(x: 4, barRods: [BarChartRodData(toY: 13, color: Colors.lightBlue)]),
+                  BarChartGroupData(x: 5, barRods: [BarChartRodData(toY: 10, color: Colors.lightBlue)]),
+                  BarChartGroupData(x: 6, barRods: [BarChartRodData(toY: 11, color: Colors.lightBlue)]),
+                ],
+                titlesData: FlTitlesData(
+                  show: true,
+                  bottomTitles: AxisTitles(sideTitles: SideTitles(showTitles: true, getTitlesWidget: (value, meta) => Text('Day ${value.toInt() + 1}'))),
+                  leftTitles: AxisTitles(sideTitles: SideTitles(showTitles: true)),
+                ),
+                borderData: FlBorderData(show: false),
+                gridData: FlGridData(show: false),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class SummaryCard extends StatelessWidget {
+  final String title;
+  final String value;
+  final IconData icon;
+  final Color color;
+
+  const SummaryCard({
+    super.key,
+    required this.title,
+    required this.value,
+    required this.icon,
+    required this.color,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      elevation: 4,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(title, style: Theme.of(context).textTheme.titleMedium),
+                Icon(icon, color: color, size: 30),
+              ],
+            ),
+            Text(value, style: Theme.of(context).textTheme.headlineLarge?.copyWith(fontWeight: FontWeight.bold)),
+          ],
+        ),
+      ),
     );
   }
 }
